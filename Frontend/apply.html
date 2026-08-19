@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admission Form — GEHU Portal</title>
+<link rel="icon" href="gehu.png">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="auth-shell">
+  <div class="auth-box">
+    <div class="nav-logo">
+      <img src="gehu.png" alt="GEHU Logo" style="width:44px;height:44px;">
+    </div>
+    <h2>🎓 Admission Form</h2>
+    <p class="auth-sub">2026 academic session</p>
+
+    <form id="applyForm" action="https://formspree.io/f/xaqlylzn" method="POST">
+      <input type="text" name="name" placeholder="Full Name" required>
+      <input type="email" name="email" placeholder="Email Address" required>
+      <input type="text" name="phone" placeholder="Phone Number" required>
+      <select name="course" required>
+        <option value="" disabled selected>Select Course</option>
+        <option value="B.Tech">B.Tech</option>
+        <option value="MBA">MBA</option>
+        <option value="BCA">BCA</option>
+        <option value="BBA">BBA</option>
+      </select>
+      <button type="submit">Apply Now 🚀</button>
+    </form>
+
+    <p class="form-note">Submissions are delivered straight to the admissions team — no server required.</p>
+    <a class="back-link" href="index.html">← Back to home</a>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

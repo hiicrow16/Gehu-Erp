@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GEHU Portal — Graphic Era Hill University</title>
+  <meta name="description" content="Graphic Era Hill University student portal — departments, courses, admissions and campus life.">
+  <link rel="icon" href="gehu.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="top-nav" id="topNav">
+  <div class="nav-logo">
+    <img src="gehu.png" alt="GEHU Logo">
+    <div class="nav-word">GEHU Portal<span>Graphic Era Hill University</span></div>
+  </div>
+
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#hero-section">Home</a></li>
+    <li><a href="#departments-section">Departments</a></li>
+    <li><a href="#faculty-section">Project Member</a></li>
+    <li><a href="#admissions-section">Admissions</a></li>
+    <li><a href="#contact-section">Contact</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button id="studentBtn">Student / Faculty Login</button>
+  </div>
+
+  <div class="login-panel" id="loginPanel">
+    <h3>Student / Faculty Login</h3>
+    <input id="campusId" placeholder="Campus ID">
+    <input id="password" type="password" placeholder="Password">
+    <button id="homeLoginBtn">Login</button>
+    <small>New Student? Register Later</small>
+  </div>
+</header>
+
+<main class="main-content">
+
+<!-- HERO -->
+<section id="hero-section" class="hero-section">
+  <div class="hero-left reveal">
+    <span class="eyebrow">Graphic Era Hill University</span>
+    <h1>Inspire. Innovate. <span class="flame-text">Impact.</span></h1>
+    <p>Empowering tomorrow's leaders through quality education, research and innovation — on a campus built for engineers, thinkers and builders.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="location.href='apply.html'">Apply for Admission</button>
+      <a class="btn-ghost" href="#departments-section">Explore Departments</a>
+    </div>
+  </div>
+
+  <div class="hero-right reveal">
+    <div class="hero-ring">
+      <div class="hero-ring-inner"></div>
+    </div>
+    <div class="hero-floater">
+      <span class="dot"></span>
+      2026 Admissions Now Open
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section reveal">
+  <div class="stats-grid">
+    <div class="stat"><h3 data-count="15000" data-suffix="+">0</h3><p>Students</p></div>
+    <div class="stat"><h3 data-count="500" data-suffix="+">0</h3><p>Faculty</p></div>
+    <div class="stat"><h3 data-count="200" data-suffix="+">0</h3><p>Recruiters</p></div>
+    <div class="stat"><h3 data-count="95" data-suffix="%">0</h3><p>Placement Rate</p></div>
+  </div>
+</section>
+
+<!-- DEPARTMENTS -->
+<section id="departments-section" class="content-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">Academics</span>
+    <h2 class="section-title">Our Academic Departments</h2>
+    <p class="section-sub">Six schools of study, one shared standard of rigor.</p>
+  </div>
+
+  <div class="grid-cards reveal">
+    <div class="card"><h4>Computer Science</h4></div>
+    <div class="card"><h4>Business Administration</h4></div>
+    <div class="card"><h4>Mechanical Engineering</h4></div>
+    <div class="card"><h4>Biotechnology</h4></div>
+    <div class="card"><h4>Architecture</h4></div>
+    <div class="card"><h4>Pharmacy</h4></div>
+  </div>
+</section>
+
+<!-- COURSES -->
+<section class="content-section tight">
+  <div class="section-head reveal">
+    <span class="eyebrow">Programs</span>
+    <h2 class="section-title">Courses Offered</h2>
+  </div>
+  <div class="grid-cards reveal">
+    <div class="course-card"><h4>B.Tech</h4><p>AI, ML, Data Science</p></div>
+    <div class="course-card"><h4>MBA</h4><p>Finance, HR</p></div>
+    <div class="course-card"><h4>BCA</h4><p>AI, Software Development</p></div>
+    <div class="course-card"><h4>BBA</h4><p>Business Management</p></div>
+  </div>
+</section>
+
+<!-- SPOTIFY -->
+<section class="music-section">
+  <div class="music-card reveal">
+    <h3>🎧 Student Lounge</h3>
+    <p>Relax. Focus. Enjoy HiiCROW playlists.</p>
+    <iframe
+      id="spotifyFrame"
+      src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M"
+      width="100%"
+      height="152"
+      frameborder="0"
+      allow="encrypted-media">
+    </iframe>
+  </div>
+</section>
+
+<!-- PROJECT MEMBER -->
+<section id="faculty-section" class="content-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">The Team</span>
+    <h2 class="section-title">Project Member</h2>
+  </div>
+
+  <div class="faculty-grid reveal">
+    <div class="faculty-card">
+      <div class="avatar"><img src="neeraj.jpg" alt="Hiicrow"></div>
+      <h4>Hiicrow</h4>
+      <p>Full Dev</p>
+    </div>
+    <div class="faculty-card">
+      <div class="avatar"><img src="gaurav.jpg" alt="Garry"></div>
+      <h4>Garry</h4>
+      <p>Frontend</p>
+    </div>
+    <div class="faculty-card">
+      <div class="avatar"><img src="rakshit.jpg" alt="Rakshit"></div>
+      <h4>Rakshit</h4>
+      <p>Backend</p>
+    </div>
+    <div class="faculty-card">
+      <div class="avatar"><img src="deepak.jpg" alt="Deepak"></div>
+      <h4>Deepak</h4>
+      <p>Backend</p>
+    </div>
+  </div>
+</section>
+
+<!-- PLACEMENTS -->
+<section class="content-section tight placements-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">Outcomes</span>
+    <h2 class="section-title">Placements</h2>
+  </div>
+  <div class="grid-cards reveal">
+    <div class="card"><h3>₹25 LPA</h3><p>Highest Package</p></div>
+    <div class="card"><h3>Top Companies</h3><p>Amazon, Google, Infosys</p></div>
+    <div class="card"><h3>Internships</h3><p>From 2nd Year</p></div>
+  </div>
+</section>
+
+<!-- CAMPUS LIFE -->
+<section class="content-section tight">
+  <div class="section-head reveal">
+    <span class="eyebrow">Beyond Class</span>
+    <h2 class="section-title">Campus Life</h2>
+  </div>
+  <div class="grid-cards reveal">
+    <div class="card"><h4>Hostel</h4></div>
+    <div class="card"><h4>Sports Complex</h4></div>
+    <div class="card"><h4>Clubs &amp; Events</h4></div>
+    <div class="card"><h4>Modern Labs</h4></div>
+  </div>
+</section>
+
+<!-- STUDENT JOURNEY -->
+<section class="content-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">How It Works</span>
+    <h2 class="section-title">Student Journey</h2>
+  </div>
+
+  <div class="workflow-cards reveal">
+    <div class="workflow-card">
+      <div class="workflow-step">01</div>
+      <h4>Apply for Admission</h4>
+      <p>Submit your online application with required academic details and documents.</p>
+    </div>
+    <div class="workflow-card">
+      <div class="workflow-step">02</div>
+      <h4>Verification &amp; Enrollment</h4>
+      <p>Our admission team verifies your application and confirms your enrollment.</p>
+    </div>
+    <div class="workflow-card">
+      <div class="workflow-step">03</div>
+      <h4>Begin Your Journey</h4>
+      <p>Attend orientation, explore campus life, and start your academic career.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ADMISSIONS CTA -->
+<section id="admissions-section" class="admissions-section">
+  <span class="eyebrow" style="color:#1a0b06;">Enrollment</span>
+  <h2 class="section-title">Admissions Open</h2>
+  <p>Apply now for the 2026 academic session. Scholarships available!</p>
+  <button onclick="location.href='apply.html'">Apply Now →</button>
+</section>
+<div class="cog-seam"></div>
+
+<!-- NEWS -->
+<section class="content-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">Happening Now</span>
+    <h2 class="section-title">Latest News &amp; Events</h2>
+  </div>
+
+  <div class="news-grid reveal">
+    <div class="news-card">
+      <div class="news-img-wrap"><img src="graf.jpg" alt="Graph Fest 2026"></div>
+      <div class="news-body">
+        <h4>Graph Fest 2026</h4>
+        <p>Talwinder is here on 17-04-26</p>
+      </div>
+    </div>
+    <div class="news-card">
+      <div class="news-img-wrap"><img src="cer.jpg" alt="Convocation"></div>
+      <div class="news-body">
+        <h4>Convocation</h4>
+        <p>Graduation ceremony May 12</p>
+      </div>
+    </div>
+    <div class="news-card">
+      <div class="news-img-wrap"><img src="sport.jpg" alt="Sports Day"></div>
+      <div class="news-body">
+        <h4>Sports Day</h4>
+        <p>Annual sports competition</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="content-section tight about-section">
+  <div class="section-head reveal" style="margin-bottom:0;">
+    <span class="eyebrow">Who We Are</span>
+    <h2 class="section-title">About GEHU</h2>
+    <p style="margin-top:16px;">Graphic Era Hill University is committed to excellence in education and research, transforming dreams into reality for every student who walks through its gates.</p>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact-section" class="content-section tight contact-section">
+  <div class="section-head reveal" style="margin-bottom:0;">
+    <span class="eyebrow">Get In Touch</span>
+    <h2 class="section-title">Contact Us</h2>
+    <p style="margin-top:16px;">Email: info@gehu.ac.in</p>
+    <p>Phone: +91 XXXXX XXXXX</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2026 Graphic Era Hill University</p>
+    <p>Developed with ❤️ by Hiicrow</p>
+  </div>
+</footer>
+
+</main>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

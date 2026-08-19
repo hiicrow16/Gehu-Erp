@@ -1,0 +1,15 @@
+# If you deploy this whole repo to Netlify, point the site at the
+# Frontend/ folder like this (Site settings -> Build & deploy also works,
+# but this file makes it automatic).
+
+[build]
+  base = "Frontend"
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

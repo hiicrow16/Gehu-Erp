@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GEHU Admin Panel</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  background: radial-gradient(circle at top left, #0f172a, #020617);
+  color: white;
+}
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background: linear-gradient(180deg, #0f172a, #020617);
+  padding: 20px;
+  position: fixed;
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.1);
+}
+.sidebar h2 { color: #22d3ee; margin-bottom: 30px; }
+.sidebar button {
+  width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none;
+  background: rgba(255,255,255,0.05); color: white; cursor: pointer; transition: all 0.3s ease;
+}
+.sidebar button:hover {
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+  transform: translateX(5px); box-shadow: 0 0 10px rgba(59,130,246,0.5);
+}
+.logout { background: rgba(255,0,0,0.7); }
+.logout:hover { background: red; }
+.main-content { margin-left: 260px; padding: 40px; width: 100%; }
+.topbar { display: flex; justify-content: space-between; align-items: center; }
+.back-btn {
+  background: linear-gradient(90deg, #06b6d4, #3b82f6); padding: 10px 18px; border-radius: 10px;
+  text-decoration: none; color: white; font-weight: bold; transition: 0.3s;
+}
+.back-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(59,130,246,0.6); }
+.section { display: none; }
+.section.active { display: block; }
+.card {
+  background: rgba(255,255,255,0.05); padding: 25px; border-radius: 16px;
+  backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(0,0,0,0.4); transition: 0.3s ease;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 0 25px rgba(59,130,246,0.4); }
+.form-row input, .form-row select {
+  padding: 12px; margin: 6px; border-radius: 8px; border: none;
+  background: rgba(255,255,255,0.05); color: white;
+}
+select {
+  appearance: none;
+  background: rgba(255,255,255,0.05) url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 20 20'><polygon points='5,7 10,12 15,7'/></svg>") no-repeat right 10px center;
+  background-size: 12px;
+}
+table { width: 100%; margin-top: 25px; border-collapse: collapse; border-radius: 12px; overflow: hidden; }
+th { background: rgba(59,130,246,0.2); }
+th, td { padding: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+tr:hover { background: rgba(59,130,246,0.1); }
+.msg { color: #ff8080; min-height: 20px; }
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>GEHU Admin</h2>
+  <button onclick="showDashboard()">Dashboard</button>
+  <button onclick="showStudents()">Manage Students</button>
+  <button onclick="showAttendance()">Attendance</button>
+  <button onclick="logout()" class="logout">Logout</button>
+</div>
+
+<div class="main-content">
+
+<div class="topbar">
+  <h1>Admin Panel</h1>
+  <a href="index.html" class="back-btn">Back to Website</a>
+</div>
+
+<section id="dashboardSection" class="section active">
+  <div class="card">
+    <h3>Total Students: <span id="totalStudents">0</span></h3>
+    <h3>Total Courses: <span id="totalCourses">0</span></h3>
+  </div>
+</section>
+
+<section id="studentsSection" class="section">
+  <h2>Manage Students</h2>
+
+  <div class="form-row">
+    <input id="username" placeholder="Login Username">
+    <input id="password" placeholder="Password" type="password">
+    <input id="studentId" placeholder="Student ID (roll no.)">
+    <input id="name" placeholder="Full Name">
+    <select id="course"><option value="">Select Course</option></select>
+    <input id="semester" placeholder="Semester (1-8)" type="number" min="1" max="12">
+    <button onclick="addStudent()">Add Student</button>
+  </div>
+  <p id="studentMsg" class="msg"></p>
+
+  <table>
+    <thead>
+      <tr><th>Student ID</th><th>Name</th><th>Course</th><th>Semester</th><th>Action</th></tr>
+    </thead>
+    <tbody id="studentTable"></tbody>
+  </table>
+</section>
+
+<section id="attendanceSection" class="section">
+  <h2>Attendance</h2>
+
+  <div class="form-row">
+    <select id="attStudentId"><option value="">Select Student</option></select>
+    <select id="attCourseFilter"><option value="">Filter subjects by course</option></select>
+    <select id="attSubjectId"><option value="">Select Subject</option></select>
+    <input type="date" id="attDate">
+    <select id="attStatus">
+      <option>Present</option>
+      <option>Absent</option>
+    </select>
+    <button onclick="markAttendance()">Submit</button>
+  </div>
+  <p id="attMsg" class="msg"></p>
+
+  <h3 id="percentage"></h3>
+
+  <table id="attendanceTable">
+    <thead><tr><th>Date</th><th>Status</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+</div>
+
+<script src="config.js"></script>
+<script>
+const API = window.API_BASE;
+const token = localStorage.getItem("token");
+
+/* AUTH GUARD */
+if (localStorage.getItem("role") !== "admin" || !token) {
+  window.location.href = "login.html";
+}
+
+function authHeaders() {
+  return { Authorization: `Bearer ${localStorage.getItem("token")}` };
+}
+
+/* SECTION SWITCH */
+function hideAll() {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+}
+function showDashboard() { hideAll(); dashboardSection.classList.add("active"); loadDashboardStats(); }
+function showStudents() { hideAll(); studentsSection.classList.add("active"); loadStudents(); }
+function showAttendance() { hideAll(); attendanceSection.classList.add("active"); loadStudentOptions(); }
+
+let coursesCache = [];
+let studentsCache = [];
+
+/* LOAD COURSES (used for the "Add Student" course dropdown and attendance filter) */
+async function loadCourses() {
+  const res = await fetch(`${API}/courses`, { headers: authHeaders() });
+  const data = await res.json();
+  coursesCache = data.success ? data.courses : [];
+
+  const courseSelect = document.getElementById("course");
+  const filterSelect = document.getElementById("attCourseFilter");
+  courseSelect.innerHTML = '<option value="">Select Course</option>';
+  filterSelect.innerHTML = '<option value="">Filter subjects by course</option>';
+
+  coursesCache.forEach(c => {
+    courseSelect.innerHTML += `<option value="${c._id}">${c.name}</option>`;
+    filterSelect.innerHTML += `<option value="${c._id}">${c.name}</option>`;
+  });
+
+  document.getElementById("totalCourses").innerText = coursesCache.length;
+}
+
+/* LOAD SUBJECTS for the selected course (attendance form) */
+async function loadSubjectsForCourse(courseId) {
+  const subjectSelect = document.getElementById("attSubjectId");
+  subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+  if (!courseId) return;
+
+  const res = await fetch(`${API}/subjects?course=${courseId}`, { headers: authHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  data.subjects.forEach(s => {
+    subjectSelect.innerHTML += `<option value="${s._id}">${s.name} (Sem ${s.semester})</option>`;
+  });
+}
+document.getElementById("attCourseFilter").addEventListener("change", (e) => loadSubjectsForCourse(e.target.value));
+
+/* DASHBOARD STATS - real counts from the database, no fake numbers */
+async function loadDashboardStats() {
+  const res = await fetch(`${API}/students`, { headers: authHeaders() });
+  const data = await res.json();
+  document.getElementById("totalStudents").innerText = data.success ? data.students.length : 0;
+  await loadCourses();
+}
+
+/* LOAD STUDENTS */
+async function loadStudents() {
+  await loadCourses();
+  const res = await fetch(`${API}/students`, { headers: authHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  studentsCache = data.students;
+  document.getElementById("totalStudents").innerText = studentsCache.length;
+
+  const tbody = document.getElementById("studentTable");
+  tbody.innerHTML = "";
+
+  studentsCache.forEach(s => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${s.studentId}</td>
+        <td>${s.name}</td>
+        <td>${s.course ? s.course.name : "-"}</td>
+        <td>${s.semester || "-"}</td>
+        <td>
+          <button onclick="deleteStudent('${s._id}')">Delete</button>
+          <button onclick="jumpToAttendance('${s._id}')">View Attendance</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+/* ADD STUDENT */
+async function addStudent() {
+  const msg = document.getElementById("studentMsg");
+  msg.textContent = "";
+
+  const body = {
+    username: document.getElementById("username").value.trim(),
+    password: document.getElementById("password").value,
+    studentId: document.getElementById("studentId").value.trim(),
+    name: document.getElementById("name").value.trim(),
+    course: document.getElementById("course").value || undefined,
+    semester: document.getElementById("semester").value ? Number(document.getElementById("semester").value) : undefined,
+  };
+
+  if (!body.username || !body.password || !body.studentId || !body.name) {
+    msg.textContent = "Username, password, student ID and name are required.";
+    return;
+  }
+
+  const res = await fetch(`${API}/students`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("studentId").value = "";
+    document.getElementById("name").value = "";
+    document.getElementById("semester").value = "";
+    loadStudents();
+  } else {
+    msg.textContent = data.message || "Could not add student.";
+  }
+}
+
+/* DELETE */
+async function deleteStudent(id) {
+  if (!confirm("Delete this student? This cannot be undone.")) return;
+  await fetch(`${API}/students/${id}`, { method: "DELETE", headers: authHeaders() });
+  loadStudents();
+}
+
+/* ATTENDANCE: populate the student dropdown */
+async function loadStudentOptions() {
+  if (!studentsCache.length) {
+    const res = await fetch(`${API}/students`, { headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) studentsCache = data.students;
+  }
+  const sel = document.getElementById("attStudentId");
+  sel.innerHTML = '<option value="">Select Student</option>';
+  studentsCache.forEach(s => {
+    sel.innerHTML += `<option value="${s._id}">${s.studentId} - ${s.name}</option>`;
+  });
+  await loadCourses();
+}
+
+function jumpToAttendance(studentProfileId) {
+  showAttendance();
+  setTimeout(() => {
+    document.getElementById("attStudentId").value = studentProfileId;
+    viewAttendance(studentProfileId);
+  }, 200);
+}
+
+/* MARK ATTENDANCE */
+async function markAttendance() {
+  const msg = document.getElementById("attMsg");
+  msg.textContent = "";
+
+  const student = document.getElementById("attStudentId").value;
+  const subject = document.getElementById("attSubjectId").value;
+  const date = document.getElementById("attDate").value;
+  const status = document.getElementById("attStatus").value;
+
+  if (!student || !subject || !date) {
+    msg.textContent = "Select a student, subject and date.";
+    return;
+  }
+
+  const res = await fetch(`${API}/attendance`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ student, subject, date, status })
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    viewAttendance(student);
+  } else {
+    msg.textContent = data.message || "Could not mark attendance.";
+  }
+}
+
+/* VIEW ATTENDANCE */
+async function viewAttendance(studentProfileId) {
+  const res = await fetch(`${API}/attendance/student/${studentProfileId}`, { headers: authHeaders() });
+  const data = await res.json();
+
+  const tbody = document.querySelector("#attendanceTable tbody");
+  tbody.innerHTML = "";
+
+  if (!data.success) return;
+
+  data.records.forEach(r => {
+    const dateStr = new Date(r.date).toLocaleDateString();
+    tbody.innerHTML += `<tr><td>${dateStr}</td><td>${r.status}</td></tr>`;
+  });
+
+  document.getElementById("percentage").innerText = `Attendance: ${data.summary.percentage}%`;
+}
+
+/* LOGOUT */
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+loadDashboardStats();
+</script>
+
+</body>
+</html>

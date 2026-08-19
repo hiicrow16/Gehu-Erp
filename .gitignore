@@ -1,0 +1,9 @@
+# Backend
+Backend/node_modules/
+Backend/.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/

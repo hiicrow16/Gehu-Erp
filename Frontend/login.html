@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — GEHU Portal</title>
+  <link rel="icon" href="gehu.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="auth-shell">
+  <div class="auth-box">
+    <div class="nav-logo">
+      <img src="gehu.png" alt="GEHU Logo" style="width:44px;height:44px;">
+    </div>
+    <h2>Portal Login</h2>
+    <p class="auth-sub">Student &amp; Faculty access</p>
+
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Campus ID" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+
+    <p id="loginMessage" class="form-note"></p>
+    <a class="back-link" href="index.html">← Back to home</a>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

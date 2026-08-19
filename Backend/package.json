@@ -1,0 +1,24 @@
+{
+  "name": "gehu-erp-backend",
+  "version": "0.2.0",
+  "description": "GEHU ERP backend (Phase 1: real DB-backed auth + core APIs)",
+  "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node --dns-result-order=ipv4first server.js",
+    "dev": "node --dns-result-order=ipv4first --watch server.js",
+    "seed:admin": "node --dns-result-order=ipv4first seed/seed.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.5.0",
+    "mongoose": "^8.6.0"
+  }
+}
