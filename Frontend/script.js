@@ -280,6 +280,90 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* =========================
+     HELP & SUPPORT — TABS
+  ========================== */
+  const tabButtons = document.querySelectorAll(".support-tab-btn");
+  if (tabButtons.length) {
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tabButtons.forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".support-panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        const panel = document.getElementById(`panel-${btn.dataset.tab}`);
+        if (panel) panel.classList.add("active");
+      });
+    });
+  }
+
+  /* =========================
+     HELP & SUPPORT — FAQ ACCORDION
+  ========================== */
+  document.querySelectorAll(".faq-question").forEach(q => {
+    q.addEventListener("click", () => {
+      const item = q.closest(".faq-item");
+      const wasOpen = item.classList.contains("open");
+      document.querySelectorAll(".faq-item.open").forEach(el => el.classList.remove("open"));
+      if (!wasOpen) item.classList.add("open");
+    });
+  });
+
+  /* =========================
+     HELP & SUPPORT — RAISE A TICKET (Formspree, no backend needed)
+  ========================== */
+  const ticketForm = document.getElementById("ticketForm");
+  if (ticketForm) {
+    ticketForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("ticketMsg");
+      const btn = document.getElementById("ticketSubmitBtn");
+      msg.textContent = "";
+      btn.disabled = true;
+      btn.textContent = "Submitting…";
+
+      try {
+        const res = await fetch(ticketForm.action, {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body: new FormData(ticketForm),
+        });
+
+        if (res.ok) {
+          ticketForm.style.display = "none";
+          document.getElementById("ticketSuccess").classList.add("open");
+        } else {
+          msg.textContent = "Couldn't submit right now. Please try again or email us directly.";
+        }
+      } catch (err) {
+        msg.textContent = "Couldn't reach the server. Please try again in a moment.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Submit Ticket";
+      }
+    });
+  }
+
+  /* =========================
+     FLOATING HELP LAUNCHER + BACK TO TOP
+  ========================== */
+  const helpLauncher = document.getElementById("helpLauncher");
+  if (helpLauncher) {
+    helpLauncher.addEventListener("click", () => {
+      const helpSection = document.getElementById("help-section");
+      if (helpSection) helpSection.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  const backToTop = document.getElementById("backToTop");
+  if (backToTop) {
+    window.addEventListener("scroll", () => {
+      backToTop.classList.toggle("show", window.scrollY > 500);
+    }, { passive: true });
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
 });
 
 /* =========================
