@@ -453,7 +453,7 @@ async function loadOrders() {
     tbody.innerHTML += `
       <tr>
         <td>${dateStr}</td>
-        <td>${o.customerName}${o.studentId ? ` (${o.studentId})` : ""}</td>
+        <td>${o.customerName}${o.studentId ? `<br><span style="color:#ffb020;font-weight:600;">Student ID: ${o.studentId}</span>` : `<br><span style="color:#64748b;">No Student ID given</span>`}</td>
         <td>${o.email}<br>${o.phone}</td>
         <td style="text-align:left; max-width: 220px;">${itemsList}</td>
         <td>₹${o.totalAmount}</td>
