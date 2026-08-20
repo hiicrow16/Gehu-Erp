@@ -319,9 +319,67 @@ img{ max-width: 100%; display: block; }
   gap: 40px;
   padding: 140px 6vw 90px;
   position: relative;
+  overflow: hidden;
   background:
     radial-gradient(ellipse at 15% 20%, rgba(255,75,43,0.14), transparent 55%),
     var(--ink);
+}
+
+/* premium ambient glow orbs */
+.hero-glow{
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+.hero-glow-1{
+  width: 420px; height: 420px;
+  top: -120px; right: 8%;
+  background: radial-gradient(circle, var(--flame-2), transparent 70%);
+  animation: floatGlow 12s ease-in-out infinite;
+}
+.hero-glow-2{
+  width: 320px; height: 320px;
+  bottom: -80px; left: 4%;
+  background: radial-gradient(circle, var(--steel), transparent 70%);
+  animation: floatGlow 15s ease-in-out infinite reverse;
+}
+@keyframes floatGlow{
+  0%, 100%{ transform: translate(0,0) scale(1); }
+  50%{ transform: translate(-24px, 26px) scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce){ .hero-glow{ animation: none; } }
+.hero-left, .hero-right{ position: relative; z-index: 1; }
+
+/* trust strip under the hero CTA */
+.trust-strip{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+}
+.trust-strip span{
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+.trust-strip span::before{
+  content: "✓";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px; height: 17px;
+  border-radius: 50%;
+  background: rgba(255,176,32,0.16);
+  color: var(--flame-3);
+  font-size: 10.5px;
+  font-weight: 700;
 }
 
 .hero-left .eyebrow{ margin-bottom: 18px; }
@@ -1196,6 +1254,228 @@ tr:nth-child(even){ background: var(--surface-2); }
 .track-result .track-row{ display: flex; justify-content: space-between; gap: 12px; }
 .track-result .track-row + .track-row{ border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
 .track-result .track-items{ color: var(--muted); font-size: 13px; }
+
+/* ============================================================
+   HELP & SUPPORT HUB (premium redesign)
+   ============================================================ */
+.support-shell{ max-width: 920px; margin: 0 auto; }
+
+.support-channels{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.support-channel-card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+.support-channel-card:hover{ transform: translateY(-4px); border-color: var(--flame-2); }
+.support-channel-icon{
+  width: 42px; height: 42px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--flame-grad);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+}
+.support-channel-card h5{ font-size: 14.5px; color: var(--paper); margin: 0 0 3px; }
+.support-channel-card p{ font-size: 12.5px; color: var(--muted); margin: 0; }
+
+.support-tabs{
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.support-tab-btn{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 11px 22px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+.support-tab-btn:hover{ color: var(--paper); border-color: var(--flame-2); }
+.support-tab-btn.active{
+  background: var(--flame-grad);
+  color: #16090a;
+  border-color: transparent;
+}
+
+.support-panel{ display: none; }
+.support-panel.active{ display: block; }
+
+/* FAQ accordion */
+.faq-list{ display: flex; flex-direction: column; gap: 12px; }
+.faq-item{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.faq-question{
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 18px 22px;
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.faq-question .faq-plus{
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--flame-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: transform 0.25s ease;
+}
+.faq-item.open .faq-question .faq-plus{ transform: rotate(45deg); background: var(--flame-grad); color: #16090a; }
+.faq-answer{
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.faq-answer p{
+  padding: 0 22px 20px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.faq-item.open .faq-answer{ max-height: 240px; }
+
+/* raise-a-ticket form */
+.ticket-card{
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 34px 30px;
+  box-shadow: var(--shadow-lg);
+}
+.ticket-card form{ display: flex; flex-direction: column; }
+.ticket-card input,
+.ticket-card select,
+.ticket-card textarea{
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  margin: 7px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  resize: vertical;
+}
+.ticket-card input:focus, .ticket-card select:focus, .ticket-card textarea:focus{
+  outline: none; border-color: var(--flame-2);
+}
+.ticket-card button{
+  margin-top: 12px;
+  padding: 13px;
+  background: var(--flame-grad);
+  color: #16090a;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.ticket-card button:hover{ transform: translateY(-2px); }
+.ticket-card button:disabled{ opacity: 0.6; cursor: not-allowed; transform: none; }
+.ticket-msg{ font-size: 13px; min-height: 16px; margin: 10px 0 0; color: var(--flame-2); }
+.ticket-success{ display: none; text-align: center; padding: 10px 0; }
+.ticket-success.open{ display: block; }
+.ticket-success h4{ color: var(--paper); font-size: 19px; margin-bottom: 8px; }
+.ticket-success p{ color: var(--muted); font-size: 13.5px; }
+
+/* ============================================================
+   FLOATING HELP LAUNCHER + BACK TO TOP
+   ============================================================ */
+.float-stack{
+  position: fixed;
+  right: 26px;
+  bottom: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 500;
+}
+.float-btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
+}
+.help-launcher{
+  gap: 9px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: var(--flame-grad);
+  color: #16090a;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+}
+.help-launcher:hover{ transform: translateY(-3px); }
+.help-launcher .pulse-dot{
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #16090a;
+  animation: pulseDot 1.6s ease-in-out infinite;
+}
+@keyframes pulseDot{
+  0%, 100%{ opacity: 1; } 50%{ opacity: 0.3; }
+}
+.back-to-top{
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line) !important;
+  color: var(--paper);
+  font-size: 18px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+}
+.back-to-top.show{ opacity: 1; visibility: visible; transform: translateY(0); }
+.back-to-top:hover{ border-color: var(--flame-2) !important; color: var(--flame-3); }
+
+@media (max-width: 560px){
+  .float-stack{ right: 16px; bottom: 16px; }
+  .help-launcher span.launcher-label{ display: none; }
+  .help-launcher{ padding: 14px; border-radius: 50%; width: 52px; height: 52px; }
+}
 
 .track-badge{
   display: inline-block;

@@ -48,6 +48,9 @@
 
 <!-- HERO -->
 <section id="hero-section" class="hero-section">
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+
   <div class="hero-left reveal">
     <span class="eyebrow">Graphic Era Hill University</span>
     <h1>Inspire. Innovate. <span class="flame-text">Impact.</span></h1>
@@ -55,6 +58,11 @@
     <div class="hero-cta">
       <button class="btn-primary" onclick="location.href='apply.html'">Apply for Admission</button>
       <a class="btn-ghost" href="#departments-section">Explore Departments</a>
+    </div>
+    <div class="trust-strip">
+      <span>NAAC A+ Accredited</span>
+      <span>UGC Approved</span>
+      <span>24×7 Student Support</span>
     </div>
   </div>
 
@@ -271,21 +279,113 @@
   </div>
 </section>
 
-<!-- HELP & SUPPORT / TRACK ORDER -->
+<!-- HELP & SUPPORT -->
 <section id="help-section" class="content-section tight">
   <div class="section-head reveal">
     <span class="eyebrow">Help &amp; Support</span>
-    <h2 class="section-title">Track Your Order</h2>
-    <p class="section-sub">Enter the Order ID and Student ID you gave at checkout to check its status.</p>
+    <h2 class="section-title">We're here whenever you need us</h2>
+    <p class="section-sub">Browse quick answers, track a store order, or raise a ticket with our support team — all in one place.</p>
   </div>
 
-  <div class="track-card reveal">
-    <form id="trackOrderForm">
-      <input type="text" id="trackOrderId" placeholder="Order ID" required>
-      <input type="text" id="trackStudentId" placeholder="Student ID" required>
-      <button type="submit">Track Order</button>
-    </form>
-    <div id="trackResult"></div>
+  <div class="support-shell reveal">
+
+    <!-- quick contact channels -->
+    <div class="support-channels">
+      <a class="support-channel-card" href="mailto:support@hiicrow.site">
+        <div class="support-channel-icon">✉️</div>
+        <div><h5>Email Us</h5><p>support@hiicrow.site</p></div>
+      </a>
+      <a class="support-channel-card" href="tel:+910000000000">
+        <div class="support-channel-icon">📞</div>
+        <div><h5>Call Us</h5><p>+91 XXXXX XXXXX</p></div>
+      </a>
+      <a class="support-channel-card" href="https://wa.me/910000000000" target="_blank" rel="noopener">
+        <div class="support-channel-icon">💬</div>
+        <div><h5>WhatsApp</h5><p>Chat with our team</p></div>
+      </a>
+      <a class="support-channel-card" href="#contact-section">
+        <div class="support-channel-icon">🏫</div>
+        <div><h5>Visit Campus</h5><p>Front office, 9 AM – 5 PM</p></div>
+      </a>
+    </div>
+
+    <!-- tabs -->
+    <div class="support-tabs">
+      <button class="support-tab-btn active" data-tab="faq">FAQs</button>
+      <button class="support-tab-btn" data-tab="track">Track Order</button>
+      <button class="support-tab-btn" data-tab="ticket">Raise a Ticket</button>
+    </div>
+
+    <!-- FAQ panel -->
+    <div class="support-panel active" id="panel-faq">
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question"><span>How do I reset my student portal password?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Contact the admin office via email or the "Raise a Ticket" tab with your Campus ID — a temporary password is issued after identity verification.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>Where can I check my attendance percentage?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Log in to the Student Dashboard with your Campus ID — your subject-wise and overall attendance percentage is shown automatically.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>How do I track a college store order?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Use the "Track Order" tab above with the Order ID and Student ID you entered at checkout to see live payment and delivery status.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>How do I apply for admission?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Click "Apply for Admission" on the homepage, fill in your details and preferred course — our admissions team reviews it and reaches out directly.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>My payment succeeded but the order still shows pending. What do I do?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>UPI confirmations can take a little time to verify manually. If it's still pending after a few hours, raise a ticket with your Order ID and transaction reference.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>Who do I contact for faculty-related queries?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Use the "Raise a Ticket" tab and select "Faculty / Academics" as the category, or email us directly — queries are routed to the right department.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track order panel -->
+    <div class="support-panel" id="panel-track">
+      <div class="track-card">
+        <form id="trackOrderForm">
+          <input type="text" id="trackOrderId" placeholder="Order ID" required>
+          <input type="text" id="trackStudentId" placeholder="Student ID" required>
+          <button type="submit">Track Order</button>
+        </form>
+        <div id="trackResult"></div>
+      </div>
+    </div>
+
+    <!-- Raise a ticket panel -->
+    <div class="support-panel" id="panel-ticket">
+      <div class="ticket-card">
+        <form id="ticketForm" action="https://formspree.io/f/xaqlylzn" method="POST">
+          <input type="hidden" name="_subject" value="Help &amp; Support Ticket — GEHU Portal">
+          <input type="text" name="name" placeholder="Full Name" required>
+          <input type="email" name="email" placeholder="Email Address" required>
+          <input type="text" name="studentId" placeholder="Campus / Student ID (optional)">
+          <select name="category" required>
+            <option value="" disabled selected>Select Category</option>
+            <option value="Login / Account">Login / Account</option>
+            <option value="Attendance / Academics">Attendance / Academics</option>
+            <option value="Store / Order">Store / Order</option>
+            <option value="Admissions">Admissions</option>
+            <option value="Faculty / Academics">Faculty / Academics</option>
+            <option value="Other">Other</option>
+          </select>
+          <textarea name="message" rows="4" placeholder="Describe your issue…" required></textarea>
+          <button type="submit" id="ticketSubmitBtn">Submit Ticket</button>
+        </form>
+        <p class="ticket-msg" id="ticketMsg"></p>
+        <div class="ticket-success" id="ticketSuccess">
+          <h4>✅ Ticket received</h4>
+          <p>Our support team will get back to you by email shortly.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -298,6 +398,13 @@
 </footer>
 
 </main>
+
+<div class="float-stack">
+  <button class="float-btn back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+  <button class="float-btn help-launcher" id="helpLauncher" aria-label="Need help?">
+    <span class="pulse-dot"></span><span class="launcher-label">Need Help?</span>
+  </button>
+</div>
 
 <script src="config.js"></script>
 <script src="script.js"></script>
