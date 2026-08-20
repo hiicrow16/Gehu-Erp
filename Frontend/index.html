@@ -24,7 +24,7 @@
   <ul class="nav-links" id="navLinks">
     <li><a href="#hero-section">Home</a></li>
     <li><a href="#departments-section">Departments</a></li>
-    <li><a href="#store-section">Store</a></li>
+    <li><a href="store.html">Store</a></li>
     <li><a href="#faculty-section">Project Member</a></li>
     <li><a href="#admissions-section">Admissions</a></li>
     <li><a href="#contact-section">Contact</a></li>
@@ -110,82 +110,6 @@
     <div class="course-card"><h4>BBA</h4><p>Business Management</p></div>
   </div>
 </section>
-
-<!-- STORE -->
-<section id="store-section" class="content-section store-section">
-  <div class="section-head reveal">
-    <span class="eyebrow">College Store</span>
-    <h2 class="section-title">Uniforms, Books &amp; Stationery</h2>
-    <p class="section-sub">Order college essentials online — no login needed. Pick up on campus.</p>
-  </div>
-
-  <div class="store-toolbar reveal">
-    <div class="store-filter-bar" id="storeFilterBar"></div>
-    <div class="store-toolbar-right">
-      <input class="store-search" id="storeSearch" placeholder="Search items...">
-      <button class="store-cart-btn" id="storeCartBtn" onclick="openStoreCart()">
-        🛒 Cart <span class="store-cart-count" id="storeCartCount">0</span>
-      </button>
-    </div>
-  </div>
-
-  <div class="store-grid reveal" id="storeGrid"></div>
-</section>
-
-<!-- STORE CART DRAWER -->
-<div class="store-overlay" id="storeOverlay" onclick="closeStoreCart()"></div>
-<div class="store-cart-drawer" id="storeCartDrawer">
-  <div class="store-cart-head">
-    <h3>Your Cart</h3>
-    <button class="store-cart-close" onclick="closeStoreCart()">✕</button>
-  </div>
-  <div class="store-cart-items" id="storeCartItems"></div>
-  <div class="store-cart-footer">
-    <div class="store-cart-total-row"><span>Total</span><span id="storeCartTotal">₹0</span></div>
-    <button class="store-checkout-btn" onclick="openCheckoutForm()">Checkout</button>
-  </div>
-</div>
-
-<!-- STORE CHECKOUT MODAL -->
-<div class="store-overlay" id="checkoutOverlay" onclick="closeCheckoutForm()"></div>
-<div class="store-checkout-modal" id="checkoutModal">
-  <div class="store-checkout-head">
-    <h3>Delivery Details</h3>
-    <button class="store-cart-close" onclick="closeCheckoutForm()">✕</button>
-  </div>
-  <form id="checkoutForm" class="store-checkout-form">
-    <label>Full Name *<input id="cf-name" required></label>
-    <label>Email *<input id="cf-email" type="email" required></label>
-    <label>Phone *<input id="cf-phone" type="tel" required></label>
-    <label>Student ID / Roll No. (optional)<input id="cf-studentid"></label>
-    <label>Delivery / Pickup Address *<textarea id="cf-address" rows="3" required></textarea></label>
-
-    <div class="store-payment-choice">
-      <label class="store-payment-option">
-        <input type="radio" name="paymentMethod" value="UPI" checked>
-        Pay via UPI
-      </label>
-      <label class="store-payment-option">
-        <input type="radio" name="paymentMethod" value="COD">
-        Cash on Delivery / Pickup
-      </label>
-    </div>
-
-    <div class="store-upi-box" id="storeUpiBox">
-      <img src="upi-qr-placeholder.png" alt="UPI QR code" class="store-qr-img">
-      <p class="store-qr-note">Scan &amp; pay the total shown above, then enter your transaction ID below.</p>
-      <label>UPI Transaction / Reference ID *<input id="cf-transactionref"></label>
-    </div>
-
-    <p class="store-checkout-msg" id="checkoutMsg"></p>
-    <button type="submit" class="store-checkout-btn" id="checkoutSubmitBtn">Place Order</button>
-  </form>
-  <div class="store-checkout-success" id="checkoutSuccess">
-    <h4>Order placed! 🎉</h4>
-    <p>We've saved your order — you'll be contacted for payment and pickup details.</p>
-    <button class="store-checkout-btn" onclick="closeCheckoutForm()">Done</button>
-  </div>
-</div>
 
 <!-- SPOTIFY -->
 <section class="music-section">

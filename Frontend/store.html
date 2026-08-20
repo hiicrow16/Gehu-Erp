@@ -1,416 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>College Store - GEHU</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
-    body {
-      margin: 0; display: flex; font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top left, #0f172a, #020617); color: white;
-      min-height: 100vh;
-    }
-    .sidebar {
-      width: 240px; height: 100vh; background: linear-gradient(180deg, #0f172a, #020617);
-      padding: 20px; position: fixed; display: flex; flex-direction: column;
-      box-shadow: 0 0 25px rgba(0,255,255,0.1);
-    }
-    .sidebar h2 { margin-bottom: 30px; color: #22d3ee; }
-    .sidebar a {
-      color: white; padding: 12px; margin: 6px 0; border-radius: 10px; cursor: pointer;
-      transition: 0.3s; background: rgba(255,255,255,0.05); text-decoration: none; display: block;
-    }
-    .sidebar a:hover { background: linear-gradient(90deg, #06b6d4, #3b82f6); transform: translateX(5px); }
-    .logout { margin-top: auto; background: red; padding: 10px; text-align: center; border-radius: 6px; cursor: pointer; }
-
-    .main-content { margin-left: 240px; padding: 40px; width: 100%; box-sizing: border-box; }
-
-    .store-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-    .store-header h1 { margin: 0; }
-    .cart-btn {
-      position: relative; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      color: white; padding: 12px 18px; border-radius: 10px; cursor: pointer; font-size: 15px;
-      display: flex; align-items: center; gap: 8px; transition: 0.3s;
-    }
-    .cart-btn:hover { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
-    .cart-count {
-      background: #ff4d6d; color: white; font-size: 12px; font-weight: 700;
-      border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
-    }
-
-    .filter-bar { display: flex; gap: 10px; margin: 26px 0; flex-wrap: wrap; }
-    .filter-btn {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1;
-      padding: 9px 18px; border-radius: 20px; cursor: pointer; font-size: 13.5px; transition: 0.25s;
-    }
-    .filter-btn:hover { border-color: #22d3ee; color: white; }
-    .filter-btn.active { background: linear-gradient(90deg, #06b6d4, #3b82f6); color: white; border-color: transparent; }
-
-    .search-box {
-      width: 100%; max-width: 320px; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05); color: white; margin-bottom: 24px; font-size: 14px;
-    }
-    .search-box::placeholder { color: #94a3b8; }
-
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-    .product-card {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
-      padding: 20px; text-align: center; transition: 0.3s; display: flex; flex-direction: column;
-    }
-    .product-card:hover { transform: translateY(-5px); box-shadow: 0 0 20px rgba(59,130,246,0.4); border-color: #22d3ee; }
-    .product-icon {
-      font-size: 40px; height: 90px; display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.04); border-radius: 12px; margin-bottom: 14px;
-    }
-    .product-card h4 { margin: 0 0 6px; font-size: 16px; }
-    .product-card .cat-tag { font-size: 11.5px; color: #22d3ee; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-    .product-card .price { font-size: 18px; font-weight: 700; margin: 8px 0 14px; color: #ffb020; }
-    .product-card .stock-note { font-size: 12px; color: #64748b; margin-bottom: 10px; }
-    .add-btn {
-      margin-top: auto; background: linear-gradient(90deg, #06b6d4, #3b82f6); border: none; color: white;
-      padding: 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s;
-    }
-    .add-btn:hover { opacity: 0.88; }
-    .add-btn:disabled { background: #334155; cursor: not-allowed; opacity: 0.6; }
-
-    .empty-note { color: #94a3b8; padding: 40px 0; text-align: center; grid-column: 1/-1; }
-
-    /* CART DRAWER */
-    .cart-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 40;
-    }
-    .cart-overlay.open { display: block; }
-    .cart-drawer {
-      position: fixed; top: 0; right: -420px; width: 380px; max-width: 90vw; height: 100vh;
-      background: #0f172a; box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 50;
-      transition: right 0.3s ease; display: flex; flex-direction: column; padding: 24px;
-      box-sizing: border-box;
-    }
-    .cart-drawer.open { right: 0; }
-    .cart-drawer h3 { margin: 0 0 20px; display: flex; justify-content: space-between; align-items: center; }
-    .cart-close { cursor: pointer; background: none; border: none; color: #94a3b8; font-size: 22px; }
-    .cart-items { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-    .cart-item {
-      background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; display: flex;
-      justify-content: space-between; align-items: center; gap: 10px;
-    }
-    .cart-item .info h5 { margin: 0 0 4px; font-size: 14px; }
-    .cart-item .info span { font-size: 12.5px; color: #94a3b8; }
-    .qty-controls { display: flex; align-items: center; gap: 8px; }
-    .qty-controls button {
-      background: rgba(255,255,255,0.1); border: none; color: white; width: 26px; height: 26px;
-      border-radius: 6px; cursor: pointer; font-size: 14px;
-    }
-    .remove-btn { background: none; border: none; color: #ff4d6d; cursor: pointer; font-size: 13px; margin-left: 6px; }
-    .cart-empty { color: #94a3b8; text-align: center; margin-top: 40px; }
-    .cart-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; margin-top: 16px; }
-    .cart-total-row { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; margin-bottom: 14px; }
-    .checkout-btn {
-      width: 100%; background: linear-gradient(90deg, #ff8a2b, #ff4b2b); border: none; color: white;
-      padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
-    }
-    .checkout-btn:hover { opacity: 0.9; }
-    .checkout-note { font-size: 11.5px; color: #64748b; text-align: center; margin-top: 10px; }
-
-    .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: #16a34a; color: white; padding: 12px 22px; border-radius: 10px; font-size: 14px;
-      opacity: 0; pointer-events: none; transition: 0.3s; z-index: 60;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  </style>
+  <title>Store — GEHU Portal</title>
+  <meta name="description" content="Order college uniforms, books and stationery online — GEHU Portal.">
+  <link rel="icon" href="gehu.png">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="sidebar">
-  <h2>GEHU Store</h2>
-  <a href="student-dashboard.html">&larr; Dashboard</a>
-  <a href="student-dashboard.html">My Courses</a>
-  <a href="student-dashboard.html">Attendance</a>
-  <a href="store.html" style="background: linear-gradient(90deg, #06b6d4, #3b82f6);">Store</a>
-  <div class="logout" onclick="logout()">Logout</div>
-</div>
+<!-- NAVBAR -->
+<header class="top-nav" id="topNav">
+  <div class="nav-logo">
+    <img src="gehu.png" alt="GEHU Logo">
+    <div class="nav-word">GEHU Portal<span>Graphic Era Hill University</span></div>
+  </div>
 
-<div class="main-content">
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
 
-  <div class="store-header">
-    <div>
-      <h1>College Store</h1>
-      <p style="color:#94a3b8; margin-top:6px;">Uniforms, stationery, books &amp; college merch — order online, pick up on campus.</p>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="index.html#departments-section">Departments</a></li>
+    <li><a href="store.html">Store</a></li>
+    <li><a href="index.html#faculty-section">Project Member</a></li>
+    <li><a href="index.html#admissions-section">Admissions</a></li>
+    <li><a href="index.html#contact-section">Contact</a></li>
+    <li><a href="index.html#help-section">Help &amp; Support</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <a href="login.html"><button id="studentBtn">Student / Faculty Login</button></a>
+  </div>
+</header>
+
+<main class="main-content">
+
+<!-- STORE -->
+<section id="store-section" class="content-section store-section" style="padding-top: 48px;">
+  <div class="section-head reveal">
+    <span class="eyebrow">College Store</span>
+    <h2 class="section-title">Uniforms, Books &amp; Stationery</h2>
+    <p class="section-sub">Order college essentials online — no login needed. Pick up on campus. Already ordered? <a href="index.html#help-section">Track your order</a>.</p>
+  </div>
+
+  <div class="store-toolbar reveal">
+    <div class="store-filter-bar" id="storeFilterBar"></div>
+    <div class="store-toolbar-right">
+      <input class="store-search" id="storeSearch" placeholder="Search items...">
+      <button class="store-cart-btn" id="storeCartBtn" onclick="openStoreCart()">
+        🛒 Cart <span class="store-cart-count" id="storeCartCount">0</span>
+      </button>
     </div>
-    <button class="cart-btn" onclick="openCart()">
-      🛒 Cart <span class="cart-count" id="cartCount">0</span>
-    </button>
   </div>
 
-  <input class="search-box" id="searchBox" placeholder="Search items..." oninput="renderProducts()">
+  <div class="store-grid reveal" id="storeGrid"></div>
+</section>
 
-  <div class="filter-bar" id="filterBar"></div>
-
-  <div class="product-grid" id="productGrid"></div>
-
-</div>
-
-<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
-<div class="cart-drawer" id="cartDrawer">
-  <h3>Your Cart <button class="cart-close" onclick="closeCart()">✕</button></h3>
-  <div class="cart-items" id="cartItems"></div>
-  <div class="cart-footer">
-    <div class="cart-total-row"><span>Total</span><span id="cartTotal">₹0</span></div>
-    <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
-    <p class="checkout-note">Payment &amp; order processing will connect to the backend soon. For now this just confirms your order locally.</p>
+<!-- STORE CART DRAWER -->
+<div class="store-overlay" id="storeOverlay" onclick="closeStoreCart()"></div>
+<div class="store-cart-drawer" id="storeCartDrawer">
+  <div class="store-cart-head">
+    <h3>Your Cart</h3>
+    <button class="store-cart-close" onclick="closeStoreCart()">✕</button>
+  </div>
+  <div class="store-cart-items" id="storeCartItems"></div>
+  <div class="store-cart-footer">
+    <div class="store-cart-total-row"><span>Total</span><span id="storeCartTotal">₹0</span></div>
+    <button class="store-checkout-btn" onclick="openCheckoutForm()">Checkout</button>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- STORE CHECKOUT MODAL -->
+<div class="store-overlay" id="checkoutOverlay" onclick="closeCheckoutForm()"></div>
+<div class="store-checkout-modal" id="checkoutModal">
+  <div class="store-checkout-head">
+    <h3>Delivery Details</h3>
+    <button class="store-cart-close" onclick="closeCheckoutForm()">✕</button>
+  </div>
+  <form id="checkoutForm" class="store-checkout-form">
+    <label>Full Name *<input id="cf-name" required></label>
+    <label>Email *<input id="cf-email" type="email" required></label>
+    <label>Phone *<input id="cf-phone" type="tel" required></label>
+    <label>Student ID / Roll No. (optional)<input id="cf-studentid"></label>
+    <label>Delivery / Pickup Address *<textarea id="cf-address" rows="3" required></textarea></label>
+
+    <div class="store-payment-choice">
+      <label class="store-payment-option">
+        <input type="radio" name="paymentMethod" value="UPI" checked>
+        Pay via UPI
+      </label>
+      <label class="store-payment-option">
+        <input type="radio" name="paymentMethod" value="COD">
+        Cash on Delivery / Pickup
+      </label>
+    </div>
+
+    <div class="store-upi-box" id="storeUpiBox">
+      <img src="upi-qr-placeholder.png" alt="UPI QR code" class="store-qr-img">
+      <p class="store-qr-note">Scan &amp; pay the total shown above, then enter your transaction ID below.</p>
+      <label>UPI Transaction / Reference ID *<input id="cf-transactionref"></label>
+    </div>
+
+    <p class="store-checkout-msg" id="checkoutMsg"></p>
+    <button type="submit" class="store-checkout-btn" id="checkoutSubmitBtn">Place Order</button>
+  </form>
+  <div class="store-checkout-success" id="checkoutSuccess">
+    <h4>Order placed! 🎉</h4>
+    <p>We've saved your order — you'll be contacted for payment and pickup details. Note your Order ID from the confirmation to track it later.</p>
+    <button class="store-checkout-btn" onclick="closeCheckoutForm()">Done</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2026 Graphic Era Hill University</p>
+    <p>Developed with ❤️ by Hiicrow</p>
+  </div>
+</footer>
+
+</main>
 
 <script src="config.js"></script>
-<script>
-/* ============================================================
-   GEHU COLLEGE STORE
-   Frontend-only for now. Product data below is a placeholder —
-   once the backend Store API is ready, replace loadProducts()
-   with a fetch to `${API}/store/items` and checkout() with a
-   POST to `${API}/store/orders`. Everything else (filtering,
-   cart, rendering) can stay as-is.
-   ============================================================ */
-
-const API = window.API_BASE;
-
-/* AUTH GUARD - same pattern as the rest of the student area */
-if (localStorage.getItem("role") !== "student" || !localStorage.getItem("token")) {
-  window.location.href = "login.html";
-}
-
-function authHeaders() {
-  return { Authorization: `Bearer ${localStorage.getItem("token")}` };
-}
-
-function logout() {
-  localStorage.clear();
-  window.location.href = "login.html";
-}
-
-/* ---------- PLACEHOLDER CATALOG ----------
-   Swap this for a real fetch once the backend model/route exists, e.g.:
-
-   async function loadProducts() {
-     const res = await fetch(`${API}/store/items`, { headers: authHeaders() });
-     const data = await res.json();
-     PRODUCTS = data.success ? data.items : [];
-     renderProducts();
-   }
-*/
-const PRODUCTS = [
-  { id: "uni-blazer",  name: "College Blazer",        category: "Dress",      price: 1499, icon: "🧥", stock: 40 },
-  { id: "uni-tie",     name: "GEHU Tie",               category: "Dress",      price: 199,  icon: "👔", stock: 100 },
-  { id: "uni-shirt",   name: "Formal Shirt (White)",   category: "Dress",      price: 599,  icon: "👕", stock: 80 },
-  { id: "uni-id",      name: "ID Card Lanyard",        category: "Dress",      price: 99,   icon: "🪪", stock: 200 },
-
-  { id: "st-notebook", name: "Ruled Notebook (200pg)", category: "Stationery", price: 60,   icon: "📓", stock: 300 },
-  { id: "st-fileset",  name: "File Folder Set (5pc)",  category: "Stationery", price: 150,  icon: "🗂️", stock: 120 },
-  { id: "st-calc",     name: "Scientific Calculator",  category: "Stationery", price: 899,  icon: "🧮", stock: 35 },
-  { id: "st-geo",      name: "Geometry Box",           category: "Stationery", price: 220,  icon: "📐", stock: 60 },
-
-  { id: "pen-blue",    name: "Blue Ball Pen (Pack of 5)",   category: "Pens", price: 75,   icon: "🖊️", stock: 250 },
-  { id: "pen-gel",     name: "Premium Gel Pen",             category: "Pens", price: 40,   icon: "✒️", stock: 150 },
-  { id: "pen-highlight", name: "Highlighter Set (4 colors)", category: "Pens", price: 130, icon: "🖍️", stock: 90 },
-
-  { id: "bk-firstyear", name: "1st Year Core Book Set", category: "Books", price: 2499, icon: "📚", stock: 25 },
-  { id: "bk-labmanual",  name: "Lab Manual (Semester)",  category: "Books", price: 249,  icon: "📗", stock: 70 },
-  { id: "bk-referenceguide", name: "Reference Guide",    category: "Books", price: 399,  icon: "📘", stock: 45 },
-
-  { id: "cl-hoodie",  name: "GEHU Hoodie",           category: "Clothes", price: 999, icon: "🧶", stock: 50 },
-  { id: "cl-tshirt",  name: "GEHU T-Shirt",          category: "Clothes", price: 449, icon: "👚", stock: 90 },
-  { id: "cl-cap",     name: "Campus Cap",             category: "Clothes", price: 249, icon: "🧢", stock: 65 },
-];
-
-const CATEGORIES = ["All", "Dress", "Stationery", "Pens", "Books", "Clothes"];
-let activeCategory = "All";
-
-/* ---------- CART (persisted in localStorage for now) ---------- */
-function getCart() {
-  return JSON.parse(localStorage.getItem("storeCart") || "{}");
-}
-function saveCart(cart) {
-  localStorage.setItem("storeCart", JSON.stringify(cart));
-  renderCartCount();
-}
-
-function addToCart(productId) {
-  const cart = getCart();
-  cart[productId] = (cart[productId] || 0) + 1;
-  saveCart(cart);
-  showToast("Added to cart");
-}
-
-function changeQty(productId, delta) {
-  const cart = getCart();
-  cart[productId] = (cart[productId] || 0) + delta;
-  if (cart[productId] <= 0) delete cart[productId];
-  saveCart(cart);
-  renderCartItems();
-}
-
-function removeFromCart(productId) {
-  const cart = getCart();
-  delete cart[productId];
-  saveCart(cart);
-  renderCartItems();
-}
-
-function cartItemCount() {
-  const cart = getCart();
-  return Object.values(cart).reduce((sum, q) => sum + q, 0);
-}
-
-function renderCartCount() {
-  document.getElementById("cartCount").innerText = cartItemCount();
-}
-
-/* ---------- FILTER BAR ---------- */
-function renderFilters() {
-  const bar = document.getElementById("filterBar");
-  bar.innerHTML = "";
-  CATEGORIES.forEach(cat => {
-    const btn = document.createElement("button");
-    btn.className = "filter-btn" + (cat === activeCategory ? " active" : "");
-    btn.innerText = cat;
-    btn.onclick = () => { activeCategory = cat; renderProducts(); renderFilters(); };
-    bar.appendChild(btn);
-  });
-}
-
-/* ---------- PRODUCT GRID ---------- */
-function renderProducts() {
-  const grid = document.getElementById("productGrid");
-  const search = document.getElementById("searchBox").value.trim().toLowerCase();
-
-  const filtered = PRODUCTS.filter(p => {
-    const matchesCategory = activeCategory === "All" || p.category === activeCategory;
-    const matchesSearch = !search || p.name.toLowerCase().includes(search);
-    return matchesCategory && matchesSearch;
-  });
-
-  grid.innerHTML = "";
-
-  if (!filtered.length) {
-    grid.innerHTML = `<div class="empty-note">No items match your search.</div>`;
-    return;
-  }
-
-  filtered.forEach(p => {
-    const card = document.createElement("div");
-    card.className = "product-card";
-    const outOfStock = p.stock <= 0;
-    card.innerHTML = `
-      <div class="product-icon">${p.icon}</div>
-      <div class="cat-tag">${p.category}</div>
-      <h4>${p.name}</h4>
-      <div class="price">₹${p.price}</div>
-      <div class="stock-note">${outOfStock ? "Out of stock" : p.stock + " in stock"}</div>
-      <button class="add-btn" ${outOfStock ? "disabled" : ""} onclick="addToCart('${p.id}')">
-        ${outOfStock ? "Unavailable" : "Add to Cart"}
-      </button>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-/* ---------- CART DRAWER ---------- */
-function openCart() {
-  renderCartItems();
-  document.getElementById("cartDrawer").classList.add("open");
-  document.getElementById("cartOverlay").classList.add("open");
-}
-function closeCart() {
-  document.getElementById("cartDrawer").classList.remove("open");
-  document.getElementById("cartOverlay").classList.remove("open");
-}
-
-function renderCartItems() {
-  const cart = getCart();
-  const container = document.getElementById("cartItems");
-  const ids = Object.keys(cart);
-
-  if (!ids.length) {
-    container.innerHTML = `<div class="cart-empty">Your cart is empty</div>`;
-    document.getElementById("cartTotal").innerText = "₹0";
-    return;
-  }
-
-  container.innerHTML = "";
-  let total = 0;
-
-  ids.forEach(id => {
-    const product = PRODUCTS.find(p => p.id === id);
-    if (!product) return;
-    const qty = cart[id];
-    const lineTotal = product.price * qty;
-    total += lineTotal;
-
-    const row = document.createElement("div");
-    row.className = "cart-item";
-    row.innerHTML = `
-      <div class="info">
-        <h5>${product.icon} ${product.name}</h5>
-        <span>₹${product.price} x ${qty} = ₹${lineTotal}</span>
-      </div>
-      <div class="qty-controls">
-        <button onclick="changeQty('${id}', -1)">-</button>
-        <span>${qty}</span>
-        <button onclick="changeQty('${id}', 1)">+</button>
-        <button class="remove-btn" onclick="removeFromCart('${id}')">Remove</button>
-      </div>
-    `;
-    container.appendChild(row);
-  });
-
-  document.getElementById("cartTotal").innerText = `₹${total}`;
-}
-
-/* ---------- CHECKOUT (stub — wire to backend later) ----------
-   Once the backend order route exists, replace the body of this
-   function with something like:
-
-   async function checkout() {
-     const cart = getCart();
-     const res = await fetch(`${API}/store/orders`, {
-       method: "POST",
-       headers: { "Content-Type": "application/json", ...authHeaders() },
-       body: JSON.stringify({ items: cart })
-     });
-     const data = await res.json();
-     if (data.success) { localStorage.removeItem("storeCart"); ... }
-   }
-*/
-function checkout() {
-  const cart = getCart();
-  if (!Object.keys(cart).length) {
-    showToast("Your cart is empty");
-    return;
-  }
-  showToast("Order noted locally — checkout will go live once the backend is connected");
-  closeCart();
-}
-
-/* ---------- TOAST ---------- */
-let toastTimer;
-function showToast(msg) {
-  const toast = document.getElementById("toast");
-  toast.innerText = msg;
-  toast.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
-}
-
-/* ---------- INIT ---------- */
-renderFilters();
-renderProducts();
-renderCartCount();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
