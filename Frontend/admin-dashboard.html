@@ -69,6 +69,7 @@ tr:hover { background: rgba(59,130,246,0.1); }
   <button onclick="showDashboard()">Dashboard</button>
   <button onclick="showStudents()">Manage Students</button>
   <button onclick="showAttendance()">Attendance</button>
+  <button onclick="showOrders()">Store Orders</button>
   <button onclick="logout()" class="logout">Logout</button>
 </div>
 
@@ -132,6 +133,25 @@ tr:hover { background: rgba(59,130,246,0.1); }
   </table>
 </section>
 
+<section id="ordersSection" class="section">
+  <h2>Store Orders</h2>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <h3>Awaiting Verification: <span id="awaitingCount">0</span></h3>
+    <h3>Total Orders: <span id="totalOrders">0</span></h3>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th><th>Customer</th><th>Contact</th><th>Items</th><th>Total</th>
+        <th>Payment</th><th>Payment Status</th><th>Fulfillment</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTable"></tbody>
+  </table>
+</section>
+
 </div>
 
 <script src="config.js"></script>
@@ -155,6 +175,7 @@ function hideAll() {
 function showDashboard() { hideAll(); dashboardSection.classList.add("active"); loadDashboardStats(); }
 function showStudents() { hideAll(); studentsSection.classList.add("active"); loadStudents(); }
 function showAttendance() { hideAll(); attendanceSection.classList.add("active"); loadStudentOptions(); }
+function showOrders() { hideAll(); ordersSection.classList.add("active"); loadOrders(); }
 
 let coursesCache = [];
 let studentsCache = [];
@@ -350,6 +371,61 @@ async function viewAttendance(studentProfileId) {
 function logout() {
   localStorage.clear();
   window.location.href = "login.html";
+}
+
+/* ============================
+   STORE ORDERS
+============================ */
+const PAYMENT_STATUS_OPTIONS = ["Awaiting Verification", "Pay on Pickup", "Paid", "Failed"];
+const FULFILLMENT_STATUS_OPTIONS = ["Pending", "Processing", "Ready for Pickup", "Completed", "Cancelled"];
+
+async function loadOrders() {
+  const res = await fetch(`${API}/store/orders`, { headers: authHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  const orders = data.orders;
+  document.getElementById("totalOrders").innerText = orders.length;
+  document.getElementById("awaitingCount").innerText =
+    orders.filter(o => o.paymentStatus === "Awaiting Verification").length;
+
+  const tbody = document.getElementById("ordersTable");
+  tbody.innerHTML = "";
+
+  orders.forEach(o => {
+    const itemsList = o.items.map(i => `${i.name} x${i.quantity}`).join(", ");
+    const dateStr = new Date(o.createdAt).toLocaleString();
+
+    const paymentOptionsHtml = PAYMENT_STATUS_OPTIONS
+      .map(s => `<option value="${s}" ${o.paymentStatus === s ? "selected" : ""}>${s}</option>`)
+      .join("");
+    const fulfillOptionsHtml = FULFILLMENT_STATUS_OPTIONS
+      .map(s => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`)
+      .join("");
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${dateStr}</td>
+        <td>${o.customerName}${o.studentId ? ` (${o.studentId})` : ""}</td>
+        <td>${o.email}<br>${o.phone}</td>
+        <td style="text-align:left; max-width: 220px;">${itemsList}</td>
+        <td>₹${o.totalAmount}</td>
+        <td>${o.paymentMethod}${o.transactionRef ? `<br><small>Ref: ${o.transactionRef}</small>` : ""}</td>
+        <td><select onchange="updateOrder('${o._id}', 'paymentStatus', this.value)">${paymentOptionsHtml}</select></td>
+        <td><select onchange="updateOrder('${o._id}', 'status', this.value)">${fulfillOptionsHtml}</select></td>
+        <td><button onclick="alert('Address: ${o.address.replace(/'/g, "\\'")}')">View Address</button></td>
+      </tr>
+    `;
+  });
+}
+
+async function updateOrder(orderId, field, value) {
+  await fetch(`${API}/store/orders/${orderId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ [field]: value }),
+  });
+  loadOrders();
 }
 
 loadDashboardStats();

@@ -13,12 +13,23 @@ router.get("/items", (req, res) => {
 // POST /api/store/orders - public checkout submission (no login required)
 router.post("/orders", async (req, res) => {
   try {
-    const { customerName, email, phone, address, studentId, items } = req.body;
+    const { customerName, email, phone, address, studentId, items, paymentMethod, transactionRef } = req.body;
 
     if (!customerName || !email || !phone || !address) {
       return res.status(400).json({
         success: false,
         message: "Name, email, phone and address are required.",
+      });
+    }
+
+    if (!["UPI", "COD"].includes(paymentMethod)) {
+      return res.status(400).json({ success: false, message: "Choose a valid payment method." });
+    }
+
+    if (paymentMethod === "UPI" && !transactionRef) {
+      return res.status(400).json({
+        success: false,
+        message: "Enter your UPI transaction/reference ID after paying.",
       });
     }
 
@@ -65,6 +76,9 @@ router.post("/orders", async (req, res) => {
       studentId,
       items: orderItems,
       totalAmount,
+      paymentMethod,
+      transactionRef: paymentMethod === "UPI" ? transactionRef : undefined,
+      paymentStatus: paymentMethod === "UPI" ? "Awaiting Verification" : "Pay on Pickup",
     });
 
     res.status(201).json({ success: true, order });
@@ -80,6 +94,18 @@ router.post("/orders", async (req, res) => {
 router.get("/orders", protect, authorize("admin"), async (req, res) => {
   const orders = await Order.find().sort({ createdAt: -1 });
   res.json({ success: true, orders });
+});
+
+// PATCH /api/store/orders/:id - admin-only: update payment/fulfillment status
+router.patch("/orders/:id", protect, authorize("admin"), async (req, res) => {
+  const { paymentStatus, status } = req.body;
+  const update = {};
+  if (paymentStatus) update.paymentStatus = paymentStatus;
+  if (status) update.status = status;
+
+  const order = await Order.findByIdAndUpdate(req.params.id, update, { new: true });
+  if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+  res.json({ success: true, order });
 });
 
 module.exports = router;

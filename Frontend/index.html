@@ -158,6 +158,24 @@
     <label>Phone *<input id="cf-phone" type="tel" required></label>
     <label>Student ID / Roll No. (optional)<input id="cf-studentid"></label>
     <label>Delivery / Pickup Address *<textarea id="cf-address" rows="3" required></textarea></label>
+
+    <div class="store-payment-choice">
+      <label class="store-payment-option">
+        <input type="radio" name="paymentMethod" value="UPI" checked>
+        Pay via UPI
+      </label>
+      <label class="store-payment-option">
+        <input type="radio" name="paymentMethod" value="COD">
+        Cash on Delivery / Pickup
+      </label>
+    </div>
+
+    <div class="store-upi-box" id="storeUpiBox">
+      <img src="upi-qr-placeholder.png" alt="UPI QR code" class="store-qr-img">
+      <p class="store-qr-note">Scan &amp; pay the total shown above, then enter your transaction ID below.</p>
+      <label>UPI Transaction / Reference ID *<input id="cf-transactionref"></label>
+    </div>
+
     <p class="store-checkout-msg" id="checkoutMsg"></p>
     <button type="submit" class="store-checkout-btn" id="checkoutSubmitBtn">Place Order</button>
   </form>

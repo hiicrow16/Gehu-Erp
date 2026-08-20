@@ -586,15 +586,34 @@ function openCheckoutForm() {
   document.getElementById("checkoutMsg").textContent = "";
   document.getElementById("checkoutModal").classList.add("open");
   document.getElementById("checkoutOverlay").classList.add("open");
+  updateStorePaymentUI();
 }
 function closeCheckoutForm() {
   document.getElementById("checkoutModal").classList.remove("open");
   document.getElementById("checkoutOverlay").classList.remove("open");
 }
 
+function getSelectedPaymentMethod() {
+  const checked = document.querySelector('input[name="paymentMethod"]:checked');
+  return checked ? checked.value : "UPI";
+}
+
+function updateStorePaymentUI() {
+  const upiBox = document.getElementById("storeUpiBox");
+  const transactionInput = document.getElementById("cf-transactionref");
+  if (!upiBox) return;
+  const isUpi = getSelectedPaymentMethod() === "UPI";
+  upiBox.classList.toggle("open", isUpi);
+  if (transactionInput) transactionInput.required = isUpi;
+}
+
 function initCheckoutForm() {
   const form = document.getElementById("checkoutForm");
   if (!form) return;
+
+  document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+    radio.addEventListener("change", updateStorePaymentUI);
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -610,6 +629,9 @@ function initCheckoutForm() {
       return;
     }
 
+    const paymentMethod = getSelectedPaymentMethod();
+    const transactionRef = document.getElementById("cf-transactionref").value.trim();
+
     const body = {
       customerName: document.getElementById("cf-name").value.trim(),
       email: document.getElementById("cf-email").value.trim(),
@@ -617,10 +639,17 @@ function initCheckoutForm() {
       studentId: document.getElementById("cf-studentid").value.trim(),
       address: document.getElementById("cf-address").value.trim(),
       items,
+      paymentMethod,
+      transactionRef,
     };
 
     if (!body.customerName || !body.email || !body.phone || !body.address) {
       msg.textContent = "Please fill in all required fields.";
+      return;
+    }
+
+    if (paymentMethod === "UPI" && !transactionRef) {
+      msg.textContent = "Enter your UPI transaction/reference ID after paying.";
       return;
     }
 
@@ -640,6 +669,7 @@ function initCheckoutForm() {
         saveStoreCart({});
         form.reset();
         form.style.display = "none";
+        updateStorePaymentUI();
         document.getElementById("checkoutSuccess").classList.add("open");
       } else {
         msg.textContent = data.message || "Could not place order. Please try again.";

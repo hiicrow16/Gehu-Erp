@@ -23,6 +23,17 @@ const orderSchema = new mongoose.Schema(
       validate: (v) => Array.isArray(v) && v.length > 0,
     },
     totalAmount: { type: Number, required: true, min: 0 },
+    paymentMethod: {
+      type: String,
+      enum: ["UPI", "COD"],
+      required: true,
+    },
+    transactionRef: { type: String, trim: true }, // buyer-entered UPI transaction/UTR ID, only for UPI orders
+    paymentStatus: {
+      type: String,
+      enum: ["Awaiting Verification", "Pay on Pickup", "Paid", "Failed"],
+      required: true,
+    },
     status: {
       type: String,
       enum: ["Pending", "Processing", "Ready for Pickup", "Completed", "Cancelled"],
