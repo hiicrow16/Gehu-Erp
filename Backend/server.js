@@ -10,6 +10,7 @@ const courseRoutes = require("./routes/courses");
 const subjectRoutes = require("./routes/subjects");
 const attendanceRoutes = require("./routes/attendance");
 const noticeRoutes = require("./routes/notices");
+const storeRoutes = require("./routes/store");
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/notices", noticeRoutes);
+app.use("/api/store", storeRoutes);
 
 // 404 handler for unknown API routes
 app.use("/api", (req, res) => {

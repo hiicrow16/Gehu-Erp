@@ -384,3 +384,280 @@ window.logout = function () {
   localStorage.clear();
   window.location.href = "login.html";
 };
+
+/* ============================================================
+   COLLEGE STORE (public — front page, no login required)
+   ============================================================ */
+
+// Fallback copy in case the backend is unreachable (e.g. cold-starting on
+// Render). The real catalog is fetched from `${API}/store/items`, which is
+// also the source of truth the backend uses to validate orders.
+const STORE_FALLBACK_PRODUCTS = [
+  { id: "uni-blazer",  name: "College Blazer",        category: "Dress",      price: 1499, icon: "🧥", stock: 40 },
+  { id: "uni-tie",     name: "GEHU Tie",               category: "Dress",      price: 199,  icon: "👔", stock: 100 },
+  { id: "uni-shirt",   name: "Formal Shirt (White)",   category: "Dress",      price: 599,  icon: "👕", stock: 80 },
+  { id: "uni-id",      name: "ID Card Lanyard",        category: "Dress",      price: 99,   icon: "🪪", stock: 200 },
+  { id: "st-notebook", name: "Ruled Notebook (200pg)", category: "Stationery", price: 60,   icon: "📓", stock: 300 },
+  { id: "st-fileset",  name: "File Folder Set (5pc)",  category: "Stationery", price: 150,  icon: "🗂️", stock: 120 },
+  { id: "st-calc",     name: "Scientific Calculator",  category: "Stationery", price: 899,  icon: "🧮", stock: 35 },
+  { id: "st-geo",      name: "Geometry Box",           category: "Stationery", price: 220,  icon: "📐", stock: 60 },
+  { id: "pen-blue",    name: "Blue Ball Pen (Pack of 5)",   category: "Pens", price: 75,   icon: "🖊️", stock: 250 },
+  { id: "pen-gel",     name: "Premium Gel Pen",             category: "Pens", price: 40,   icon: "✒️", stock: 150 },
+  { id: "pen-highlight", name: "Highlighter Set (4 colors)", category: "Pens", price: 130, icon: "🖍️", stock: 90 },
+  { id: "bk-firstyear", name: "1st Year Core Book Set", category: "Books", price: 2499, icon: "📚", stock: 25 },
+  { id: "bk-labmanual",  name: "Lab Manual (Semester)",  category: "Books", price: 249,  icon: "📗", stock: 70 },
+  { id: "bk-referenceguide", name: "Reference Guide",    category: "Books", price: 399,  icon: "📘", stock: 45 },
+  { id: "cl-hoodie",  name: "GEHU Hoodie",           category: "Clothes", price: 999, icon: "🧶", stock: 50 },
+  { id: "cl-tshirt",  name: "GEHU T-Shirt",          category: "Clothes", price: 449, icon: "👚", stock: 90 },
+  { id: "cl-cap",     name: "Campus Cap",             category: "Clothes", price: 249, icon: "🧢", stock: 65 },
+];
+
+// Icons aren't stored server-side (catalog there is price/stock only), so we
+// map them back on by product id once we have the live list.
+const STORE_ICONS = STORE_FALLBACK_PRODUCTS.reduce((map, p) => {
+  map[p.id] = p.icon;
+  return map;
+}, {});
+
+const STORE_CATEGORIES = ["All", "Dress", "Stationery", "Pens", "Books", "Clothes"];
+let storeProducts = [];
+let storeActiveCategory = "All";
+
+async function loadStoreProducts() {
+  const grid = document.getElementById("storeGrid");
+  if (!grid) return; // store section isn't on this page
+
+  try {
+    const res = await fetch(`${API}/store/items`);
+    const data = await res.json();
+    storeProducts = data.success && data.items.length
+      ? data.items.map(p => ({ ...p, icon: STORE_ICONS[p.id] || "🛍️" }))
+      : STORE_FALLBACK_PRODUCTS;
+  } catch (err) {
+    storeProducts = STORE_FALLBACK_PRODUCTS;
+  }
+
+  renderStoreFilters();
+  renderStoreProducts();
+}
+
+function getStoreCart() {
+  return JSON.parse(localStorage.getItem("storeCart") || "{}");
+}
+function saveStoreCart(cart) {
+  localStorage.setItem("storeCart", JSON.stringify(cart));
+  const countEl = document.getElementById("storeCartCount");
+  if (countEl) {
+    const count = Object.values(cart).reduce((sum, q) => sum + q, 0);
+    countEl.innerText = count;
+  }
+}
+
+function addToStoreCart(productId) {
+  const cart = getStoreCart();
+  cart[productId] = (cart[productId] || 0) + 1;
+  saveStoreCart(cart);
+}
+
+function changeStoreQty(productId, delta) {
+  const cart = getStoreCart();
+  cart[productId] = (cart[productId] || 0) + delta;
+  if (cart[productId] <= 0) delete cart[productId];
+  saveStoreCart(cart);
+  renderStoreCartItems();
+}
+
+function removeFromStoreCart(productId) {
+  const cart = getStoreCart();
+  delete cart[productId];
+  saveStoreCart(cart);
+  renderStoreCartItems();
+}
+
+function renderStoreFilters() {
+  const bar = document.getElementById("storeFilterBar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  STORE_CATEGORIES.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className = "store-filter-btn" + (cat === storeActiveCategory ? " active" : "");
+    btn.innerText = cat;
+    btn.onclick = () => { storeActiveCategory = cat; renderStoreProducts(); renderStoreFilters(); };
+    bar.appendChild(btn);
+  });
+}
+
+function renderStoreProducts() {
+  const grid = document.getElementById("storeGrid");
+  const searchEl = document.getElementById("storeSearch");
+  if (!grid) return;
+  const search = searchEl ? searchEl.value.trim().toLowerCase() : "";
+
+  const filtered = storeProducts.filter(p => {
+    const matchesCategory = storeActiveCategory === "All" || p.category === storeActiveCategory;
+    const matchesSearch = !search || p.name.toLowerCase().includes(search);
+    return matchesCategory && matchesSearch;
+  });
+
+  grid.innerHTML = "";
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="store-empty-note">No items match your search.</div>`;
+    return;
+  }
+
+  filtered.forEach(p => {
+    const outOfStock = p.stock <= 0;
+    const card = document.createElement("div");
+    card.className = "store-product-card";
+    card.innerHTML = `
+      <div class="store-product-icon">${p.icon || "🛍️"}</div>
+      <div class="cat-tag">${p.category}</div>
+      <h4>${p.name}</h4>
+      <div class="store-price">₹${p.price}</div>
+      <div class="store-stock-note">${outOfStock ? "Out of stock" : p.stock + " in stock"}</div>
+      <button class="store-add-btn" ${outOfStock ? "disabled" : ""} onclick="addToStoreCart('${p.id}')">
+        ${outOfStock ? "Unavailable" : "Add to Cart"}
+      </button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function openStoreCart() {
+  renderStoreCartItems();
+  document.getElementById("storeCartDrawer").classList.add("open");
+  document.getElementById("storeOverlay").classList.add("open");
+}
+function closeStoreCart() {
+  document.getElementById("storeCartDrawer").classList.remove("open");
+  document.getElementById("storeOverlay").classList.remove("open");
+}
+
+function renderStoreCartItems() {
+  const cart = getStoreCart();
+  const container = document.getElementById("storeCartItems");
+  if (!container) return;
+  const ids = Object.keys(cart);
+
+  if (!ids.length) {
+    container.innerHTML = `<div class="store-cart-empty">Your cart is empty</div>`;
+    document.getElementById("storeCartTotal").innerText = "₹0";
+    return;
+  }
+
+  container.innerHTML = "";
+  let total = 0;
+
+  ids.forEach(id => {
+    const product = storeProducts.find(p => p.id === id);
+    if (!product) return;
+    const qty = cart[id];
+    const lineTotal = product.price * qty;
+    total += lineTotal;
+
+    const row = document.createElement("div");
+    row.className = "store-cart-item";
+    row.innerHTML = `
+      <div class="info">
+        <h5>${product.icon || "🛍️"} ${product.name}</h5>
+        <span>₹${product.price} x ${qty} = ₹${lineTotal}</span>
+      </div>
+      <div class="store-qty-controls">
+        <button onclick="changeStoreQty('${id}', -1)">-</button>
+        <span>${qty}</span>
+        <button onclick="changeStoreQty('${id}', 1)">+</button>
+        <button class="store-remove-btn" onclick="removeFromStoreCart('${id}')">Remove</button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  document.getElementById("storeCartTotal").innerText = `₹${total}`;
+}
+
+/* ---------- CHECKOUT MODAL ---------- */
+function openCheckoutForm() {
+  const cart = getStoreCart();
+  if (!Object.keys(cart).length) return;
+
+  closeStoreCart();
+  document.getElementById("checkoutForm").style.display = "flex";
+  document.getElementById("checkoutSuccess").classList.remove("open");
+  document.getElementById("checkoutMsg").textContent = "";
+  document.getElementById("checkoutModal").classList.add("open");
+  document.getElementById("checkoutOverlay").classList.add("open");
+}
+function closeCheckoutForm() {
+  document.getElementById("checkoutModal").classList.remove("open");
+  document.getElementById("checkoutOverlay").classList.remove("open");
+}
+
+function initCheckoutForm() {
+  const form = document.getElementById("checkoutForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById("checkoutMsg");
+    const submitBtn = document.getElementById("checkoutSubmitBtn");
+    msg.textContent = "";
+
+    const cart = getStoreCart();
+    const items = Object.entries(cart).map(([productId, quantity]) => ({ productId, quantity }));
+
+    if (!items.length) {
+      msg.textContent = "Your cart is empty.";
+      return;
+    }
+
+    const body = {
+      customerName: document.getElementById("cf-name").value.trim(),
+      email: document.getElementById("cf-email").value.trim(),
+      phone: document.getElementById("cf-phone").value.trim(),
+      studentId: document.getElementById("cf-studentid").value.trim(),
+      address: document.getElementById("cf-address").value.trim(),
+      items,
+    };
+
+    if (!body.customerName || !body.email || !body.phone || !body.address) {
+      msg.textContent = "Please fill in all required fields.";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Placing order…";
+
+    try {
+      const res = await fetch(`${API}/store/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.removeItem("storeCart");
+        saveStoreCart({});
+        form.reset();
+        form.style.display = "none";
+        document.getElementById("checkoutSuccess").classList.add("open");
+      } else {
+        msg.textContent = data.message || "Could not place order. Please try again.";
+      }
+    } catch (err) {
+      msg.textContent = "Can't reach the backend right now. Please try again in a moment.";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Place Order";
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadStoreProducts();
+  initCheckoutForm();
+  saveStoreCart(getStoreCart()); // sync the cart count badge on page load
+
+  const storeSearchEl = document.getElementById("storeSearch");
+  if (storeSearchEl) storeSearchEl.addEventListener("input", renderStoreProducts);
+});
