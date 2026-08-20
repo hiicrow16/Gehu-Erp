@@ -229,6 +229,57 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* =========================
+     TRACK YOUR ORDER (index.html - Help & Support)
+  ========================== */
+  const trackForm = document.getElementById("trackOrderForm");
+  if (trackForm) {
+    const resultBox = document.getElementById("trackResult");
+
+    const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+    trackForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const orderId = document.getElementById("trackOrderId").value.trim();
+      const studentId = document.getElementById("trackStudentId").value.trim();
+      const btn = trackForm.querySelector("button[type='submit']");
+
+      if (btn) { btn.disabled = true; btn.textContent = "Checking…"; }
+      resultBox.className = "track-result hidden";
+      resultBox.innerHTML = "";
+
+      try {
+        const res = await fetch(`${API}/store/track?orderId=${encodeURIComponent(orderId)}&studentId=${encodeURIComponent(studentId)}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          resultBox.className = "track-result error";
+          resultBox.textContent = data.message || "No matching order found.";
+        } else {
+          const o = data.order;
+          const itemsList = o.items.map(i => `${i.name} x${i.quantity}`).join(", ");
+          const dateStr = new Date(o.createdAt).toLocaleString();
+
+          resultBox.className = "track-result";
+          resultBox.innerHTML = `
+            <div class="track-row"><span>Order Date</span><span>${dateStr}</span></div>
+            <div class="track-row"><span>Total</span><span>₹${o.totalAmount}</span></div>
+            <div class="track-row"><span>Payment</span><span>${o.paymentMethod}</span></div>
+            <div class="track-row"><span>Payment Status</span><span class="track-badge ${slug(o.paymentStatus)}">${o.paymentStatus}</span></div>
+            <div class="track-row"><span>Order Status</span><span class="track-badge ${slug(o.status)}">${o.status}</span></div>
+            <div class="track-row track-items"><span>Items</span><span>${itemsList}</span></div>
+          `;
+        }
+      } catch (err) {
+        resultBox.className = "track-result error";
+        resultBox.textContent = "Couldn't reach the server. Try again in a moment.";
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "Track Order"; }
+      }
+    });
+  }
+
 });
 
 /* =========================
