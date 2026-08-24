@@ -7,3 +7,5 @@ Backend/.env
 Thumbs.db
 *.log
 .vscode/
+
+.git.zip
