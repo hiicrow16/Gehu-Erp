@@ -58,12 +58,66 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // The navbar panel is a shortcut into the real login page rather than a
-  // second login form, so credentials are only ever submitted from login.html.
+  // The navbar quick-login panel now logs in directly (same request the
+  // full login.html page makes), instead of discarding what was typed here
+  // and bouncing to login.html for a second, empty attempt.
   const homeLoginBtn = document.getElementById("homeLoginBtn");
   if (homeLoginBtn) {
-    homeLoginBtn.addEventListener("click", () => {
-      window.location.href = "login.html";
+    homeLoginBtn.addEventListener("click", async () => {
+      const campusIdField = document.getElementById("campusId");
+      const passwordField = document.getElementById("password");
+      const username = campusIdField ? campusIdField.value.trim() : "";
+      const password = passwordField ? passwordField.value.trim() : "";
+
+      let msg = document.getElementById("homeLoginMessage");
+      if (!msg && loginPanel) {
+        msg = document.createElement("small");
+        msg.id = "homeLoginMessage";
+        msg.className = "form-note";
+        loginPanel.appendChild(msg);
+      }
+      if (msg) msg.textContent = "";
+
+      if (!username || !password) {
+        if (msg) msg.textContent = "Enter your Campus ID and password.";
+        return;
+      }
+
+      homeLoginBtn.disabled = true;
+      homeLoginBtn.textContent = "Signing in…";
+
+      try {
+        const res = await fetch(`${API}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("role", data.role);
+          localStorage.setItem("username", data.username);
+          if (data.profile && data.profile._id) {
+            localStorage.setItem("profileId", data.profile._id);
+          }
+
+          if (data.role === "student") {
+            window.location.href = "student-dashboard.html";
+          } else if (data.role === "admin") {
+            window.location.href = "admin-dashboard.html";
+          } else if (data.role === "faculty") {
+            if (msg) msg.textContent = "Faculty login succeeded, but the faculty dashboard page isn't built yet.";
+          }
+        } else if (msg) {
+          msg.textContent = data.message || "Login failed.";
+        }
+      } catch (error) {
+        if (msg) msg.textContent = "Can't reach the backend. Check config.js API_BASE and that the server is running.";
+      } finally {
+        homeLoginBtn.disabled = false;
+        homeLoginBtn.textContent = "Login";
+      }
     });
   }
 
