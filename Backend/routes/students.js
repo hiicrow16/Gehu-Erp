@@ -39,24 +39,55 @@ router.post("/", protect, authorize("admin"), async (req, res) => {
       return res.status(400).json({ success: false, message: "username, password, studentId and name are required" });
     }
 
-    const user = await User.create({ username, password, role: "student" });
-    const student = await Student.create({
-      user: user._id,
-      studentId,
-      name,
-      email,
-      phone,
-      course: course || undefined,
-      semester,
-      department,
-      admissionYear,
-    });
+    // Self-heal: if a User with this username already exists but has no
+    // matching Student profile (left over from an earlier failed attempt,
+    // e.g. this route erroring out between creating the User and the
+    // Student), clean it up first instead of permanently blocking the
+    // username. A User that DOES have a linked Student is a real conflict
+    // and is left alone - that case still correctly fails as a duplicate.
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      const linkedStudent = await Student.findOne({ user: existingUser._id });
+      if (!linkedStudent) {
+        await User.deleteOne({ _id: existingUser._id });
+      }
+    }
+
+    let user;
+    try {
+      user = await User.create({ username, password, role: "student" });
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(409).json({ success: false, message: "Username already exists" });
+      }
+      throw err;
+    }
+
+    let student;
+    try {
+      student = await Student.create({
+        user: user._id,
+        studentId,
+        name,
+        email,
+        phone,
+        course: course || undefined,
+        semester,
+        department,
+        admissionYear,
+      });
+    } catch (err) {
+      // Roll back the just-created login so it doesn't become another
+      // orphaned User blocking this username on the next attempt.
+      await User.deleteOne({ _id: user._id });
+      if (err.code === 11000) {
+        return res.status(409).json({ success: false, message: "Student ID already exists" });
+      }
+      throw err;
+    }
 
     res.status(201).json({ success: true, student });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({ success: false, message: "Username or student ID already exists" });
-    }
     res.status(500).json({ success: false, message: "Could not create student" });
   }
 });
