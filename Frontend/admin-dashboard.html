@@ -109,6 +109,9 @@ tr:hover { background: rgba(59,130,246,0.1); }
   <h2>GEHU Admin</h2>
   <button onclick="showDashboard()">Dashboard</button>
   <button onclick="showStudents()">Manage Students</button>
+  <button onclick="showCourses()">Manage Courses</button>
+  <button onclick="showSubjects()">Manage Subjects</button>
+  <button onclick="showNotices()">Manage Notices</button>
   <button onclick="showAttendance()">Attendance</button>
   <button onclick="showOrders()">Store Orders</button>
   <button onclick="logout()" class="logout">Logout</button>
@@ -136,18 +139,100 @@ tr:hover { background: rgba(59,130,246,0.1); }
     <input id="password" placeholder="Password" type="password">
     <input id="studentId" placeholder="Student ID (roll no.)">
     <input id="name" placeholder="Full Name">
+    <input id="studentEmail" placeholder="Email">
+    <input id="studentPhone" placeholder="Phone">
     <select id="course"><option value="">Select Course</option></select>
     <input id="semester" placeholder="Semester (1-8)" type="number" min="1" max="12">
-    <button onclick="addStudent()">Add Student</button>
+    <input id="studentDept" placeholder="Department">
+    <input id="studentAdmissionYear" placeholder="Admission Year" type="number" min="2000" max="2100">
+    <button id="studentSubmitBtn" onclick="submitStudent()">Add Student</button>
+    <button id="studentCancelBtn" onclick="cancelStudentEdit()" style="display:none;">Cancel Edit</button>
   </div>
   <p id="studentMsg" class="msg"></p>
 
+  <div class="table-wrap">
   <table>
     <thead>
-      <tr><th>Student ID</th><th>Name</th><th>Course</th><th>Semester</th><th>Action</th></tr>
+      <tr>
+        <th>Student ID</th><th>Username</th><th>Name</th><th>Course</th><th>Semester</th>
+        <th>Email</th><th>Phone</th><th>Action</th>
+      </tr>
     </thead>
     <tbody id="studentTable"></tbody>
   </table>
+  </div>
+</section>
+
+<section id="coursesSection" class="section">
+  <h2>Manage Courses</h2>
+
+  <div class="form-row">
+    <input id="courseName" placeholder="Course Name (e.g. BCA)">
+    <input id="courseCode" placeholder="Course Code (e.g. BCA)">
+    <input id="courseDept" placeholder="Department">
+    <input id="courseDuration" placeholder="Duration (years)" type="number" min="1" max="6">
+    <button id="courseSubmitBtn" onclick="submitCourse()">Add Course</button>
+    <button id="courseCancelBtn" onclick="cancelCourseEdit()" style="display:none;">Cancel Edit</button>
+  </div>
+  <p id="courseMsg" class="msg"></p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Code</th><th>Department</th><th>Duration (yrs)</th><th>Action</th></tr>
+    </thead>
+    <tbody id="courseTable"></tbody>
+  </table>
+  </div>
+</section>
+
+<section id="subjectsSection" class="section">
+  <h2>Manage Subjects</h2>
+
+  <div class="form-row">
+    <input id="subjectName" placeholder="Subject Name">
+    <input id="subjectCode" placeholder="Subject Code">
+    <select id="subjectCourse"><option value="">Select Course</option></select>
+    <input id="subjectSemester" placeholder="Semester (1-12)" type="number" min="1" max="12">
+    <button id="subjectSubmitBtn" onclick="submitSubject()">Add Subject</button>
+    <button id="subjectCancelBtn" onclick="cancelSubjectEdit()" style="display:none;">Cancel Edit</button>
+  </div>
+  <p id="subjectMsg" class="msg"></p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Code</th><th>Course</th><th>Semester</th><th>Action</th></tr>
+    </thead>
+    <tbody id="subjectTable"></tbody>
+  </table>
+  </div>
+</section>
+
+<section id="noticesSection" class="section">
+  <h2>Manage Notices</h2>
+
+  <div class="form-row">
+    <input id="noticeTitle" placeholder="Title">
+    <input id="noticeContent" placeholder="Content" style="min-width: 260px;">
+    <select id="noticeAudience">
+      <option value="all">All</option>
+      <option value="student">Students Only</option>
+      <option value="faculty">Faculty Only</option>
+    </select>
+    <button id="noticeSubmitBtn" onclick="submitNotice()">Post Notice</button>
+    <button id="noticeCancelBtn" onclick="cancelNoticeEdit()" style="display:none;">Cancel Edit</button>
+  </div>
+  <p id="noticeMsg" class="msg"></p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Title</th><th>Content</th><th>Audience</th><th>Posted</th><th>Action</th></tr>
+    </thead>
+    <tbody id="noticeTable"></tbody>
+  </table>
+  </div>
 </section>
 
 <section id="attendanceSection" class="section">
@@ -217,6 +302,9 @@ function hideAll() {
 }
 function showDashboard() { hideAll(); dashboardSection.classList.add("active"); loadDashboardStats(); }
 function showStudents() { hideAll(); studentsSection.classList.add("active"); loadStudents(); }
+function showCourses() { hideAll(); coursesSection.classList.add("active"); loadCoursesSection(); }
+function showSubjects() { hideAll(); subjectsSection.classList.add("active"); loadSubjectsSection(); }
+function showNotices() { hideAll(); noticesSection.classList.add("active"); loadNoticesSection(); }
 function showAttendance() { hideAll(); attendanceSection.classList.add("active"); loadStudentOptions(); }
 function showOrders() { hideAll(); ordersSection.classList.add("active"); loadOrders(); }
 
@@ -283,10 +371,15 @@ async function loadStudents() {
     tbody.innerHTML += `
       <tr>
         <td>${s.studentId}</td>
+        <td>${s.user ? s.user.username : "-"}</td>
         <td>${s.name}</td>
         <td>${s.course ? s.course.name : "-"}</td>
         <td>${s.semester || "-"}</td>
+        <td>${s.email || "-"}</td>
+        <td>${s.phone || "-"}</td>
         <td>
+          <button onclick="startEditStudent('${s._id}')">Edit</button>
+          <button onclick="resetStudentPassword('${s._id}')">Reset Password</button>
           <button onclick="deleteStudent('${s._id}')">Delete</button>
           <button onclick="jumpToAttendance('${s._id}')">View Attendance</button>
         </td>
@@ -295,18 +388,97 @@ async function loadStudents() {
   });
 }
 
-/* ADD STUDENT */
-async function addStudent() {
+let editingStudentId = null;
+
+function startEditStudent(id) {
+  const s = studentsCache.find(x => x._id === id);
+  if (!s) return;
+  editingStudentId = id;
+
+  document.getElementById("username").value = s.user ? s.user.username : "";
+  document.getElementById("password").value = "";
+  document.getElementById("password").placeholder = "Leave blank (use Reset Password to change)";
+  document.getElementById("password").disabled = true;
+  document.getElementById("studentId").value = s.studentId || "";
+  document.getElementById("studentId").disabled = true; // studentId is the unique key; not editable here
+  document.getElementById("name").value = s.name || "";
+  document.getElementById("studentEmail").value = s.email || "";
+  document.getElementById("studentPhone").value = s.phone || "";
+  document.getElementById("course").value = s.course ? s.course._id : "";
+  document.getElementById("semester").value = s.semester || "";
+  document.getElementById("studentDept").value = s.department || "";
+  document.getElementById("studentAdmissionYear").value = s.admissionYear || "";
+
+  document.getElementById("studentSubmitBtn").textContent = "Update Student";
+  document.getElementById("studentCancelBtn").style.display = "inline-block";
+}
+
+function cancelStudentEdit() {
+  editingStudentId = null;
+  ["username", "password", "studentId", "name", "studentEmail", "studentPhone",
+   "course", "semester", "studentDept", "studentAdmissionYear"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  document.getElementById("password").placeholder = "Password";
+  document.getElementById("password").disabled = false;
+  document.getElementById("studentId").disabled = false;
+  document.getElementById("studentSubmitBtn").textContent = "Add Student";
+  document.getElementById("studentCancelBtn").style.display = "none";
+  document.getElementById("studentMsg").textContent = "";
+}
+
+/* ADD OR UPDATE STUDENT */
+async function submitStudent() {
   const msg = document.getElementById("studentMsg");
   msg.textContent = "";
 
+  if (editingStudentId) {
+    const body = {
+      username: document.getElementById("username").value.trim(),
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("studentEmail").value.trim() || undefined,
+      phone: document.getElementById("studentPhone").value.trim() || undefined,
+      course: document.getElementById("course").value || undefined,
+      semester: document.getElementById("semester").value ? Number(document.getElementById("semester").value) : undefined,
+      department: document.getElementById("studentDept").value.trim() || undefined,
+      admissionYear: document.getElementById("studentAdmissionYear").value
+        ? Number(document.getElementById("studentAdmissionYear").value) : undefined,
+    };
+
+    if (!body.name) {
+      msg.textContent = "Name is required.";
+      return;
+    }
+
+    const res = await fetch(`${API}/students/${editingStudentId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      cancelStudentEdit();
+      loadStudents();
+    } else {
+      msg.textContent = data.message || "Could not update student.";
+    }
+    return;
+  }
+
+  // Creating a new student
   const body = {
     username: document.getElementById("username").value.trim(),
     password: document.getElementById("password").value,
     studentId: document.getElementById("studentId").value.trim(),
     name: document.getElementById("name").value.trim(),
+    email: document.getElementById("studentEmail").value.trim() || undefined,
+    phone: document.getElementById("studentPhone").value.trim() || undefined,
     course: document.getElementById("course").value || undefined,
     semester: document.getElementById("semester").value ? Number(document.getElementById("semester").value) : undefined,
+    department: document.getElementById("studentDept").value.trim() || undefined,
+    admissionYear: document.getElementById("studentAdmissionYear").value
+      ? Number(document.getElementById("studentAdmissionYear").value) : undefined,
   };
 
   if (!body.username || !body.password || !body.studentId || !body.name) {
@@ -322,15 +494,29 @@ async function addStudent() {
   const data = await res.json();
 
   if (data.success) {
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("studentId").value = "";
-    document.getElementById("name").value = "";
-    document.getElementById("semester").value = "";
+    cancelStudentEdit();
     loadStudents();
   } else {
     msg.textContent = data.message || "Could not add student.";
   }
+}
+
+/* RESET PASSWORD */
+async function resetStudentPassword(id) {
+  const newPassword = prompt("Enter a new password for this student (min 6 characters):");
+  if (!newPassword) return;
+  if (newPassword.length < 6) {
+    alert("Password must be at least 6 characters.");
+    return;
+  }
+
+  const res = await fetch(`${API}/students/${id}/password`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ password: newPassword })
+  });
+  const data = await res.json();
+  alert(data.success ? "Password updated." : (data.message || "Could not update password."));
 }
 
 /* DELETE */
@@ -408,6 +594,288 @@ async function viewAttendance(studentProfileId) {
   });
 
   document.getElementById("percentage").innerText = `Attendance: ${data.summary.percentage}%`;
+}
+
+/* ============================
+   MANAGE COURSES
+============================ */
+let editingCourseId = null;
+
+async function loadCoursesSection() {
+  await loadCourses(); // refreshes coursesCache + the other dropdowns too
+  const tbody = document.getElementById("courseTable");
+  tbody.innerHTML = "";
+  coursesCache.forEach(c => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${c.name}</td>
+        <td>${c.code}</td>
+        <td>${c.department || "-"}</td>
+        <td>${c.durationYears || "-"}</td>
+        <td>
+          <button onclick="startEditCourse('${c._id}')">Edit</button>
+          <button onclick="deleteCourse('${c._id}')">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function startEditCourse(id) {
+  const c = coursesCache.find(x => x._id === id);
+  if (!c) return;
+  editingCourseId = id;
+  document.getElementById("courseName").value = c.name || "";
+  document.getElementById("courseCode").value = c.code || "";
+  document.getElementById("courseDept").value = c.department || "";
+  document.getElementById("courseDuration").value = c.durationYears || "";
+  document.getElementById("courseSubmitBtn").textContent = "Update Course";
+  document.getElementById("courseCancelBtn").style.display = "inline-block";
+}
+
+function cancelCourseEdit() {
+  editingCourseId = null;
+  document.getElementById("courseName").value = "";
+  document.getElementById("courseCode").value = "";
+  document.getElementById("courseDept").value = "";
+  document.getElementById("courseDuration").value = "";
+  document.getElementById("courseSubmitBtn").textContent = "Add Course";
+  document.getElementById("courseCancelBtn").style.display = "none";
+  document.getElementById("courseMsg").textContent = "";
+}
+
+async function submitCourse() {
+  const msg = document.getElementById("courseMsg");
+  msg.textContent = "";
+
+  const body = {
+    name: document.getElementById("courseName").value.trim(),
+    code: document.getElementById("courseCode").value.trim(),
+    department: document.getElementById("courseDept").value.trim() || undefined,
+    durationYears: document.getElementById("courseDuration").value
+      ? Number(document.getElementById("courseDuration").value) : undefined,
+  };
+
+  if (!body.name || !body.code) {
+    msg.textContent = "Name and code are required.";
+    return;
+  }
+
+  const url = editingCourseId ? `${API}/courses/${editingCourseId}` : `${API}/courses`;
+  const method = editingCourseId ? "PUT" : "POST";
+
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    cancelCourseEdit();
+    loadCoursesSection();
+  } else {
+    msg.textContent = data.message || "Could not save course.";
+  }
+}
+
+async function deleteCourse(id) {
+  if (!confirm("Delete this course? Subjects linked to it may become orphaned.")) return;
+  await fetch(`${API}/courses/${id}`, { method: "DELETE", headers: authHeaders() });
+  loadCoursesSection();
+}
+
+/* ============================
+   MANAGE SUBJECTS
+============================ */
+let editingSubjectId = null;
+let subjectsCache = [];
+
+async function loadSubjectsSection() {
+  await loadCourses(); // ensures coursesCache is fresh for the dropdown
+
+  const courseSelect = document.getElementById("subjectCourse");
+  const prevValue = courseSelect.value;
+  courseSelect.innerHTML = '<option value="">Select Course</option>';
+  coursesCache.forEach(c => {
+    courseSelect.innerHTML += `<option value="${c._id}">${c.name}</option>`;
+  });
+  if (prevValue) courseSelect.value = prevValue;
+
+  const res = await fetch(`${API}/subjects`, { headers: authHeaders() });
+  const data = await res.json();
+  subjectsCache = data.success ? data.subjects : [];
+
+  const tbody = document.getElementById("subjectTable");
+  tbody.innerHTML = "";
+  subjectsCache.forEach(s => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.code}</td>
+        <td>${s.course ? s.course.name : "-"}</td>
+        <td>${s.semester}</td>
+        <td>
+          <button onclick="startEditSubject('${s._id}')">Edit</button>
+          <button onclick="deleteSubject('${s._id}')">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function startEditSubject(id) {
+  const s = subjectsCache.find(x => x._id === id);
+  if (!s) return;
+  editingSubjectId = id;
+  document.getElementById("subjectName").value = s.name || "";
+  document.getElementById("subjectCode").value = s.code || "";
+  document.getElementById("subjectCourse").value = s.course ? s.course._id : "";
+  document.getElementById("subjectSemester").value = s.semester || "";
+  document.getElementById("subjectSubmitBtn").textContent = "Update Subject";
+  document.getElementById("subjectCancelBtn").style.display = "inline-block";
+}
+
+function cancelSubjectEdit() {
+  editingSubjectId = null;
+  document.getElementById("subjectName").value = "";
+  document.getElementById("subjectCode").value = "";
+  document.getElementById("subjectCourse").value = "";
+  document.getElementById("subjectSemester").value = "";
+  document.getElementById("subjectSubmitBtn").textContent = "Add Subject";
+  document.getElementById("subjectCancelBtn").style.display = "none";
+  document.getElementById("subjectMsg").textContent = "";
+}
+
+async function submitSubject() {
+  const msg = document.getElementById("subjectMsg");
+  msg.textContent = "";
+
+  const body = {
+    name: document.getElementById("subjectName").value.trim(),
+    code: document.getElementById("subjectCode").value.trim(),
+    course: document.getElementById("subjectCourse").value,
+    semester: document.getElementById("subjectSemester").value
+      ? Number(document.getElementById("subjectSemester").value) : undefined,
+  };
+
+  if (!body.name || !body.code || !body.course || !body.semester) {
+    msg.textContent = "Name, code, course and semester are all required.";
+    return;
+  }
+
+  const url = editingSubjectId ? `${API}/subjects/${editingSubjectId}` : `${API}/subjects`;
+  const method = editingSubjectId ? "PUT" : "POST";
+
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    cancelSubjectEdit();
+    loadSubjectsSection();
+  } else {
+    msg.textContent = data.message || "Could not save subject.";
+  }
+}
+
+async function deleteSubject(id) {
+  if (!confirm("Delete this subject? Existing attendance records for it will remain but may become harder to interpret.")) return;
+  await fetch(`${API}/subjects/${id}`, { method: "DELETE", headers: authHeaders() });
+  loadSubjectsSection();
+}
+
+/* ============================
+   MANAGE NOTICES
+============================ */
+let editingNoticeId = null;
+let noticesCache = [];
+
+async function loadNoticesSection() {
+  const res = await fetch(`${API}/notices`, { headers: authHeaders() });
+  const data = await res.json();
+  noticesCache = data.success ? data.notices : [];
+
+  const tbody = document.getElementById("noticeTable");
+  tbody.innerHTML = "";
+  noticesCache.forEach(n => {
+    const dateStr = new Date(n.createdAt).toLocaleDateString();
+    tbody.innerHTML += `
+      <tr>
+        <td>${n.title}</td>
+        <td style="text-align:left; max-width: 320px;">${n.content}</td>
+        <td>${n.audience}</td>
+        <td>${dateStr}</td>
+        <td>
+          <button onclick="startEditNotice('${n._id}')">Edit</button>
+          <button onclick="deleteNotice('${n._id}')">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function startEditNotice(id) {
+  const n = noticesCache.find(x => x._id === id);
+  if (!n) return;
+  editingNoticeId = id;
+  document.getElementById("noticeTitle").value = n.title || "";
+  document.getElementById("noticeContent").value = n.content || "";
+  document.getElementById("noticeAudience").value = n.audience || "all";
+  document.getElementById("noticeSubmitBtn").textContent = "Update Notice";
+  document.getElementById("noticeCancelBtn").style.display = "inline-block";
+}
+
+function cancelNoticeEdit() {
+  editingNoticeId = null;
+  document.getElementById("noticeTitle").value = "";
+  document.getElementById("noticeContent").value = "";
+  document.getElementById("noticeAudience").value = "all";
+  document.getElementById("noticeSubmitBtn").textContent = "Post Notice";
+  document.getElementById("noticeCancelBtn").style.display = "none";
+  document.getElementById("noticeMsg").textContent = "";
+}
+
+async function submitNotice() {
+  const msg = document.getElementById("noticeMsg");
+  msg.textContent = "";
+
+  const body = {
+    title: document.getElementById("noticeTitle").value.trim(),
+    content: document.getElementById("noticeContent").value.trim(),
+    audience: document.getElementById("noticeAudience").value,
+  };
+
+  if (!body.title || !body.content) {
+    msg.textContent = "Title and content are required.";
+    return;
+  }
+
+  const url = editingNoticeId ? `${API}/notices/${editingNoticeId}` : `${API}/notices`;
+  const method = editingNoticeId ? "PUT" : "POST";
+
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    cancelNoticeEdit();
+    loadNoticesSection();
+  } else {
+    msg.textContent = data.message || "Could not save notice.";
+  }
+}
+
+async function deleteNotice(id) {
+  if (!confirm("Delete this notice?")) return;
+  await fetch(`${API}/notices/${id}`, { method: "DELETE", headers: authHeaders() });
+  loadNoticesSection();
 }
 
 /* LOGOUT */
