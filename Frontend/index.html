@@ -389,6 +389,33 @@
   </div>
 </section>
 
+<!-- CHEAT NOTES TERMINAL -->
+<section id="notes-section" class="content-section tight">
+  <div class="section-head reveal">
+    <h2 class="section-title">Cheat Notes</h2>
+    <p class="section-sub">Quick notes, shortcuts and reminders — open to everyone.</p>
+  </div>
+
+  <div class="term-window reveal" id="cheatTerminal">
+    <div class="term-bar">
+      <span class="term-dots"><i></i><i></i><i></i></span>
+      <span class="term-title">gehu@portal: ~/cheat-notes</span>
+      <span class="term-admin-badge" id="termAdminBadge" hidden>ADMIN</span>
+    </div>
+    <div class="term-body" id="termBody">
+      <div class="term-line"><span class="term-prompt">$</span> ls cheat-notes/</div>
+      <div id="termNotes"><div class="term-dim">loading notes…</div></div>
+      <div class="term-line term-last"><span class="term-prompt">$</span> <span class="term-cursor"></span></div>
+    </div>
+    <div class="term-foot">
+      <label class="term-grep"><span class="term-prompt">grep</span>
+        <input type="text" id="termSearch" placeholder="search notes…" autocomplete="off" spellcheck="false">
+      </label>
+      <button type="button" class="term-btn term-admin-only" id="termNewBtn" hidden>+ new note</button>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="footer-content">

@@ -880,3 +880,183 @@ document.addEventListener("DOMContentLoaded", () => {
   const storeSearchEl = document.getElementById("storeSearch");
   if (storeSearchEl) storeSearchEl.addEventListener("input", renderStoreProducts);
 });
+
+/* ============================================================
+   CHEAT NOTES TERMINAL
+   - Everyone can read (public GET /cheatnotes).
+   - Only a logged-in admin sees edit controls; the server also
+     enforces admin-only writes, so hiding the UI is not the only guard.
+   ============================================================ */
+(function initCheatTerminal() {
+  document.addEventListener("DOMContentLoaded", () => {
+    const wrap = document.getElementById("cheatTerminal");
+    if (!wrap) return;
+
+    const listEl = document.getElementById("termNotes");
+    const searchEl = document.getElementById("termSearch");
+    const newBtn = document.getElementById("termNewBtn");
+    const badge = document.getElementById("termAdminBadge");
+
+    const isAdmin = !!localStorage.getItem("token") && localStorage.getItem("role") === "admin";
+    let notes = [];
+    let editingId = null; // note id being edited, or "new"
+
+    if (isAdmin) {
+      newBtn.hidden = false;
+      badge.hidden = false;
+    }
+
+    function el(tag, cls, text) {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text; // textContent => no HTML injection
+      return n;
+    }
+
+    function slug(title) {
+      return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "note";
+    }
+
+    function fmtDate(d) {
+      return new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+    }
+
+    async function api(path, options = {}) {
+      const res = await fetch(`${API}/cheatnotes${path}`, {
+        ...options,
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+      });
+      let data = {};
+      try { data = await res.json(); } catch (e) { /* non-JSON error */ }
+      if (res.status === 401 || res.status === 403) {
+        throw new Error("Your admin session has expired. Please log in again.");
+      }
+      if (!res.ok || !data.success) throw new Error(data.message || "Something went wrong.");
+      return data;
+    }
+
+    function buildEditor(note) {
+      const box = el("div", "term-editor");
+      box.appendChild(el("label", "", "title"));
+      const title = el("input");
+      title.maxLength = 80;
+      title.placeholder = "e.g. git-basics";
+      title.value = note ? note.title : "";
+      box.appendChild(title);
+
+      box.appendChild(el("label", "", "content"));
+      const content = el("textarea");
+      content.maxLength = 5000;
+      content.placeholder = "Write your note here…";
+      content.value = note ? note.content : "";
+      box.appendChild(content);
+
+      const err = el("div", "term-error");
+      const actions = el("div", "term-editor-actions");
+      const save = el("button", "term-btn primary", "save");
+      save.type = "button";
+      const cancel = el("button", "term-btn", "cancel");
+      cancel.type = "button";
+      actions.append(save, cancel, err);
+      box.appendChild(actions);
+
+      cancel.addEventListener("click", () => { editingId = null; render(); });
+      save.addEventListener("click", async () => {
+        err.textContent = "";
+        if (!title.value.trim() || !content.value.trim()) {
+          err.textContent = "Title and content are required.";
+          return;
+        }
+        save.disabled = true;
+        save.textContent = "saving…";
+        try {
+          const body = JSON.stringify({ title: title.value, content: content.value });
+          if (note) await api(`/${note._id}`, { method: "PUT", body });
+          else await api("", { method: "POST", body });
+          editingId = null;
+          await load();
+        } catch (e) {
+          err.textContent = e.message;
+          save.disabled = false;
+          save.textContent = "save";
+        }
+      });
+      setTimeout(() => title.focus(), 0);
+      return box;
+    }
+
+    function render() {
+      listEl.textContent = "";
+      const q = searchEl.value.trim().toLowerCase();
+
+      if (isAdmin && editingId === "new") listEl.appendChild(buildEditor(null));
+
+      const shown = notes.filter((n) =>
+        !q || n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q)
+      );
+
+      if (!shown.length && editingId !== "new") {
+        listEl.appendChild(el("div", "term-dim",
+          notes.length ? "grep: no matches found." : "(empty) — no notes yet."));
+        return;
+      }
+
+      shown.forEach((n) => {
+        if (isAdmin && editingId === n._id) {
+          listEl.appendChild(buildEditor(n));
+          return;
+        }
+        const item = el("div", "term-note");
+        const head = el("div", "term-note-head");
+        const cmd = el("span", "term-cmd");
+        cmd.append(el("span", "term-prompt", "$"), document.createTextNode(`cat ${slug(n.title)}.txt`));
+        head.appendChild(cmd);
+
+        const copy = el("button", "term-btn", "copy");
+        copy.type = "button";
+        copy.addEventListener("click", async () => {
+          try { await navigator.clipboard.writeText(n.content); copy.textContent = "copied"; }
+          catch (e) { copy.textContent = "failed"; }
+          setTimeout(() => (copy.textContent = "copy"), 1200);
+        });
+        head.appendChild(copy);
+
+        if (isAdmin) {
+          const edit = el("button", "term-btn", "edit");
+          edit.type = "button";
+          edit.addEventListener("click", () => { editingId = n._id; render(); });
+          const del = el("button", "term-btn danger", "delete");
+          del.type = "button";
+          del.addEventListener("click", async () => {
+            if (!confirm(`Delete "${n.title}"?`)) return;
+            try { await api(`/${n._id}`, { method: "DELETE" }); await load(); }
+            catch (e) { alert(e.message); }
+          });
+          head.append(edit, del);
+        }
+        item.appendChild(head);
+        item.appendChild(el("pre", "term-note-body", n.content));
+        item.appendChild(el("div", "term-note-meta", `# ${n.title} · updated ${fmtDate(n.updatedAt || n.createdAt)}`));
+        listEl.appendChild(item);
+      });
+    }
+
+    async function load() {
+      try {
+        const res = await fetch(`${API}/cheatnotes`);
+        const data = await res.json();
+        if (!data.success) throw new Error();
+        notes = data.notes;
+        render();
+      } catch (e) {
+        listEl.textContent = "";
+        listEl.appendChild(el("div", "term-dim", "error: can't reach the server. It may be waking up — try again in a moment."));
+      }
+    }
+
+    searchEl.addEventListener("input", render);
+    newBtn.addEventListener("click", () => { editingId = "new"; searchEl.value = ""; render(); });
+
+    load();
+  });
+})();
