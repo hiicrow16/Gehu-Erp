@@ -6,6 +6,8 @@ const orderItemSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     price: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },
+    size: { type: String, trim: true },  // only for items that come in sizes
+    color: { type: String, trim: true }, // only for items that come in colors
   },
   { _id: false }
 );
@@ -22,7 +24,12 @@ const orderSchema = new mongoose.Schema(
       required: true,
       validate: (v) => Array.isArray(v) && v.length > 0,
     },
-    totalAmount: { type: Number, required: true, min: 0 },
+    subtotal: { type: Number, min: 0 },        // before any discount (older orders don't have this)
+    discountAmount: { type: Number, default: 0, min: 0 },
+    discountLabel: { type: String, trim: true }, // e.g. "Fresher offer: 10% off"
+    couponCode: { type: String, trim: true, uppercase: true },
+    studentDiscount: { type: Boolean, default: false },
+    totalAmount: { type: Number, required: true, min: 0 }, // what the buyer actually pays
     paymentMethod: {
       type: String,
       enum: ["UPI", "COD"],

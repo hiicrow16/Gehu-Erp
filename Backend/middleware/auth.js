@@ -19,6 +19,22 @@ function protect(req, res, next) {
   }
 }
 
+// Like protect(), but never rejects: a missing, expired or bad token just means
+// "guest". Used by the public store so logged-in students get their discount
+// and pre-filled details without making login mandatory.
+function optionalAuth(req, res, next) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+  if (token) {
+    try {
+      req.user = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      // ignore - treat as guest
+    }
+  }
+  next();
+}
+
 // Restricts a route to specific roles. Use after protect().
 // Example: router.get('/', protect, authorize('admin', 'faculty'), handler)
 function authorize(...allowedRoles) {
@@ -30,4 +46,4 @@ function authorize(...allowedRoles) {
   };
 }
 
-module.exports = { protect, authorize };
+module.exports = { protect, optionalAuth, authorize };

@@ -575,43 +575,113 @@ window.logout = function () {
 };
 
 /* ============================================================
-   COLLEGE STORE (public — front page, no login required)
+   COLLEGE STORE (public — no login required)
+   Features: product popup, sizes/colors, wishlist, recently viewed,
+   sorting, coupon codes, student discount + pre-filled checkout.
+   Prices, discounts and totals are ALWAYS decided by the backend
+   (POST /store/quote and /store/orders); the browser only displays them.
    ============================================================ */
 
 // Fallback copy in case the backend is unreachable (e.g. cold-starting on
 // Render). The real catalog is fetched from `${API}/store/items`, which is
 // also the source of truth the backend uses to validate orders.
+// Keep in sync with Backend/lib/storeCatalog.js.
 const STORE_FALLBACK_PRODUCTS = [
-  { id: "uni-blazer",  name: "College Blazer",        category: "Dress",      price: 1499, icon: "🧥", stock: 40 },
-  { id: "uni-tie",     name: "GEHU Tie",               category: "Dress",      price: 199,  icon: "👔", stock: 100 },
-  { id: "uni-shirt",   name: "Formal Shirt (White)",   category: "Dress",      price: 599,  icon: "👕", stock: 80 },
-  { id: "uni-id",      name: "ID Card Lanyard",        category: "Dress",      price: 99,   icon: "🪪", stock: 200 },
-  { id: "st-notebook", name: "Ruled Notebook (200pg)", category: "Stationery", price: 60,   icon: "📓", stock: 300 },
-  { id: "st-fileset",  name: "File Folder Set (5pc)",  category: "Stationery", price: 150,  icon: "🗂️", stock: 120 },
-  { id: "st-calc",     name: "Scientific Calculator",  category: "Stationery", price: 899,  icon: "🧮", stock: 35 },
-  { id: "st-geo",      name: "Geometry Box",           category: "Stationery", price: 220,  icon: "📐", stock: 60 },
-  { id: "pen-blue",    name: "Blue Ball Pen (Pack of 5)",   category: "Pens", price: 75,   icon: "🖊️", stock: 250 },
-  { id: "pen-gel",     name: "Premium Gel Pen",             category: "Pens", price: 40,   icon: "✒️", stock: 150 },
-  { id: "pen-highlight", name: "Highlighter Set (4 colors)", category: "Pens", price: 130, icon: "🖍️", stock: 90 },
-  { id: "bk-firstyear", name: "1st Year Core Book Set", category: "Books", price: 2499, icon: "📚", stock: 25 },
-  { id: "bk-labmanual",  name: "Lab Manual (Semester)",  category: "Books", price: 249,  icon: "📗", stock: 70 },
-  { id: "bk-referenceguide", name: "Reference Guide",    category: "Books", price: 399,  icon: "📘", stock: 45 },
-  { id: "cl-hoodie",  name: "GEHU Hoodie",           category: "Clothes", price: 999, icon: "🧶", stock: 50 },
-  { id: "cl-tshirt",  name: "GEHU T-Shirt",          category: "Clothes", price: 449, icon: "👚", stock: 90 },
-  { id: "cl-cap",     name: "Campus Cap",             category: "Clothes", price: 249, icon: "🧢", stock: 65 },
+  {"id": "uni-blazer", "name": "College Blazer", "category": "Dress", "price": 1499, "icon": "🧥", "stock": 40, "sold": 0, "description": "College blazer for the GEHU uniform. Choose your size.", "sizes": ["S", "M", "L", "XL", "XXL"]},
+  {"id": "uni-tie", "name": "GEHU Tie", "category": "Dress", "price": 199, "icon": "👔", "stock": 100, "sold": 0, "description": "GEHU tie to go with the college uniform."},
+  {"id": "uni-shirt", "name": "Formal Shirt (White)", "category": "Dress", "price": 599, "icon": "👕", "stock": 80, "sold": 0, "description": "White formal shirt to go with the college uniform. Choose your size.", "sizes": ["S", "M", "L", "XL", "XXL"]},
+  {"id": "uni-id", "name": "ID Card Lanyard", "category": "Dress", "price": 99, "icon": "🪪", "stock": 200, "sold": 0, "description": "Lanyard for your college ID card."},
+  {"id": "st-notebook", "name": "Ruled Notebook (200pg)", "category": "Stationery", "price": 60, "icon": "📓", "stock": 300, "sold": 0, "description": "Ruled notebook, 200 pages."},
+  {"id": "st-fileset", "name": "File Folder Set (5pc)", "category": "Stationery", "price": 150, "icon": "🗂️", "stock": 120, "sold": 0, "description": "Set of 5 file folders."},
+  {"id": "st-calc", "name": "Scientific Calculator", "category": "Stationery", "price": 899, "icon": "🧮", "stock": 35, "sold": 0, "description": "Scientific calculator."},
+  {"id": "st-geo", "name": "Geometry Box", "category": "Stationery", "price": 220, "icon": "📐", "stock": 60, "sold": 0, "description": "Geometry box."},
+  {"id": "pen-blue", "name": "Blue Ball Pen (Pack of 5)", "category": "Pens", "price": 75, "icon": "🖊️", "stock": 250, "sold": 0, "description": "Pack of 5 blue ball pens."},
+  {"id": "pen-gel", "name": "Premium Gel Pen", "category": "Pens", "price": 40, "icon": "✒️", "stock": 150, "sold": 0, "description": "Premium gel pen."},
+  {"id": "pen-highlight", "name": "Highlighter Set (4 colors)", "category": "Pens", "price": 130, "icon": "🖍️", "stock": 90, "sold": 0, "description": "Set of 4 highlighters in different colors."},
+  {"id": "bk-firstyear", "name": "1st Year Core Book Set", "category": "Books", "price": 2499, "icon": "📚", "stock": 25, "sold": 0, "description": "Core book set for 1st year students."},
+  {"id": "bk-labmanual", "name": "Lab Manual (Semester)", "category": "Books", "price": 249, "icon": "📗", "stock": 70, "sold": 0, "description": "Lab manual for the semester."},
+  {"id": "bk-referenceguide", "name": "Reference Guide", "category": "Books", "price": 399, "icon": "📘", "stock": 45, "sold": 0, "description": "Reference guide."},
+  {"id": "cl-hoodie", "name": "GEHU Hoodie", "category": "Clothes", "price": 999, "icon": "🧶", "stock": 50, "sold": 0, "description": "GEHU hoodie. Choose your size and color.", "sizes": ["S", "M", "L", "XL", "XXL"], "colors": ["Black", "Navy", "Grey"]},
+  {"id": "cl-tshirt", "name": "GEHU T-Shirt", "category": "Clothes", "price": 449, "icon": "👚", "stock": 90, "sold": 0, "description": "GEHU t-shirt. Choose your size and color.", "sizes": ["S", "M", "L", "XL", "XXL"], "colors": ["Black", "White", "Navy"]},
+  {"id": "cl-cap", "name": "Campus Cap", "category": "Clothes", "price": 249, "icon": "🧢", "stock": 65, "sold": 0, "description": "Campus cap. Choose your color.", "colors": ["Black", "Navy"]}
 ];
 
-// Icons aren't stored server-side (catalog there is price/stock only), so we
-// map them back on by product id once we have the live list.
+// Icons aren't stored server-side, so we map them back on by product id.
 const STORE_ICONS = STORE_FALLBACK_PRODUCTS.reduce((map, p) => {
   map[p.id] = p.icon;
   return map;
 }, {});
 
 const STORE_CATEGORIES = ["All", "Dress", "Stationery", "Pens", "Books", "Clothes"];
+const STORE_COLOR_HEX = { Black: "#14161c", White: "#f4f4f4", Navy: "#1f2f6b", Grey: "#8b909a", Red: "#c62828", Blue: "#1e5bd8" };
+const STORE_MAX_QTY = 50;       // must match the limit in Backend/lib/pricing.js
+const STORE_RECENT_MAX = 6;
+
 let storeProducts = [];
 let storeActiveCategory = "All";
+let storeSortMode = "featured";
+let storeWishOnly = false;
+let storeStudent = null;        // { name, email, phone, studentId } when a student is logged in
+let storeQuote = null;          // last price quote from the backend
+let storeCouponCode = "";       // coupon the buyer applied
+let storeCouponMsg = { text: "", ok: false };
+let storeQuoteSeq = 0;
+let pm = null;                  // product popup state: { id, size, color, qty }
+let pmLastFocus = null;
 
+/* ---------- small helpers ---------- */
+function storeRead(key, fallback) {
+  try {
+    const v = JSON.parse(localStorage.getItem(key));
+    return v == null ? fallback : v;
+  } catch (e) {
+    return fallback;
+  }
+}
+function storeWrite(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage full/blocked: ignore */ }
+}
+function escapeStoreHtml(str) {
+  return String(str == null ? "" : str).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+const rupee = n => "₹" + Number(n || 0).toLocaleString("en-IN");
+const getStoreProduct = id => storeProducts.find(p => p.id === id);
+const needsOptions = p => !!(p && ((p.sizes && p.sizes.length) || (p.colors && p.colors.length)));
+const maxQtyFor = p => Math.max(1, Math.min(STORE_MAX_QTY, p ? p.stock : STORE_MAX_QTY));
+function variantText(size, color) {
+  return [size, color].filter(Boolean).join(", ");
+}
+function productVisual(p, big) {
+  if (p.image) {
+    return `<img src="${escapeStoreHtml(p.image)}" alt="${escapeStoreHtml(p.name)}" loading="lazy"
+      onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${p.icon || "🛍️"}'}))">`;
+  }
+  return `<span>${p.icon || "🛍️"}</span>`;
+}
+
+let storeToastTimer;
+function showStoreToast(text, opts = {}) {
+  const { cart = true, info = false } = opts;
+  let toast = document.getElementById("storeToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "storeToast";
+    toast.className = "store-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    document.body.appendChild(toast);
+  }
+  toast.classList.toggle("info", info);
+  toast.innerHTML = `<span class="store-toast-tick">${info ? "i" : "✓"}</span><span></span>${cart ? `<button type="button" onclick="openStoreCart()">View Cart</button>` : ""}`;
+  toast.children[1].textContent = text;
+  toast.classList.add("show");
+  clearTimeout(storeToastTimer);
+  storeToastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+}
+
+/* ---------- catalog ---------- */
 async function loadStoreProducts() {
   const grid = document.getElementById("storeGrid");
   if (!grid) return; // store section isn't on this page
@@ -626,31 +696,74 @@ async function loadStoreProducts() {
     storeProducts = STORE_FALLBACK_PRODUCTS;
   }
 
+  pruneStoreCart();
   renderStoreFilters();
   renderStoreProducts();
+  renderStoreRecent();
+  saveStoreCart(getStoreCart());
+  refreshStoreQuote();
 }
 
+/* ---------- cart ----------
+   Each cart LINE is one product + size + color, so a blazer in M and a blazer
+   in L are separate lines. Stored as { "id|size|color": { productId, size, color, qty } }.
+   Carts saved by the older version ({ id: qty }) are converted on the fly. */
+function storeLineKey(productId, size, color) {
+  return [productId, size || "", color || ""].join("|");
+}
 function getStoreCart() {
-  return JSON.parse(localStorage.getItem("storeCart") || "{}");
+  const raw = storeRead("storeCart", {});
+  const cart = {};
+  Object.entries(raw).forEach(([key, v]) => {
+    if (typeof v === "number") {
+      if (v > 0) cart[storeLineKey(key)] = { productId: key, size: "", color: "", qty: Math.floor(v) };
+    } else if (v && v.productId && v.qty > 0) {
+      cart[key] = { productId: v.productId, size: v.size || "", color: v.color || "", qty: Math.floor(v.qty) };
+    }
+  });
+  return cart;
 }
 function saveStoreCart(cart) {
-  localStorage.setItem("storeCart", JSON.stringify(cart));
+  storeWrite("storeCart", cart);
   const countEl = document.getElementById("storeCartCount");
-  if (countEl) {
-    const count = Object.values(cart).reduce((sum, q) => sum + q, 0);
-    countEl.innerText = count;
+  if (countEl) countEl.innerText = Object.values(cart).reduce((sum, l) => sum + l.qty, 0);
+}
+// Drop lines that can no longer be ordered (product gone, or a size/color is
+// missing - e.g. a cart saved before sizes existed).
+function pruneStoreCart() {
+  const cart = getStoreCart();
+  let removed = 0;
+  Object.entries(cart).forEach(([key, line]) => {
+    const p = getStoreProduct(line.productId);
+    const bad = !p
+      || (p.sizes && !p.sizes.includes(line.size))
+      || (!p.sizes && line.size)
+      || (p.colors && !p.colors.includes(line.color))
+      || (!p.colors && line.color);
+    if (bad) { delete cart[key]; removed++; }
+  });
+  if (removed) {
+    saveStoreCart(cart);
+    showStoreToast("Some cart items were removed because they need a size or color. Please add them again.", { cart: false, info: true });
   }
 }
 
-function addToStoreCart(productId, btn) {
+function addToStoreCart(productId, opts = {}, btn) {
+  const p = getStoreProduct(productId);
+  if (!p || p.stock <= 0) return false;
+  const size = opts.size || "";
+  const color = opts.color || "";
+  const addQty = Math.max(1, opts.qty || 1);
+
   const cart = getStoreCart();
-  cart[productId] = (cart[productId] || 0) + 1;
+  const key = storeLineKey(productId, size, color);
+  const line = cart[key] || { productId, size, color, qty: 0 };
+  line.qty = Math.min(maxQtyFor(p), line.qty + addQty);
+  cart[key] = line;
   saveStoreCart(cart);
 
-  // Tell the buyer it worked: toast + button flash + cart badge pop
-  const product = storeProducts.find(p => p.id === productId);
-  const qty = cart[productId];
-  showStoreToast(`${product ? product.name : "Item"} added to cart${qty > 1 ? ` (x${qty})` : ""}`);
+  const vt = variantText(size, color);
+  showStoreToast(`${p.name}${vt ? ` (${vt})` : ""} added to cart${line.qty > 1 ? ` (x${line.qty})` : ""}`);
 
   if (btn) {
     const original = btn.dataset.label || btn.textContent.trim();
@@ -670,45 +783,473 @@ function addToStoreCart(productId, btn) {
     void badge.offsetWidth; // restart the animation
     badge.classList.add("pop");
   }
+  refreshStoreQuote();
+  return true;
 }
 
-let storeToastTimer;
-function showStoreToast(text) {
-  let toast = document.getElementById("storeToast");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.id = "storeToast";
-    toast.className = "store-toast";
-    toast.setAttribute("role", "status");
-    toast.setAttribute("aria-live", "polite");
-    document.body.appendChild(toast);
+function changeStoreQty(key, delta) {
+  const cart = getStoreCart();
+  const line = cart[key];
+  if (!line) return;
+  line.qty = Math.min(maxQtyFor(getStoreProduct(line.productId)), line.qty + delta);
+  if (line.qty <= 0) delete cart[key];
+  saveStoreCart(cart);
+  renderStoreCartItems();
+  refreshStoreQuote();
+}
+
+function removeFromStoreCart(key) {
+  const cart = getStoreCart();
+  delete cart[key];
+  saveStoreCart(cart);
+  renderStoreCartItems();
+  refreshStoreQuote();
+}
+
+function openStoreCart() {
+  closeProductModal();
+  renderStoreCartItems();
+  renderStoreSummary();
+  document.getElementById("storeCartDrawer").classList.add("open");
+  document.getElementById("storeOverlay").classList.add("open");
+  refreshStoreQuote();
+}
+function closeStoreCart() {
+  document.getElementById("storeCartDrawer").classList.remove("open");
+  document.getElementById("storeOverlay").classList.remove("open");
+}
+
+function renderStoreCartItems() {
+  const cart = getStoreCart();
+  const container = document.getElementById("storeCartItems");
+  if (!container) return;
+  const keys = Object.keys(cart);
+
+  if (!keys.length) {
+    container.innerHTML = `<div class="store-cart-empty">Your cart is empty</div>`;
+    renderStoreSummary();
+    return;
   }
-  toast.innerHTML = `<span class="store-toast-tick">✓</span><span></span><button type="button" onclick="openStoreCart()">View Cart</button>`;
-  toast.children[1].textContent = text;
-  toast.classList.add("show");
-  clearTimeout(storeToastTimer);
-  storeToastTimer = setTimeout(() => toast.classList.remove("show"), 2500);
+
+  container.innerHTML = "";
+  keys.forEach(key => {
+    const line = cart[key];
+    const product = getStoreProduct(line.productId);
+    if (!product) return;
+    const vt = variantText(line.size, line.color);
+
+    const row = document.createElement("div");
+    row.className = "store-cart-item";
+    row.dataset.key = key;
+    row.innerHTML = `
+      <div class="info">
+        <h5>${product.icon || "🛍️"} ${escapeStoreHtml(product.name)}</h5>
+        ${vt ? `<em class="store-cart-variant">${escapeStoreHtml(vt)}</em>` : ""}
+        <span>${rupee(product.price)} x ${line.qty} = ${rupee(product.price * line.qty)}</span>
+      </div>
+      <div class="store-qty-controls">
+        <button type="button" data-act="dec" aria-label="Decrease quantity">-</button>
+        <span>${line.qty}</span>
+        <button type="button" data-act="inc" aria-label="Increase quantity">+</button>
+        <button type="button" class="store-remove-btn" data-act="remove">Remove</button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+  renderStoreSummary();
 }
 
-function escapeStoreHtml(str) {
-  return String(str == null ? "" : str).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[c]));
+/* ---------- price quote (discounts come from the backend) ---------- */
+function storeCartPayload() {
+  return Object.values(getStoreCart()).map(l => ({
+    productId: l.productId, quantity: l.qty, size: l.size || undefined, color: l.color || undefined
+  }));
+}
+function storeLocalSubtotal() {
+  return Object.values(getStoreCart()).reduce((sum, l) => {
+    const p = getStoreProduct(l.productId);
+    return sum + (p ? p.price * l.qty : 0);
+  }, 0);
+}
+async function postStoreQuote(couponCode) {
+  const emailEl = document.getElementById("cf-email");
+  const idEl = document.getElementById("cf-studentid");
+  const res = await fetch(`${API}/store/quote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({
+      items: storeCartPayload(),
+      couponCode,
+      email: emailEl ? emailEl.value.trim() : "",
+      studentId: idEl ? idEl.value.trim() : "",
+    }),
+  });
+  return res.json();
 }
 
-/* ---------- RECEIPT ---------- */
+async function refreshStoreQuote() {
+  const items = storeCartPayload();
+  if (!items.length) {
+    storeQuote = null;
+    storeCouponMsg = { text: "", ok: false };
+    renderStoreSummary();
+    return;
+  }
+  const seq = ++storeQuoteSeq;
+  try {
+    let data = await postStoreQuote(storeCouponCode);
+    if (seq !== storeQuoteSeq) return; // a newer request superseded this one
+
+    if (!data.success && storeCouponCode) {
+      // The coupon doesn't apply right now (e.g. cart below the minimum): say why, price without it.
+      storeCouponMsg = { text: data.message, ok: false };
+      data = await postStoreQuote("");
+      if (seq !== storeQuoteSeq) return;
+    } else if (data.success && storeCouponCode) {
+      storeCouponMsg = data.couponSkipped
+        ? { text: `${storeCouponCode} saves less than your student discount, so the student discount was used.`, ok: true }
+        : { text: `${data.couponCode} applied: ${data.discountLabel}`, ok: true };
+    }
+    storeQuote = data.success ? data : null;
+  } catch (err) {
+    if (seq !== storeQuoteSeq) return;
+    storeQuote = null; // backend unreachable: show the plain subtotal
+  }
+  renderStoreSummary();
+}
+
+function summaryHtml() {
+  const subtotal = storeLocalSubtotal();
+  if (!subtotal) return `<div class="store-summary-row total"><span>Total</span><span>₹0</span></div>`;
+  const q = storeQuote;
+  if (!q || !q.discountAmount) {
+    return `<div class="store-summary-row total"><span>Total</span><span>${rupee(q ? q.totalAmount : subtotal)}</span></div>`;
+  }
+  return `
+    <div class="store-summary-row"><span>Subtotal</span><span>${rupee(q.subtotal)}</span></div>
+    <div class="store-summary-row discount"><span>${escapeStoreHtml(q.discountLabel)}</span><span>−${rupee(q.discountAmount)}</span></div>
+    <div class="store-summary-row total"><span>Total</span><span>${rupee(q.totalAmount)}</span></div>`;
+}
+function renderStoreSummary() {
+  const html = summaryHtml();
+  ["storeCartSummary", "checkoutSummary"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
+  const total = storeQuote ? storeQuote.totalAmount : storeLocalSubtotal();
+  const upi = document.getElementById("storeUpiAmount");
+  if (upi) upi.textContent = rupee(total);
+
+  const msg = document.getElementById("storeCouponMsg");
+  if (msg) {
+    msg.textContent = storeCouponMsg.text;
+    msg.className = "store-coupon-msg" + (storeCouponMsg.text ? (storeCouponMsg.ok ? " ok" : " err") : "");
+  }
+  const input = document.getElementById("storeCouponInput");
+  const btn = document.getElementById("storeCouponBtn");
+  if (input && btn) {
+    const applied = !!storeCouponCode && storeCouponMsg.ok;
+    btn.textContent = applied ? "Remove" : "Apply";
+    btn.dataset.mode = applied ? "remove" : "apply";
+    input.readOnly = applied;
+    if (applied) input.value = storeCouponCode;
+  }
+}
+
+async function applyStoreCoupon() {
+  const input = document.getElementById("storeCouponInput");
+  const btn = document.getElementById("storeCouponBtn");
+
+  if (btn.dataset.mode === "remove") {
+    storeCouponCode = "";
+    storeCouponMsg = { text: "", ok: false };
+    input.value = "";
+    storeWrite("storeCoupon", "");
+    refreshStoreQuote();
+    return;
+  }
+
+  const code = input.value.trim().toUpperCase();
+  if (!code) { storeCouponMsg = { text: "Enter a coupon code first.", ok: false }; renderStoreSummary(); return; }
+  if (!storeCartPayload().length) { storeCouponMsg = { text: "Add something to your cart first.", ok: false }; renderStoreSummary(); return; }
+
+  btn.disabled = true;
+  try {
+    const data = await postStoreQuote(code);
+    if (data.success) {
+      storeCouponCode = code;
+      storeWrite("storeCoupon", code);
+      storeQuote = data;
+      storeCouponMsg = data.couponSkipped
+        ? { text: `${code} saves less than your student discount, so the student discount was used.`, ok: true }
+        : { text: `${data.couponCode} applied: ${data.discountLabel}`, ok: true };
+    } else {
+      storeCouponMsg = { text: data.message || "That coupon didn't work.", ok: false };
+    }
+  } catch (err) {
+    storeCouponMsg = { text: "Can't check the coupon right now. Please try again.", ok: false };
+  } finally {
+    btn.disabled = false;
+    renderStoreSummary();
+  }
+}
+
+/* ---------- wishlist + recently viewed (saved on this device) ---------- */
+const getWishlist = () => storeRead("storeWishlist", []);
+const isWished = id => getWishlist().includes(id);
+
+function toggleWishlist(id) {
+  const list = getWishlist();
+  const i = list.indexOf(id);
+  if (i >= 0) list.splice(i, 1); else list.push(id);
+  storeWrite("storeWishlist", list);
+  const p = getStoreProduct(id);
+  showStoreToast(i >= 0 ? "Removed from wishlist" : `${p ? p.name : "Item"} saved to wishlist`, { cart: false });
+  renderStoreFilters();
+  renderStoreProducts();
+  if (pm && pm.id === id) renderProductModal();
+}
+
+function pushRecent(id) {
+  const list = storeRead("storeRecent", []).filter(x => x !== id);
+  list.unshift(id);
+  storeWrite("storeRecent", list.slice(0, STORE_RECENT_MAX));
+  renderStoreRecent();
+}
+function renderStoreRecent() {
+  const wrap = document.getElementById("storeRecent");
+  const row = document.getElementById("storeRecentRow");
+  if (!wrap || !row) return;
+  const items = storeRead("storeRecent", []).map(getStoreProduct).filter(Boolean);
+  wrap.hidden = !items.length;
+  row.innerHTML = items.map(p => `
+    <button type="button" class="store-recent-item" data-id="${escapeStoreHtml(p.id)}">
+      <span class="store-recent-icon">${productVisual(p)}</span>
+      <span class="store-recent-name">${escapeStoreHtml(p.name)}</span>
+      <span class="store-recent-price">${rupee(p.price)}</span>
+    </button>`).join("");
+}
+
+/* ---------- listing: filters, sorting, cards ---------- */
+function renderStoreFilters() {
+  const bar = document.getElementById("storeFilterBar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  STORE_CATEGORIES.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className = "store-filter-btn" + (!storeWishOnly && cat === storeActiveCategory ? " active" : "");
+    btn.innerText = cat;
+    btn.onclick = () => { storeActiveCategory = cat; storeWishOnly = false; renderStoreFilters(); renderStoreProducts(); };
+    bar.appendChild(btn);
+  });
+  const wish = document.createElement("button");
+  wish.className = "store-filter-btn wish" + (storeWishOnly ? " active" : "");
+  wish.innerText = `♥ Wishlist (${getWishlist().length})`;
+  wish.onclick = () => { storeWishOnly = !storeWishOnly; renderStoreFilters(); renderStoreProducts(); };
+  bar.appendChild(wish);
+}
+
+function sortStoreProducts(list) {
+  const indexOf = new Map(storeProducts.map((p, i) => [p.id, i]));
+  const byFeatured = (a, b) => indexOf.get(a.id) - indexOf.get(b.id);
+  const sorted = [...list];
+  switch (storeSortMode) {
+    case "popular":    sorted.sort((a, b) => (b.sold || 0) - (a.sold || 0) || byFeatured(a, b)); break;
+    case "price-asc":  sorted.sort((a, b) => a.price - b.price || byFeatured(a, b)); break;
+    case "price-desc": sorted.sort((a, b) => b.price - a.price || byFeatured(a, b)); break;
+    case "name":       sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
+    default:           sorted.sort(byFeatured);
+  }
+  return sorted;
+}
+
+function variantHint(p) {
+  const bits = [];
+  if (p.sizes && p.sizes.length) bits.push(p.sizes.length > 1 ? `${p.sizes[0]}–${p.sizes[p.sizes.length - 1]}` : p.sizes[0]);
+  if (p.colors && p.colors.length) bits.push(`${p.colors.length} color${p.colors.length > 1 ? "s" : ""}`);
+  return bits.join(" · ");
+}
+
+function renderStoreProducts() {
+  const grid = document.getElementById("storeGrid");
+  const searchEl = document.getElementById("storeSearch");
+  if (!grid) return;
+  const search = searchEl ? searchEl.value.trim().toLowerCase() : "";
+  const wished = getWishlist();
+
+  const filtered = storeProducts.filter(p => {
+    const matchesCategory = storeWishOnly ? wished.includes(p.id) : (storeActiveCategory === "All" || p.category === storeActiveCategory);
+    const matchesSearch = !search || p.name.toLowerCase().includes(search);
+    return matchesCategory && matchesSearch;
+  });
+
+  grid.innerHTML = "";
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="store-empty-note">${storeWishOnly && !search
+      ? "Your wishlist is empty. Tap the ♡ on any item to save it for later."
+      : "No items match your search."}</div>`;
+    return;
+  }
+
+  sortStoreProducts(filtered).forEach(p => {
+    const outOfStock = p.stock <= 0;
+    const opts = needsOptions(p);
+    const hint = variantHint(p);
+    const liked = wished.includes(p.id);
+    const card = document.createElement("div");
+    card.className = "store-product-card";
+    card.dataset.id = p.id;
+    card.innerHTML = `
+      <button type="button" class="store-heart${liked ? " on" : ""}" data-act="wish" aria-pressed="${liked}"
+        aria-label="${liked ? "Remove from wishlist" : "Save to wishlist"}">${liked ? "♥" : "♡"}</button>
+      <button type="button" class="store-card-open" data-act="open" aria-label="View details for ${escapeStoreHtml(p.name)}">
+        <div class="store-product-icon">${productVisual(p)}</div>
+        <div class="cat-tag">${escapeStoreHtml(p.category)}</div>
+        <h4>${escapeStoreHtml(p.name)}</h4>
+      </button>
+      <div class="store-price">${rupee(p.price)}</div>
+      ${hint ? `<div class="store-variant-hint">${escapeStoreHtml(hint)}</div>` : ""}
+      <div class="store-stock-note">${outOfStock ? "Out of stock" : p.stock + " in stock"}</div>
+      <button class="store-add-btn" data-act="${opts ? "open" : "add"}" ${outOfStock ? "disabled" : ""}>
+        ${outOfStock ? "Unavailable" : (opts ? "Select Options" : "Add to Cart")}
+      </button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* ---------- product detail popup ---------- */
+function openProductModal(id) {
+  const p = getStoreProduct(id);
+  if (!p) return;
+  pm = {
+    id,
+    size: p.sizes && p.sizes.length === 1 ? p.sizes[0] : "",
+    color: p.colors && p.colors.length === 1 ? p.colors[0] : "",
+    qty: 1,
+  };
+  pmLastFocus = document.activeElement;
+  pushRecent(id);
+  renderProductModal();
+  const modal = document.getElementById("productModal");
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.getElementById("productOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+  document.getElementById("pmClose").focus();
+}
+
+function closeProductModal() {
+  const modal = document.getElementById("productModal");
+  if (!modal || !modal.classList.contains("open")) return;
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  document.getElementById("productOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+  pm = null;
+  if (pmLastFocus && pmLastFocus.focus) pmLastFocus.focus();
+}
+
+function renderProductModal() {
+  if (!pm) return;
+  const p = getStoreProduct(pm.id);
+  const body = document.getElementById("productModalBody");
+  if (!p || !body) return;
+  const out = p.stock <= 0;
+  const liked = isWished(p.id);
+  const low = !out && p.stock <= 10;
+
+  const sizeHtml = p.sizes ? `
+    <div class="pm-group" data-group="size">
+      <div class="pm-label">Size <b>*</b><span class="pm-chosen">${escapeStoreHtml(pm.size)}</span></div>
+      <div class="pm-chips">${p.sizes.map(s => `
+        <button type="button" class="pm-chip${pm.size === s ? " on" : ""}" data-act="size" data-v="${escapeStoreHtml(s)}" aria-pressed="${pm.size === s}">${escapeStoreHtml(s)}</button>`).join("")}
+      </div>
+    </div>` : "";
+
+  const colorHtml = p.colors ? `
+    <div class="pm-group" data-group="color">
+      <div class="pm-label">Color <b>*</b><span class="pm-chosen">${escapeStoreHtml(pm.color)}</span></div>
+      <div class="pm-chips">${p.colors.map(c => `
+        <button type="button" class="pm-chip pm-color${pm.color === c ? " on" : ""}" data-act="color" data-v="${escapeStoreHtml(c)}" aria-pressed="${pm.color === c}">
+          <i style="background:${STORE_COLOR_HEX[c] || "#888"}"></i>${escapeStoreHtml(c)}</button>`).join("")}
+      </div>
+    </div>` : "";
+
+  body.innerHTML = `
+    <div class="pm-grid">
+      <div class="pm-photo">${productVisual(p, true)}</div>
+      <div class="pm-info">
+        <div class="cat-tag">${escapeStoreHtml(p.category)}</div>
+        <h3 id="pmName">${escapeStoreHtml(p.name)}</h3>
+        <div class="pm-price">${rupee(p.price)}</div>
+        <p class="pm-desc">${escapeStoreHtml(p.description || "")}</p>
+        ${sizeHtml}${colorHtml}
+        <div class="pm-stock ${out ? "out" : low ? "low" : ""}">${out ? "Out of stock" : low ? `Only ${p.stock} left` : "In stock"}</div>
+        <div class="pm-row">
+          <div class="store-qty-controls pm-qty">
+            <button type="button" data-act="dec" aria-label="Decrease quantity">-</button>
+            <span>${pm.qty}</span>
+            <button type="button" data-act="inc" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="store-heart pm-heart${liked ? " on" : ""}" data-act="wish" aria-pressed="${liked}"
+            aria-label="${liked ? "Remove from wishlist" : "Save to wishlist"}">${liked ? "♥" : "♡"}</button>
+        </div>
+        <p class="pm-msg" id="pmMsg" aria-live="polite"></p>
+        <button type="button" class="store-checkout-btn" data-act="add" ${out ? "disabled" : ""}>
+          ${out ? "Unavailable" : `Add to Cart · ${rupee(p.price * pm.qty)}`}
+        </button>
+      </div>
+    </div>`;
+}
+
+function handleProductModalClick(e) {
+  const btn = e.target.closest("[data-act]");
+  if (!btn || !pm) return;
+  const p = getStoreProduct(pm.id);
+  switch (btn.dataset.act) {
+    case "size":  pm.size = pm.size === btn.dataset.v ? "" : btn.dataset.v; renderProductModal(); break;
+    case "color": pm.color = pm.color === btn.dataset.v ? "" : btn.dataset.v; renderProductModal(); break;
+    case "inc":   pm.qty = Math.min(maxQtyFor(p), pm.qty + 1); renderProductModal(); break;
+    case "dec":   pm.qty = Math.max(1, pm.qty - 1); renderProductModal(); break;
+    case "wish":  toggleWishlist(pm.id); break;
+    case "add": {
+      const missing = [];
+      if (p.sizes && !pm.size) missing.push("size");
+      if (p.colors && !pm.color) missing.push("color");
+      if (missing.length) {
+        document.getElementById("pmMsg").textContent = `Please choose a ${missing.join(" and ")}.`;
+        missing.forEach(g => {
+          const el = document.querySelector(`.pm-group[data-group="${g}"]`);
+          if (el) { el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake", "need"); }
+        });
+        return;
+      }
+      if (addToStoreCart(pm.id, { size: pm.size, color: pm.color, qty: pm.qty })) closeProductModal();
+      break;
+    }
+  }
+}
+
+/* ---------- receipt ---------- */
 let lastStoreReceiptHtml = "";
 
 function buildReceiptHtml(order) {
   const fmt = d => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-  const rows = order.items.map(i => `
+  const rows = order.items.map(i => {
+    const vt = variantText(i.size, i.color);
+    return `
     <tr>
-      <td>${escapeStoreHtml(i.name)}</td>
+      <td>${escapeStoreHtml(i.name)}${vt ? `<br><small>${escapeStoreHtml(vt)}</small>` : ""}</td>
       <td class="num">${i.quantity}</td>
       <td class="num">₹${i.price}</td>
       <td class="num">₹${i.price * i.quantity}</td>
-    </tr>`).join("");
+    </tr>`;
+  }).join("");
   const payLabel = order.paymentMethod === "UPI" ? "UPI (awaiting verification)" : "Cash on Delivery / Pickup";
+  const discountRows = order.discountAmount > 0 ? `
+        <tr><td colspan="3">Subtotal</td><td class="num">₹${order.subtotal != null ? order.subtotal : order.totalAmount + order.discountAmount}</td></tr>
+        <tr><td colspan="3">${escapeStoreHtml(order.discountLabel || "Discount")}${order.couponCode ? ` (${escapeStoreHtml(order.couponCode)})` : ""}</td><td class="num">−₹${order.discountAmount}</td></tr>` : "";
 
   return `
     <div class="receipt">
@@ -726,7 +1267,7 @@ function buildReceiptHtml(order) {
       <table>
         <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th></tr></thead>
         <tbody>${rows}</tbody>
-        <tfoot><tr><td colspan="3">Total</td><td class="num">₹${order.totalAmount}</td></tr></tfoot>
+        <tfoot>${discountRows}<tr class="grand"><td colspan="3">Total</td><td class="num">₹${order.totalAmount}</td></tr></tfoot>
       </table>
       <p class="receipt-foot">Keep your Order ID — you need it with your Student ID to track this order.</p>
     </div>`;
@@ -758,7 +1299,8 @@ function printStoreReceipt() {
       .receipt-meta span{color:#666}.receipt-meta b{text-align:right;word-break:break-all}
       table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14px}
       th,td{padding:8px 4px;border-bottom:1px solid #ddd;text-align:left}
-      .num{text-align:right}tfoot td{font-weight:bold;font-size:16px;border-bottom:none}
+      small{color:#666}
+      .num{text-align:right}tfoot td{border-bottom:none}tfoot tr.grand td{font-weight:bold;font-size:16px}
       .receipt-foot{color:#666;font-size:12px;margin-top:20px}
     </style></head><body>${lastStoreReceiptHtml}</body></html>`);
   w.document.close();
@@ -766,123 +1308,53 @@ function printStoreReceipt() {
   w.print(); // choose "Save as PDF" in the print dialog to download
 }
 
-function changeStoreQty(productId, delta) {
-  const cart = getStoreCart();
-  cart[productId] = (cart[productId] || 0) + delta;
-  if (cart[productId] <= 0) delete cart[productId];
-  saveStoreCart(cart);
-  renderStoreCartItems();
-}
+/* ---------- student: pre-filled details + banner ---------- */
+async function loadStoreStudent() {
+  const banner = document.getElementById("storeStudentBanner");
+  if (!banner) return;
 
-function removeFromStoreCart(productId) {
-  const cart = getStoreCart();
-  delete cart[productId];
-  saveStoreCart(cart);
-  renderStoreCartItems();
-}
-
-function renderStoreFilters() {
-  const bar = document.getElementById("storeFilterBar");
-  if (!bar) return;
-  bar.innerHTML = "";
-  STORE_CATEGORIES.forEach(cat => {
-    const btn = document.createElement("button");
-    btn.className = "store-filter-btn" + (cat === storeActiveCategory ? " active" : "");
-    btn.innerText = cat;
-    btn.onclick = () => { storeActiveCategory = cat; renderStoreProducts(); renderStoreFilters(); };
-    bar.appendChild(btn);
-  });
-}
-
-function renderStoreProducts() {
-  const grid = document.getElementById("storeGrid");
-  const searchEl = document.getElementById("storeSearch");
-  if (!grid) return;
-  const search = searchEl ? searchEl.value.trim().toLowerCase() : "";
-
-  const filtered = storeProducts.filter(p => {
-    const matchesCategory = storeActiveCategory === "All" || p.category === storeActiveCategory;
-    const matchesSearch = !search || p.name.toLowerCase().includes(search);
-    return matchesCategory && matchesSearch;
-  });
-
-  grid.innerHTML = "";
-  if (!filtered.length) {
-    grid.innerHTML = `<div class="store-empty-note">No items match your search.</div>`;
-    return;
+  if (localStorage.getItem("token") && localStorage.getItem("role") === "student") {
+    try {
+      const res = await fetch(`${API}/store/me`, { headers: authHeaders() });
+      const data = await res.json();
+      if (data.success && data.student) storeStudent = data.student;
+    } catch (err) { /* offline: behave like a guest */ }
   }
 
-  filtered.forEach(p => {
-    const outOfStock = p.stock <= 0;
-    const card = document.createElement("div");
-    card.className = "store-product-card";
-    card.innerHTML = `
-      <div class="store-product-icon">${p.icon || "🛍️"}</div>
-      <div class="cat-tag">${p.category}</div>
-      <h4>${p.name}</h4>
-      <div class="store-price">₹${p.price}</div>
-      <div class="store-stock-note">${outOfStock ? "Out of stock" : p.stock + " in stock"}</div>
-      <button class="store-add-btn" ${outOfStock ? "disabled" : ""} onclick="addToStoreCart('${p.id}', this)">
-        ${outOfStock ? "Unavailable" : "Add to Cart"}
-      </button>
-    `;
-    grid.appendChild(card);
-  });
+  if (storeStudent) {
+    banner.innerHTML = `🎓 Hi <b>${escapeStoreHtml(storeStudent.name.split(" ")[0])}</b>! Your student discount is applied automatically at checkout, and your details are pre-filled.`;
+    banner.classList.add("on");
+  } else {
+    banner.innerHTML = `🎓 Are you a GEHU student? <a href="login.html">Log in</a> for an automatic student discount and faster checkout. You can still order without logging in.`;
+    banner.classList.remove("on");
+  }
+  banner.hidden = false;
+  refreshStoreQuote(); // pick up the student discount in the cart totals
 }
 
-function openStoreCart() {
-  renderStoreCartItems();
-  document.getElementById("storeCartDrawer").classList.add("open");
-  document.getElementById("storeOverlay").classList.add("open");
-}
-function closeStoreCart() {
-  document.getElementById("storeCartDrawer").classList.remove("open");
-  document.getElementById("storeOverlay").classList.remove("open");
-}
-
-function renderStoreCartItems() {
-  const cart = getStoreCart();
-  const container = document.getElementById("storeCartItems");
-  if (!container) return;
-  const ids = Object.keys(cart);
-
-  if (!ids.length) {
-    container.innerHTML = `<div class="store-cart-empty">Your cart is empty</div>`;
-    document.getElementById("storeCartTotal").innerText = "₹0";
+function prefillCheckoutForStudent() {
+  const note = document.getElementById("checkoutStudentNote");
+  const idEl = document.getElementById("cf-studentid");
+  if (!storeStudent) {
+    if (note) note.hidden = true;
+    if (idEl) idEl.readOnly = false;
     return;
   }
-
-  container.innerHTML = "";
-  let total = 0;
-
-  ids.forEach(id => {
-    const product = storeProducts.find(p => p.id === id);
-    if (!product) return;
-    const qty = cart[id];
-    const lineTotal = product.price * qty;
-    total += lineTotal;
-
-    const row = document.createElement("div");
-    row.className = "store-cart-item";
-    row.innerHTML = `
-      <div class="info">
-        <h5>${product.icon || "🛍️"} ${product.name}</h5>
-        <span>₹${product.price} x ${qty} = ₹${lineTotal}</span>
-      </div>
-      <div class="store-qty-controls">
-        <button onclick="changeStoreQty('${id}', -1)">-</button>
-        <span>${qty}</span>
-        <button onclick="changeStoreQty('${id}', 1)">+</button>
-        <button class="store-remove-btn" onclick="removeFromStoreCart('${id}')">Remove</button>
-      </div>
-    `;
-    container.appendChild(row);
-  });
-
-  document.getElementById("storeCartTotal").innerText = `₹${total}`;
+  const fill = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && !el.value && val) el.value = val;
+  };
+  fill("cf-name", storeStudent.name);
+  fill("cf-email", storeStudent.email);
+  fill("cf-phone", storeStudent.phone);
+  if (idEl) { idEl.value = storeStudent.studentId; idEl.readOnly = true; }
+  if (note) {
+    note.textContent = "Details filled from your student account. You can edit anything except your Student ID.";
+    note.hidden = false;
+  }
 }
 
-/* ---------- CHECKOUT MODAL ---------- */
+/* ---------- checkout modal ---------- */
 function openCheckoutForm() {
   const cart = getStoreCart();
   if (!Object.keys(cart).length) return;
@@ -893,7 +1365,10 @@ function openCheckoutForm() {
   document.getElementById("checkoutMsg").textContent = "";
   document.getElementById("checkoutModal").classList.add("open");
   document.getElementById("checkoutOverlay").classList.add("open");
+  prefillCheckoutForStudent();
   updateStorePaymentUI();
+  renderStoreSummary();
+  refreshStoreQuote();
 }
 function closeCheckoutForm() {
   document.getElementById("checkoutModal").classList.remove("open");
@@ -922,15 +1397,20 @@ function initCheckoutForm() {
     radio.addEventListener("change", updateStorePaymentUI);
   });
 
+  // Re-check the price when the buyer types their email / student ID, so a
+  // once-per-customer coupon that was already used is caught BEFORE they pay.
+  ["cf-email", "cf-studentid"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", refreshStoreQuote);
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = document.getElementById("checkoutMsg");
     const submitBtn = document.getElementById("checkoutSubmitBtn");
     msg.textContent = "";
 
-    const cart = getStoreCart();
-    const items = Object.entries(cart).map(([productId, quantity]) => ({ productId, quantity }));
-
+    const items = storeCartPayload();
     if (!items.length) {
       msg.textContent = "Your cart is empty.";
       return;
@@ -948,6 +1428,7 @@ function initCheckoutForm() {
       items,
       paymentMethod,
       transactionRef,
+      couponCode: storeCouponMsg.ok ? storeCouponCode : "",
     };
 
     if (!body.customerName || !body.email || !body.phone || !body.address) {
@@ -966,20 +1447,26 @@ function initCheckoutForm() {
     try {
       const res = await fetch(`${API}/store/orders`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify(body),
       });
       const data = await res.json();
 
       if (data.success) {
-        localStorage.removeItem("storeCart");
+        storeWrite("storeCart", {});
         saveStoreCart({});
+        storeCouponCode = "";
+        storeCouponMsg = { text: "", ok: false };
+        storeQuote = null;
+        storeWrite("storeCoupon", "");
         form.reset();
         form.style.display = "none";
         updateStorePaymentUI();
+        renderStoreSummary();
         showOrderConfirmation(data.order);
       } else {
         msg.textContent = data.message || "Could not place order. Please try again.";
+        refreshStoreQuote(); // keep the amount on screen honest
       }
     } catch (err) {
       msg.textContent = "Can't reach the backend right now. Please try again in a moment.";
@@ -990,13 +1477,73 @@ function initCheckoutForm() {
   });
 }
 
+/* ---------- wiring ---------- */
 document.addEventListener("DOMContentLoaded", () => {
+  if (!document.getElementById("storeGrid")) return;
+
+  storeCouponCode = storeRead("storeCoupon", "") || "";
+  const couponInput = document.getElementById("storeCouponInput");
+  if (couponInput && storeCouponCode) couponInput.value = storeCouponCode;
+
   loadStoreProducts();
+  loadStoreStudent();
   initCheckoutForm();
   saveStoreCart(getStoreCart()); // sync the cart count badge on page load
 
-  const storeSearchEl = document.getElementById("storeSearch");
-  if (storeSearchEl) storeSearchEl.addEventListener("input", renderStoreProducts);
+  const searchEl = document.getElementById("storeSearch");
+  if (searchEl) searchEl.addEventListener("input", renderStoreProducts);
+
+  const sortEl = document.getElementById("storeSort");
+  if (sortEl) sortEl.addEventListener("change", () => { storeSortMode = sortEl.value; renderStoreProducts(); });
+
+  // product grid: heart / open details / quick add (one listener for all cards)
+  document.getElementById("storeGrid").addEventListener("click", e => {
+    const card = e.target.closest(".store-product-card");
+    if (!card) return;
+    const id = card.dataset.id;
+    const act = e.target.closest("[data-act]");
+    if (act && act.dataset.act === "wish") return toggleWishlist(id);
+    if (act && act.dataset.act === "add") return addToStoreCart(id, {}, act);
+    if (act && act.disabled) return;
+    openProductModal(id); // "Select Options", the photo/title, or a click anywhere else on the card
+  });
+
+  document.getElementById("storeRecentRow").addEventListener("click", e => {
+    const item = e.target.closest(".store-recent-item");
+    if (item) openProductModal(item.dataset.id);
+  });
+  document.getElementById("storeRecentClear").addEventListener("click", () => {
+    storeWrite("storeRecent", []);
+    renderStoreRecent();
+  });
+
+  document.getElementById("productModal").addEventListener("click", handleProductModalClick);
+  document.getElementById("productOverlay").addEventListener("click", closeProductModal);
+  document.getElementById("pmClose").addEventListener("click", closeProductModal);
+
+  // cart lines: + / - / remove
+  document.getElementById("storeCartItems").addEventListener("click", e => {
+    const btn = e.target.closest("[data-act]");
+    const row = e.target.closest(".store-cart-item");
+    if (!btn || !row) return;
+    const key = row.dataset.key;
+    if (btn.dataset.act === "inc") changeStoreQty(key, 1);
+    else if (btn.dataset.act === "dec") changeStoreQty(key, -1);
+    else if (btn.dataset.act === "remove") removeFromStoreCart(key);
+  });
+
+  document.getElementById("storeCouponForm").addEventListener("submit", e => {
+    e.preventDefault();
+    applyStoreCoupon();
+  });
+
+  // Esc closes whatever is open, topmost first
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    if (document.getElementById("productModal").classList.contains("open")) closeProductModal();
+    else if (document.getElementById("checkoutModal").classList.contains("open")) closeCheckoutForm();
+    else if (document.getElementById("storeCartDrawer").classList.contains("open")) closeStoreCart();
+  });
 });
 
 /* ============================================================

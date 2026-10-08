@@ -890,6 +890,12 @@ function logout() {
 const PAYMENT_STATUS_OPTIONS = ["Awaiting Verification", "Pay on Pickup", "Paid", "Failed"];
 const FULFILLMENT_STATUS_OPTIONS = ["Pending", "Processing", "Ready for Pickup", "Completed", "Cancelled"];
 
+// Orders contain text typed by the public (name, address...). Always escape it
+// before putting it into the page, otherwise a crafted order could run script here.
+function escOrder(v) {
+  return String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
 function statusSlug(s) {
   return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
@@ -908,7 +914,13 @@ async function loadOrders() {
   tbody.innerHTML = "";
 
   orders.forEach(o => {
-    const itemsList = o.items.map(i => `${i.name} x${i.quantity}`).join(", ");
+    const itemsList = o.items.map(i => {
+      const variant = [i.size, i.color].filter(Boolean).join(", ");
+      return `${escOrder(i.name)}${variant ? ` <b>(${escOrder(variant)})</b>` : ""} x${i.quantity}`;
+    }).join("<br>");
+    const discountNote = o.discountAmount > 0
+      ? `<br><small style="color:#4ade80;">−₹${o.discountAmount}${o.couponCode ? ` · ${escOrder(o.couponCode)}` : o.studentDiscount ? " · student discount" : ""}</small>`
+      : "";
     const dateStr = new Date(o.createdAt).toLocaleString();
 
     const paymentOptionsHtml = PAYMENT_STATUS_OPTIONS
@@ -921,14 +933,14 @@ async function loadOrders() {
     tbody.innerHTML += `
       <tr>
         <td>${dateStr}</td>
-        <td>${o.customerName}${o.studentId ? `<br><span style="color:#ffb020;font-weight:600;">Student ID: ${o.studentId}</span>` : `<br><span style="color:#64748b;">No Student ID given</span>`}</td>
-        <td>${o.email}<br>${o.phone}</td>
+        <td>${escOrder(o.customerName)}${o.studentId ? `<br><span style="color:#ffb020;font-weight:600;">Student ID: ${escOrder(o.studentId)}</span>` : `<br><span style="color:#64748b;">No Student ID given</span>`}</td>
+        <td>${escOrder(o.email)}<br>${escOrder(o.phone)}</td>
         <td style="text-align:left; max-width: 220px;">${itemsList}</td>
-        <td>₹${o.totalAmount}</td>
-        <td>${o.paymentMethod}${o.transactionRef ? `<br><small>Ref: ${o.transactionRef}</small>` : ""}</td>
+        <td>₹${o.totalAmount}${discountNote}</td>
+        <td>${escOrder(o.paymentMethod)}${o.transactionRef ? `<br><small>Ref: ${escOrder(o.transactionRef)}</small>` : ""}</td>
         <td><select class="status-select status-${statusSlug(o.paymentStatus)}" onchange="updateOrder('${o._id}', 'paymentStatus', this.value)">${paymentOptionsHtml}</select></td>
         <td><select class="status-select status-${statusSlug(o.status)}" onchange="updateOrder('${o._id}', 'status', this.value)">${fulfillOptionsHtml}</select></td>
-        <td><button onclick="alert('Address: ${o.address.replace(/'/g, "\\'")}')">View Address</button></td>
+        <td><button data-address="${escOrder(o.address)}" onclick="alert('Address: ' + this.dataset.address)">View Address</button></td>
       </tr>
     `;
   });

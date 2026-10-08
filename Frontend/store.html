@@ -46,10 +46,19 @@
     <p class="section-sub">Order college essentials online — no login needed. Pick up on campus. Already ordered? <a href="index.html#help-section">Track your order</a>.</p>
   </div>
 
+  <div class="store-student-banner reveal" id="storeStudentBanner" hidden></div>
+
   <div class="store-toolbar reveal">
     <div class="store-filter-bar" id="storeFilterBar"></div>
     <div class="store-toolbar-right">
-      <input class="store-search" id="storeSearch" placeholder="Search items...">
+      <input class="store-search" id="storeSearch" placeholder="Search items..." aria-label="Search items">
+      <select class="store-sort" id="storeSort" aria-label="Sort items">
+        <option value="featured">Sort: Featured</option>
+        <option value="popular">Popularity</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="name">Name: A to Z</option>
+      </select>
       <button class="store-cart-btn" id="storeCartBtn" onclick="openStoreCart()">
         🛒 Cart <span class="store-cart-count" id="storeCartCount">0</span>
       </button>
@@ -57,7 +66,22 @@
   </div>
 
   <div class="store-grid reveal" id="storeGrid"></div>
+
+  <div class="store-recent" id="storeRecent" hidden>
+    <div class="store-recent-head">
+      <h3>Recently viewed</h3>
+      <button type="button" class="store-link-btn" id="storeRecentClear">Clear</button>
+    </div>
+    <div class="store-recent-row" id="storeRecentRow"></div>
+  </div>
 </section>
+
+<!-- PRODUCT DETAIL POPUP -->
+<div class="store-overlay" id="productOverlay"></div>
+<div class="store-product-modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="pmName" aria-hidden="true">
+  <button type="button" class="store-cart-close pm-close" id="pmClose" aria-label="Close">✕</button>
+  <div id="productModalBody"></div>
+</div>
 
 <!-- STORE CART DRAWER -->
 <div class="store-overlay" id="storeOverlay" onclick="closeStoreCart()"></div>
@@ -68,7 +92,12 @@
   </div>
   <div class="store-cart-items" id="storeCartItems"></div>
   <div class="store-cart-footer">
-    <div class="store-cart-total-row"><span>Total</span><span id="storeCartTotal">₹0</span></div>
+    <form class="store-coupon-form" id="storeCouponForm" autocomplete="off">
+      <input id="storeCouponInput" placeholder="Coupon code" aria-label="Coupon code" maxlength="30">
+      <button type="submit" id="storeCouponBtn">Apply</button>
+    </form>
+    <p class="store-coupon-msg" id="storeCouponMsg" aria-live="polite"></p>
+    <div class="store-summary" id="storeCartSummary"></div>
     <button class="store-checkout-btn" onclick="openCheckoutForm()">Checkout</button>
   </div>
 </div>
@@ -81,6 +110,8 @@
     <button class="store-cart-close" onclick="closeCheckoutForm()">✕</button>
   </div>
   <form id="checkoutForm" class="store-checkout-form">
+    <div class="store-summary store-summary-box" id="checkoutSummary"></div>
+    <p class="store-checkout-note" id="checkoutStudentNote" hidden></p>
     <label>Full Name *<input id="cf-name" required></label>
     <label>Email *<input id="cf-email" type="email" required></label>
     <label>Phone *<input id="cf-phone" type="tel" required></label>
@@ -100,7 +131,7 @@
 
     <div class="store-upi-box" id="storeUpiBox">
       <img src="upi-qr-placeholder.png" alt="UPI QR code" class="store-qr-img">
-      <p class="store-qr-note">Scan &amp; pay the total shown above, then enter your transaction ID below.</p>
+      <p class="store-qr-note">Scan &amp; pay <b id="storeUpiAmount">the total</b>, then enter your transaction ID below.</p>
       <label>UPI Transaction / Reference ID *<input id="cf-transactionref"></label>
     </div>
 

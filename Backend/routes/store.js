@@ -2,21 +2,115 @@ const express = require("express");
 const router = express.Router();
 
 const Order = require("../models/Order");
-const { STORE_CATALOG, findProduct } = require("../lib/storeCatalog");
-const { protect, authorize } = require("../middleware/auth");
+const Student = require("../models/Student");
+const { STORE_CATALOG } = require("../lib/storeCatalog");
+const { priceOrder, PricingError } = require("../lib/pricing");
+const { protect, optionalAuth, authorize } = require("../middleware/auth");
 const { sendOrderSms } = require("../lib/sms");
 
 const DELIVERY_DAYS = 7;
 
+const escapeRegex = (str) => String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// If the request carries a valid STUDENT token, return that student's profile
+// (checked against the database, so a deactivated account loses the discount).
+// Anyone else - guest, faculty, admin, expired token - gets null.
+async function getLoggedInStudent(req) {
+  if (!req.user || req.user.role !== "student" || !req.user.profileId) return null;
+  const student = await Student.findById(req.user.profileId).populate("user", "isActive");
+  if (!student || !student.user || student.user.isActive === false) return null;
+  return student;
+}
+
+// Has this customer already used a once-per-customer coupon?
+async function couponAlreadyUsed(coupon, { email, studentId }) {
+  if (!coupon || !coupon.oncePerCustomer) return false;
+  const who = [];
+  if (email) who.push({ email: String(email).trim().toLowerCase() });
+  if (studentId) who.push({ studentId: new RegExp(`^${escapeRegex(String(studentId).trim())}$`, "i") });
+  if (!who.length) return false;
+  return !!(await Order.exists({ couponCode: coupon.code, status: { $ne: "Cancelled" }, $or: who }));
+}
+
 // GET /api/store/items - public product catalog (no login required)
-router.get("/items", (req, res) => {
-  res.json({ success: true, items: STORE_CATALOG });
+// Each item also carries `sold` (units in non-cancelled orders) for "Popularity" sorting.
+router.get("/items", async (req, res) => {
+  let soldById = {};
+  try {
+    const rows = await Order.aggregate([
+      { $match: { status: { $ne: "Cancelled" } } },
+      { $unwind: "$items" },
+      { $group: { _id: "$items.productId", sold: { $sum: "$items.quantity" } } },
+    ]);
+    soldById = Object.fromEntries(rows.map((r) => [r._id, r.sold]));
+  } catch (err) {
+    console.error("Could not compute popularity:", err.message); // catalog still loads
+  }
+  res.json({
+    success: true,
+    items: STORE_CATALOG.map((p) => ({ ...p, sold: soldById[p.id] || 0 })),
+  });
+});
+
+// GET /api/store/me - pre-fill details for a logged-in student's checkout.
+// Guests (or any non-student) just get { student: null }.
+router.get("/me", optionalAuth, async (req, res) => {
+  try {
+    const student = await getLoggedInStudent(req);
+    if (!student) return res.json({ success: true, student: null });
+    res.json({
+      success: true,
+      student: {
+        name: student.name,
+        email: student.email || "",
+        phone: student.phone || "",
+        studentId: student.studentId,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: true, student: null });
+  }
+});
+
+// POST /api/store/quote - price a cart without placing an order.
+// Body: { items, couponCode, email?, studentId? }. Used by the cart drawer and
+// checkout screen to show the exact amount BEFORE the buyer pays (email /
+// studentId let us catch an already-used once-per-customer coupon early).
+// The real checkout recalculates everything again.
+router.post("/quote", optionalAuth, async (req, res) => {
+  try {
+    const student = await getLoggedInStudent(req);
+    const { items, couponCode, email, studentId } = req.body;
+
+    const priced = priceOrder(items, { couponCode, isStudent: !!student });
+
+    const who = { email, studentId: student ? student.studentId : studentId };
+    if (await couponAlreadyUsed(priced.coupon, who)) {
+      throw new PricingError(`You've already used ${priced.coupon.code}.`);
+    }
+
+    res.json({
+      success: true,
+      subtotal: priced.subtotal,
+      discountAmount: priced.discountAmount,
+      discountLabel: priced.discountLabel,
+      couponCode: priced.couponCode,
+      couponSkipped: priced.couponSkipped,
+      studentDiscount: priced.studentDiscount,
+      totalAmount: priced.totalAmount,
+    });
+  } catch (err) {
+    if (err instanceof PricingError) return res.status(400).json({ success: false, message: err.message });
+    console.error(err);
+    res.status(500).json({ success: false, message: "Could not price your cart." });
+  }
 });
 
 // POST /api/store/orders - public checkout submission (no login required)
-router.post("/orders", async (req, res) => {
+router.post("/orders", optionalAuth, async (req, res) => {
   try {
-    const { customerName, email, phone, address, studentId, items, paymentMethod, transactionRef } = req.body;
+    const { customerName, email, phone, address, studentId, items, paymentMethod, transactionRef, couponCode } = req.body;
 
     if (!customerName || !email || !phone || !address) {
       return res.status(400).json({
@@ -36,39 +130,17 @@ router.post("/orders", async (req, res) => {
       });
     }
 
-    if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ success: false, message: "Cart is empty." });
-    }
+    // Rebuild the order from the trusted server catalog and rules so a
+    // tampered client request can't change prices, sizes or discounts.
+    const student = await getLoggedInStudent(req);
+    const priced = priceOrder(items, { couponCode, isStudent: !!student });
 
-    // Rebuild the order line-by-line from the trusted server catalog so a
-    // tampered client request can't change prices or invent products.
-    let totalAmount = 0;
-    const orderItems = [];
+    // A logged-in student's real roll number always wins over whatever was typed,
+    // so their order can be tracked and the discount can't be borrowed.
+    const finalStudentId = student ? student.studentId : studentId;
 
-    for (const line of items) {
-      const product = findProduct(line.productId);
-      if (!product) {
-        return res.status(400).json({
-          success: false,
-          message: `Unknown product: ${line.productId}`,
-        });
-      }
-
-      const quantity = Number(line.quantity);
-      if (!Number.isInteger(quantity) || quantity < 1) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid quantity for ${product.name}.`,
-        });
-      }
-
-      orderItems.push({
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        quantity,
-      });
-      totalAmount += product.price * quantity;
+    if (await couponAlreadyUsed(priced.coupon, { email, studentId: finalStudentId })) {
+      return res.status(400).json({ success: false, message: `You've already used ${priced.coupon.code}.` });
     }
 
     const order = await Order.create({
@@ -76,9 +148,14 @@ router.post("/orders", async (req, res) => {
       email,
       phone,
       address,
-      studentId,
-      items: orderItems,
-      totalAmount,
+      studentId: finalStudentId,
+      items: priced.lines,
+      subtotal: priced.subtotal,
+      discountAmount: priced.discountAmount,
+      discountLabel: priced.discountLabel || undefined,
+      couponCode: priced.couponCode || undefined,
+      studentDiscount: priced.studentDiscount,
+      totalAmount: priced.totalAmount,
       paymentMethod,
       transactionRef: paymentMethod === "UPI" ? transactionRef : undefined,
       paymentStatus: paymentMethod === "UPI" ? "Awaiting Verification" : "Pay on Pickup",
@@ -91,6 +168,7 @@ router.post("/orders", async (req, res) => {
 
     res.status(201).json({ success: true, order });
   } catch (err) {
+    if (err instanceof PricingError) return res.status(400).json({ success: false, message: err.message });
     console.error(err);
     res.status(500).json({ success: false, message: "Could not place order." });
   }
@@ -136,6 +214,9 @@ router.get("/track", async (req, res) => {
         createdAt: order.createdAt,
         estimatedDelivery: order.estimatedDelivery,
         items: order.items,
+        subtotal: order.subtotal,
+        discountAmount: order.discountAmount,
+        discountLabel: order.discountLabel,
         totalAmount: order.totalAmount,
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
