@@ -5,8 +5,8 @@ const Attendance = require("../models/Attendance");
 const Faculty = require("../models/Faculty");
 const { protect, authorize } = require("../middleware/auth");
 
-// POST /api/attendance  (faculty) - mark one student present/absent for a subject/date
-router.post("/", protect, authorize("faculty"), async (req, res) => {
+// POST /api/attendance  (faculty, admin) - mark one student present/absent for a subject/date
+router.post("/", protect, authorize("faculty", "admin"), async (req, res) => {
   try {
     const { student, subject, date, status } = req.body;
     if (!student || !subject || !date || !status) {

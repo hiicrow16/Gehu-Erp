@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GEHU Admin Panel</title>
+<style>
+:root{--line:rgba(255,255,255,.09);--txt:#e2e8f0;--mut:#8b9bb8;--acc:#22d3ee;--acc2:#3b82f6;--bad:#f87171;--ok:#4ade80;--warn:#fbbf24;--card:rgba(255,255,255,.045)}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:radial-gradient(circle at top left,#0f172a,#020617) fixed;color:var(--txt);min-height:100vh}
+.side{position:fixed;inset:0 auto 0 0;width:240px;padding:20px 14px;background:linear-gradient(180deg,#0b1328,#020617);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;z-index:20;transition:transform .25s}
+.side h2{color:var(--acc);margin:4px 10px 18px;letter-spacing:.3px}
+.nav{display:block;width:100%;text-align:left;padding:11px 14px;border:0;border-radius:10px;background:transparent;color:var(--txt);font:inherit;cursor:pointer;transition:.2s}
+.nav:hover{background:rgba(59,130,246,.15)}
+.nav.on{background:linear-gradient(90deg,#06b6d4,#3b82f6);color:#fff;font-weight:600;box-shadow:0 0 14px rgba(59,130,246,.4)}
+.nav.out{margin-top:auto;color:#fecaca;background:rgba(239,68,68,.12)}.nav.out:hover{background:#dc2626;color:#fff}
+main{margin-left:240px;padding:28px 36px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+.top h1{margin:0;font-size:26px}
+#burger{display:none}
+.btn{font:inherit;font-size:14px;cursor:pointer;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--txt);transition:.2s;text-decoration:none;display:inline-block}
+.btn:hover{background:rgba(59,130,246,.25);border-color:rgba(59,130,246,.5)}
+.btn.pri{background:linear-gradient(90deg,#06b6d4,#3b82f6);border:0;color:#fff;font-weight:600}
+.btn.pri:hover{filter:brightness(1.12)}
+.btn.bad:hover{background:rgba(239,68,68,.3);border-color:var(--bad)}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+.btn:disabled{opacity:.55;cursor:wait}
+.sec{display:none}.sec.on{display:block}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.bar .grow{flex:1;min-width:160px}
+input,select,textarea{font:inherit;font-size:14px;color:var(--txt);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;padding:10px 12px;width:100%;outline:0;transition:.2s}
+.bar input,.bar select{width:auto}.bar input.grow{width:auto}
+input:focus,select:focus,textarea:focus{border-color:var(--acc2);box-shadow:0 0 0 3px rgba(59,130,246,.25)}
+select option{background:#0f172a}
+input:disabled{opacity:.5}
+label{display:block;font-size:12.5px;color:var(--mut);font-weight:600}
+label>*{margin-top:5px;font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.stat{cursor:pointer;transition:.2s}.stat:hover{transform:translateY(-3px);border-color:rgba(59,130,246,.5)}
+.stat b{display:block;font-size:30px;color:var(--acc)}.stat span{color:var(--mut);font-size:13px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:rgba(59,130,246,.18);text-align:left;white-space:nowrap;position:sticky;top:0}
+th,td{padding:11px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}tbody tr:hover{background:rgba(59,130,246,.08)}
+td.act{white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--mut);padding:36px 12px}
+.alert{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:#fecaca;padding:12px 14px;border-radius:10px;margin-bottom:14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.alert.warn{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4);color:#fde68a}
+.badge{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.badge.Present{background:rgba(34,197,94,.18);color:#bbf7d0}.badge.Absent{background:rgba(239,68,68,.18);color:#fecaca}
+.pbar{height:8px;border-radius:9px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:8px}.pbar i{display:block;height:100%;background:linear-gradient(90deg,#06b6d4,#3b82f6)}
+#modal{position:fixed;inset:0;background:rgba(2,6,23,.75);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#modal.on{display:flex}
+.box{background:#0b1328;border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:640px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.box h3{margin:0 0 16px}
+.ferr{color:var(--bad);min-height:20px;margin:12px 0 0;font-size:14px}
+.acts{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
+#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:99}
+.toast{background:#0f1b38;border:1px solid var(--line);border-left:4px solid var(--ok);padding:11px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:in .25s}
+.toast.err{border-left-color:var(--bad)}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+.status-select{min-width:150px;padding:7px 10px}
+.status-select.status-awaiting-verification,.status-select.status-pending{background-color:rgba(234,179,8,.15);color:#fde68a}
+.status-select.status-pay-on-pickup,.status-select.status-processing{background-color:rgba(59,130,246,.15);color:#bfdbfe}
+.status-select.status-paid,.status-select.status-ready-for-pickup,.status-select.status-completed{background-color:rgba(34,197,94,.15);color:#bbf7d0}
+.status-select.status-failed,.status-select.status-cancelled{background-color:rgba(239,68,68,.15);color:#fecaca}
+@media(max-width:860px){.side{transform:translateX(-100%)}.side.open{transform:none}main{margin-left:0;padding:18px}#burger{display:inline-block}}
+</style>
+</head>
+<body>
+<aside class="side" id="side">
+  <h2>GEHU Admin</h2>
+  <button class="nav" data-v="dashboard">Dashboard</button>
+  <button class="nav" data-v="students">Manage Students</button>
+  <button class="nav" data-v="courses">Manage Courses</button>
+  <button class="nav" data-v="subjects">Manage Subjects</button>
+  <button class="nav" data-v="notices">Manage Notices</button>
+  <button class="nav" data-v="attendance">Attendance</button>
+  <button class="nav" data-v="orders">Store Orders</button>
+  <button class="nav out" onclick="logout()">Logout</button>
+</aside>
+<main>
+  <div class="top">
+    <div style="display:flex;gap:10px;align-items:center"><button class="btn" id="burger" onclick="side.classList.toggle('open')">☰</button><h1 id="title">Admin Panel</h1></div>
+    <a href="index.html" class="btn pri">Back to Website</a>
+  </div>
+  <section class="sec" id="sec-dashboard"></section>
+  <section class="sec" id="sec-students"></section>
+  <section class="sec" id="sec-courses"></section>
+  <section class="sec" id="sec-subjects"></section>
+  <section class="sec" id="sec-notices"></section>
+  <section class="sec" id="sec-attendance"></section>
+  <section class="sec" id="sec-orders"></section>
+</main>
+<div id="modal"></div><div id="toasts"></div>
+
+<script src="config.js"></script>
+<script>
+const API = window.API_BASE, $ = s => document.querySelector(s);
+const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+if (localStorage.getItem("role") !== "admin" || !localStorage.getItem("token")) location.href = "login.html";
+const S = { students: [], courses: [], subjects: [], notices: [] };
+const logout = () => { localStorage.clear(); location.href = "login.html"; };
+
+/* ---------- helpers ---------- */
+async function api(path, opt = {}) {
+  try {
+    const r = await fetch(API + path, { ...opt, headers: { ...(opt.body ? { "Content-Type": "application/json" } : {}), Authorization: "Bearer " + localStorage.getItem("token") } });
+    const d = await r.json().catch(() => ({ success: false, message: "Server sent an invalid response" }));
+    if (r.status === 401) { toast("Session expired - please log in again", 1); setTimeout(logout, 1500); }
+    return d;
+  } catch (e) {
+    return { success: false, message: "Cannot reach the server. If it is hosted on a free plan it may be waking up - retry in ~30 seconds." };
+  }
+}
+const send = (m, path, body) => api(path, { method: m, body: body ? JSON.stringify(body) : undefined });
+async function load(k, path, prop) { const d = await api(path); if (d.success) S[k] = d[prop]; return d; }
+function toast(msg, bad) { const t = document.createElement("div"); t.className = "toast" + (bad ? " err" : ""); t.textContent = msg; $("#toasts").append(t); setTimeout(() => t.remove(), 3500); }
+const alertBox = (msg, retry) => `<div class="alert"><span>⚠ ${esc(msg)}</span>${retry ? `<button class="btn sm" onclick="${retry}">Retry</button>` : ""}</div>`;
+const table = (heads, rows, empty) => `<div class="tw"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.length ? rows.map(r => `<tr>${r.map(c => `<td${c.startsWith("<button") ? ' class="act"' : ""}>${c}</td>`).join("")}</tr>`).join("") : `<tr><td class="empty" colspan="${heads.length}">${empty}</td></tr>`}</tbody></table></div>`;
+const sel = (id, label, opts, noBlank, val, extra = "") => `<label>${label}<select id="${id}" name="${id}" ${extra}>${noBlank ? "" : '<option value="">Select…</option>'}${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(v) === String(val) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`;
+const btn = (label, fn, cls = "") => `<button class="btn sm ${cls}" onclick="${fn}">${label}</button>`;
+
+/* ---------- modal ---------- */
+function closeModal(ok) { const m = $("#modal"), c = m._c; m._c = null; m.classList.remove("on"); if (!ok && c) c(); }
+function modal(title, body, o = {}) {
+  const m = $("#modal"); m._c = o.onCancel;
+  m.innerHTML = `<div class="box"><h3>${esc(title)}</h3><form>${body}<p class="ferr"></p><div class="acts"><button type="button" class="btn" id="mx">${o.onOk ? "Cancel" : "Close"}</button>${o.onOk ? `<button class="btn ${o.danger ? "bad" : "pri"}">${o.ok || "Save"}</button>` : ""}</div></form></div>`;
+  m.classList.add("on");
+  $("#mx").onclick = () => closeModal();
+  const f = m.querySelector("form");
+  f.onsubmit = async e => { e.preventDefault(); const b = f.querySelector(".acts .btn:last-child"); b.disabled = true; const err = await o.onOk?.(f); b.disabled = false; if (err) f.querySelector(".ferr").textContent = err; else closeModal(true); };
+}
+const ask = (msg, ok = "Delete") => new Promise(res => modal("Please confirm", `<p>${esc(msg)}</p>`, { ok, danger: 1, onOk: () => res(true), onCancel: () => res(false) }));
+$("#modal").addEventListener("mousedown", e => { if (e.target.id === "modal") closeModal(); });
+
+/* ---------- forms from field specs ---------- */
+function formHtml(fields, item, editing) {
+  return `<div class="grid">${fields.filter(f => !f.only || (f.only === "add") !== !!editing).map(f => {
+    let v = item ? (f.get ? f.get(item) : item[f.k]) : "";
+    if (v == null) v = "";
+    if (f.opts) return sel(f.k, f.l, f.opts(), 0, v);
+    if (f.t === "textarea") return `<label style="grid-column:1/-1">${f.l}<textarea name="${f.k}" rows="4" ${f.req ? "required" : ""}>${esc(v)}</textarea></label>`;
+    return `<label>${f.l}${f.req ? " *" : ""}<input name="${f.k}" type="${f.t || "text"}" value="${esc(v)}" ${f.req ? "required" : ""} ${f.min != null ? `min="${f.min}"` : ""} ${f.max != null ? `max="${f.max}"` : ""} ${f.lock && editing ? "disabled" : ""}></label>`;
+  }).join("")}</div>`;
+}
+function collect(fields, form, editing) {
+  const b = {};
+  fields.forEach(f => {
+    if ((f.only && (f.only === "add") === !!editing) || (f.lock && editing)) return;
+    const el = form.elements[f.k]; if (!el) return;
+    const v = el.value.trim();
+    b[f.k] = v === "" ? undefined : (f.t === "number" ? Number(v) : v);
+  });
+  return b;
+}
+
+/* ---------- navigation ---------- */
+const VIEWS = { dashboard: ["Dashboard", loadDash], students: ["Manage Students", loadStudents], courses: ["Manage Courses", () => loadCrud("courses")], subjects: ["Manage Subjects", () => loadCrud("subjects")], notices: ["Manage Notices", () => loadCrud("notices")], attendance: ["Attendance", () => loadAtt()], orders: ["Store Orders", loadOrders] };
+function go(v, arg) {
+  if (!VIEWS[v]) v = "dashboard";
+  document.querySelectorAll(".sec").forEach(e => e.classList.toggle("on", e.id === "sec-" + v));
+  document.querySelectorAll(".nav[data-v]").forEach(e => e.classList.toggle("on", e.dataset.v === v));
+  $("#title").textContent = VIEWS[v][0]; $("#side").classList.remove("open"); history.replaceState(null, "", "#" + v);
+  VIEWS[v][1](arg);
+}
+document.querySelectorAll(".nav[data-v]").forEach(b => b.onclick = () => go(b.dataset.v));
+
+/* ---------- dashboard ---------- */
+async function loadDash() {
+  const el = $("#sec-dashboard");
+  el.innerHTML = '<p class="empty">Loading…</p>';
+  const [st, co, su, no, or] = await Promise.all(["/students", "/courses", "/subjects", "/notices", "/store/orders"].map(p => api(p)));
+  const n = (d, k) => d.success ? d[k].length : "–";
+  const awaiting = or.success ? or.orders.filter(o => o.paymentStatus === "Awaiting Verification").length : "–";
+  const stat = (v, l, go_) => `<div class="card stat" onclick="go('${go_}')"><b>${v}</b><span>${l}</span></div>`;
+  if (st.success) S.students = st.students;
+  el.innerHTML = (st.success ? "" : alertBox(st.message || "Could not load students", "loadDash()")) +
+    `<div class="grid">${stat(n(st, "students"), "Students", "students")}${stat(n(co, "courses"), "Courses", "courses")}${stat(n(su, "subjects"), "Subjects", "subjects")}${stat(n(no, "notices"), "Notices", "notices")}${stat(n(or, "orders"), "Store orders", "orders")}${stat(awaiting, "Awaiting payment verification", "orders")}</div>
+    <h3 style="margin:26px 0 12px">Recently added students</h3>` +
+    table(["Student ID", "Name", "Course", "Semester"], (st.success ? st.students.slice(0, 5) : []).map(s => [esc(s.studentId), esc(s.name), esc(s.course?.name || "-"), esc(s.semester || "-")]), "No students yet. Add your first one from Manage Students.");
+}
+
+/* ---------- students ---------- */
+const SF = [
+  { k: "name", l: "Full name", req: 1 },
+  { k: "studentId", l: "Student ID (roll no.)", req: 1, lock: 1 },
+  { k: "username", l: "Login username", req: 1, get: s => s.user && s.user.username },
+  { k: "password", l: "Password (min 6)", t: "password", req: 1, only: "add", min: 6 },
+  { k: "email", l: "Email", t: "email" }, { k: "phone", l: "Phone" },
+  { k: "course", l: "Course", opts: () => S.courses.map(c => [c._id, c.name]), get: s => s.course && s.course._id },
+  { k: "semester", l: "Semester", t: "number", min: 1, max: 12 },
+  { k: "department", l: "Department" }, { k: "admissionYear", l: "Admission year", t: "number", min: 2000, max: 2100 }
+];
+let stuErr = "", orphans = [];
+async function loadStudents() {
+  $("#sec-students").innerHTML = '<p class="empty">Loading…</p>';
+  const [d, , o] = await Promise.all([load("students", "/students", "students"), load("courses", "/courses", "courses"), api("/students/orphans")]);
+  stuErr = d.success ? "" : (d.message || "Could not load students");
+  orphans = o.success ? o.orphans : [];
+  drawStudents();
+}
+function filteredStudents() {
+  const q = ($("#sq")?.value || "").toLowerCase(), c = $("#sc")?.value || "";
+  return S.students.filter(s => (!c || s.course?._id === c) && (!q || [s.studentId, s.name, s.user?.username, s.email, s.phone].some(x => String(x || "").toLowerCase().includes(q))));
+}
+function drawStudents() {
+  const q = $("#sq")?.value || "", c = $("#sc")?.value || "";
+  $("#sec-students").innerHTML =
+    (stuErr ? alertBox(stuErr, "loadStudents()") : "") +
+    (orphans.length ? `<div class="alert warn"><span>${orphans.length} unused student login(s) found (${orphans.slice(0, 4).map(u => "<b>" + esc(u.username) + "</b>").join(", ")}${orphans.length > 4 ? "…" : ""}) - leftovers from failed attempts that can block usernames.</span><button class="btn sm" onclick="cleanOrphans()">Clean up</button></div>` : "") +
+    `<div class="bar"><input id="sq" class="grow" placeholder="Search name, ID, username, email, phone…" value="${esc(q)}" oninput="drawRows()">
+      <select id="sc" onchange="drawRows()"><option value="">All courses</option>${S.courses.map(x => `<option value="${x._id}" ${x._id === c ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select>
+      <button class="btn" onclick="exportCsv()">Export CSV</button><button class="btn pri" onclick="studentForm()">+ Add Student</button></div>
+    <p id="scount" style="color:var(--mut);font-size:13px;margin:0 0 10px"></p><div id="srows"></div>`;
+  drawRows();
+}
+function drawRows() {
+  const list = filteredStudents();
+  $("#scount").textContent = `Showing ${list.length} of ${S.students.length} students`;
+  $("#srows").innerHTML = table(["Student ID", "Username", "Name", "Course", "Sem", "Email", "Phone", "Actions"],
+    list.map(s => [esc(s.studentId), esc(s.user?.username || "-"), esc(s.name), esc(s.course?.name || "-"), esc(s.semester || "-"), esc(s.email || "-"), esc(s.phone || "-"),
+      btn("Edit", `studentForm('${s._id}')`) + btn("Password", `resetPw('${s._id}')`) + btn("Attendance", `go('attendance','${s._id}')`) + btn("Delete", `delStudent('${s._id}')`, "bad")]),
+    S.students.length ? "No students match your search." : (stuErr ? "Students could not be loaded." : "No students yet. Click “+ Add Student”."));
+}
+function studentForm(id) {
+  const s = id && S.students.find(x => x._id === id);
+  modal(s ? "Edit student" : "Add student", formHtml(SF, s, !!s), {
+    ok: s ? "Update" : "Add student",
+    onOk: async f => {
+      const b = collect(SF, f, !!s);
+      const d = s ? await send("PUT", "/students/" + id, b) : await send("POST", "/students", b);
+      if (!d.success) return d.message || "Could not save student";
+      toast(s ? "Student updated" : "Student added"); loadStudents();
+    }
+  });
+}
+function resetPw(id) {
+  modal("Reset password", `<label>New password (min 6 characters)<input name="pw" type="password" minlength="6" required></label>`, {
+    ok: "Reset", onOk: async f => { const d = await send("PUT", `/students/${id}/password`, { password: f.elements.pw.value }); if (!d.success) return d.message || "Failed"; toast("Password updated"); }
+  });
+}
+async function delStudent(id) {
+  const s = S.students.find(x => x._id === id);
+  if (!await ask(`Delete ${s?.name || "this student"}? Their login is removed too. This cannot be undone.`)) return;
+  const d = await send("DELETE", "/students/" + id); toast(d.success ? "Student deleted" : d.message || "Failed", !d.success); loadStudents();
+}
+async function cleanOrphans() {
+  if (!await ask(`Remove ${orphans.length} unused student login(s)? Admin and faculty accounts are never touched.`, "Clean up")) return;
+  const d = await send("DELETE", "/students/orphans"); toast(d.success ? `Removed ${d.removed} login(s)` : d.message || "Failed", !d.success); loadStudents();
+}
+function exportCsv() {
+  const rows = [["Student ID", "Username", "Name", "Course", "Semester", "Email", "Phone"], ...filteredStudents().map(s => [s.studentId, s.user?.username, s.name, s.course?.name, s.semester, s.email, s.phone])];
+  const csv = rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "students.csv"; a.click();
+}
+
+/* ---------- courses / subjects / notices (generic CRUD) ---------- */
+const CRUD = {
+  courses: { api: "/courses", prop: "courses", one: "course", fields: [{ k: "name", l: "Course name", req: 1 }, { k: "code", l: "Course code", req: 1 }, { k: "department", l: "Department" }, { k: "durationYears", l: "Duration (years)", t: "number", min: 1, max: 6 }],
+    cols: [["Name", c => c.name], ["Code", c => c.code], ["Department", c => c.department || "-"], ["Duration (yrs)", c => c.durationYears || "-"]] },
+  subjects: { api: "/subjects", prop: "subjects", one: "subject", fields: [{ k: "name", l: "Subject name", req: 1 }, { k: "code", l: "Subject code", req: 1 }, { k: "course", l: "Course", opts: () => S.courses.map(c => [c._id, c.name]), get: s => s.course && s.course._id }, { k: "semester", l: "Semester", t: "number", req: 1, min: 1, max: 12 }],
+    cols: [["Name", s => s.name], ["Code", s => s.code], ["Course", s => s.course?.name || "-"], ["Semester", s => s.semester]] },
+  notices: { api: "/notices", prop: "notices", one: "notice", fields: [{ k: "title", l: "Title", req: 1 }, { k: "audience", l: "Audience", opts: () => [["all", "Everyone"], ["student", "Students only"], ["faculty", "Faculty only"]], get: n => n.audience || "all" }, { k: "content", l: "Content", t: "textarea", req: 1 }],
+    cols: [["Title", n => n.title], ["Content", n => n.content.length > 90 ? n.content.slice(0, 90) + "…" : n.content], ["Audience", n => n.audience], ["Posted", n => new Date(n.createdAt).toLocaleDateString()]] }
+};
+async function loadCrud(k) {
+  $("#sec-" + k).innerHTML = '<p class="empty">Loading…</p>';
+  if (k === "subjects") await load("courses", "/courses", "courses");
+  const d = await load(k, CRUD[k].api, CRUD[k].prop);
+  const c = CRUD[k];
+  $("#sec-" + k).innerHTML = (d.success ? "" : alertBox(d.message || "Could not load", `loadCrud('${k}')`)) +
+    `<div class="bar"><span style="color:var(--mut)" class="grow">${S[k].length} ${k}</span><button class="btn pri" onclick="crudForm('${k}')">+ Add ${c.one}</button></div>` +
+    table([...c.cols.map(x => x[0]), "Actions"], S[k].map(i => [...c.cols.map(x => esc(x[1](i))), btn("Edit", `crudForm('${k}','${i._id}')`) + btn("Delete", `crudDel('${k}','${i._id}')`, "bad")]), `No ${k} yet.`);
+}
+function crudForm(k, id) {
+  const c = CRUD[k], it = id && S[k].find(x => x._id === id);
+  modal((it ? "Edit " : "Add ") + c.one, formHtml(c.fields, it, !!it), {
+    onOk: async f => {
+      const b = collect(c.fields, f, !!it);
+      const d = await send(it ? "PUT" : "POST", c.api + (it ? "/" + id : ""), b);
+      if (!d.success) return d.message || "Could not save";
+      toast(c.one[0].toUpperCase() + c.one.slice(1) + " saved"); loadCrud(k);
+    }
+  });
+}
+async function crudDel(k, id) {
+  if (!await ask(`Delete this ${CRUD[k].one}?`)) return;
+  const d = await send("DELETE", CRUD[k].api + "/" + id); toast(d.success ? "Deleted" : d.message || "Failed", !d.success); loadCrud(k);
+}
+
+/* ---------- attendance ---------- */
+async function loadAtt(pre) {
+  await Promise.all([load("students", "/students", "students"), load("courses", "/courses", "courses")]);
+  $("#sec-attendance").innerHTML = `<div class="card"><div class="grid">
+    ${sel("attStu", "Student", S.students.map(s => [s._id, `${s.studentId} - ${s.name}`]), 0, pre)}
+    ${sel("attCourse", "Course (lists its subjects)", S.courses.map(c => [c._id, c.name]))}
+    ${sel("attSub", "Subject", [])}
+    <label>Date<input type="date" id="attDate" value="${new Date().toISOString().slice(0, 10)}"></label>
+    ${sel("attStatus", "Status", [["Present", "Present"], ["Absent", "Absent"]], 1)}
+    <label>&nbsp;<button class="btn pri" style="width:100%" onclick="markAtt()">Mark attendance</button></label></div></div><div id="attOut" style="margin-top:20px"></div>`;
+  $("#attCourse").onchange = async e => {
+    $("#attSub").innerHTML = '<option value="">Select…</option>';
+    if (!e.target.value) return;
+    const d = await api("/subjects?course=" + e.target.value);
+    if (d.success) $("#attSub").innerHTML += d.subjects.map(s => `<option value="${s._id}">${esc(s.name)} (Sem ${s.semester})</option>`).join("");
+  };
+  $("#attStu").onchange = () => viewAtt($("#attStu").value);
+  if (pre) viewAtt(pre);
+}
+async function markAtt() {
+  const b = { student: $("#attStu").value, subject: $("#attSub").value, date: $("#attDate").value, status: $("#attStatus").value };
+  if (!b.student || !b.subject || !b.date) return toast("Select a student, course/subject and date", 1);
+  const d = await send("POST", "/attendance", b);
+  toast(d.success ? "Attendance marked" : d.message || "Failed", !d.success);
+  if (d.success) viewAtt(b.student);
+}
+async function viewAtt(id) {
+  if (!id) return ($("#attOut").innerHTML = "");
+  const d = await api("/attendance/student/" + id);
+  if (!d.success) return ($("#attOut").innerHTML = alertBox(d.message || "Could not load attendance"));
+  const m = d.summary;
+  $("#attOut").innerHTML = `<div class="card" style="margin-bottom:14px"><b style="font-size:22px;color:var(--acc)">${m.percentage}%</b> attendance <span style="color:var(--mut)">· ${m.present} present · ${m.absent} absent · ${m.total} total</span><div class="pbar"><i style="width:${m.percentage}%"></i></div></div>` +
+    table(["Date", "Subject", "Status"], d.records.map(r => [new Date(r.date).toLocaleDateString(), esc(r.subject?.name || "-"), `<span class="badge ${esc(r.status)}">${esc(r.status)}</span>`]), "No attendance recorded for this student yet.");
+}
+
+/* ---------- store orders ---------- */
+const PAY = ["Awaiting Verification", "Pay on Pickup", "Paid", "Failed"], FUL = ["Pending", "Processing", "Ready for Pickup", "Completed", "Cancelled"];
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+let ORD = [];
+async function loadOrders() {
+  const d = await api("/store/orders");
+  ORD = d.success ? d.orders : [];
+  const aw = ORD.filter(o => o.paymentStatus === "Awaiting Verification").length;
+  const st = (o, f, list) => `<select class="status-select status-${slug(o[f])}" onchange="updOrder('${o._id}','${f}',this.value)">${list.map(s => `<option ${o[f] === s ? "selected" : ""}>${s}</option>`).join("")}</select>`;
+  $("#sec-orders").innerHTML = (d.success ? "" : alertBox(d.message || "Could not load orders", "loadOrders()")) +
+    `<div class="grid" style="margin-bottom:18px"><div class="card stat"><b>${ORD.length}</b><span>Total orders</span></div><div class="card stat"><b style="color:var(--warn)">${aw}</b><span>Awaiting verification</span></div></div>` +
+    table(["Date", "Customer", "Contact", "Items", "Total", "Payment", "Payment status", "Fulfillment", ""], ORD.map(o => [
+      new Date(o.createdAt).toLocaleString(),
+      esc(o.customerName) + (o.studentId ? `<br><small style="color:var(--warn)">ID: ${esc(o.studentId)}</small>` : ""),
+      esc(o.email) + "<br>" + esc(o.phone),
+      o.items.map(i => `${esc(i.name)}${[i.size, i.color].filter(Boolean).length ? ` <b>(${esc([i.size, i.color].filter(Boolean).join(", "))})</b>` : ""} ×${i.quantity}`).join("<br>"),
+      "₹" + esc(o.totalAmount) + (o.discountAmount > 0 ? `<br><small style="color:var(--ok)">−₹${esc(o.discountAmount)}${o.couponCode ? " · " + esc(o.couponCode) : ""}</small>` : ""),
+      esc(o.paymentMethod) + (o.transactionRef ? `<br><small>Ref: ${esc(o.transactionRef)}</small>` : ""),
+      st(o, "paymentStatus", PAY), st(o, "status", FUL), btn("Address", `showAddr('${o._id}')`)]), "No orders yet.");
+}
+function showAddr(id) { const o = ORD.find(x => x._id === id); modal("Delivery address", `<p style="white-space:pre-wrap">${esc(o?.address || "No address given")}</p>`); }
+async function updOrder(id, field, value) {
+  const d = await send("PATCH", "/store/orders/" + id, { [field]: value });
+  toast(d.success === false ? d.message || "Update failed" : "Order updated", d.success === false); loadOrders();
+}
+
+go(location.hash.slice(1));
+</script>
+</body>
+</html>
