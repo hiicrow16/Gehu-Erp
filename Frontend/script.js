@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("token", data.token);
           localStorage.setItem("role", data.role);
           localStorage.setItem("username", data.username);
+          localStorage.setItem("displayName", (data.profile && data.profile.name) || data.username);
           if (data.profile && data.profile._id) {
             localStorage.setItem("profileId", data.profile._id);
           }
@@ -198,6 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("token", data.token);
           localStorage.setItem("role", data.role);
           localStorage.setItem("username", data.username);
+          localStorage.setItem("displayName", (data.profile && data.profile.name) || data.username);
           if (data.profile && data.profile._id) {
             localStorage.setItem("profileId", data.profile._id);
           }
