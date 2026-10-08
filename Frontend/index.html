@@ -275,7 +275,7 @@
     <span class="eyebrow">Get In Touch</span>
     <h2 class="section-title">Contact Us</h2>
     <p style="margin-top:16px;">Email: info@gehu.ac.in</p>
-    <p>Phone: +91 XXXXX XXXXX</p>
+    <p>Phone: <span data-support-text="phone">+91 XXXXX XXXXX</span></p>
   </div>
 </section>
 
@@ -295,11 +295,11 @@
         <div class="support-channel-icon">✉️</div>
         <div><h5>Email Us</h5><p>support@hiicrow.site</p></div>
       </a>
-      <a class="support-channel-card" href="tel:+910000000000">
+      <a class="support-channel-card" href="#contact-section" data-support="phone">
         <div class="support-channel-icon">📞</div>
-        <div><h5>Call Us</h5><p>+91 XXXXX XXXXX</p></div>
+        <div><h5>Call Us</h5><p data-support-text="phone">+91 XXXXX XXXXX</p></div>
       </a>
-      <a class="support-channel-card" href="https://wa.me/910000000000" target="_blank" rel="noopener">
+      <a class="support-channel-card" href="https://gehu-erp-backend.onrender.com/api/support/whatsapp" target="_blank" rel="noopener" data-support="whatsapp">
         <div class="support-channel-icon">💬</div>
         <div><h5>WhatsApp</h5><p>Chat with our team</p></div>
       </a>
@@ -436,5 +436,6 @@
 <script src="config.js"></script>
 <script src="script.js"></script>
 <script src="nav-auth.js"></script>
+<script src="feedback.js"></script>
 </body>
 </html>

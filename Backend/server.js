@@ -12,8 +12,12 @@ const attendanceRoutes = require("./routes/attendance");
 const noticeRoutes = require("./routes/notices");
 const storeRoutes = require("./routes/store");
 const cheatNoteRoutes = require("./routes/cheatnotes");
+const supportRoutes = require("./routes/support");
+const feedbackRoutes = require("./routes/feedback");
 
 const app = express();
+// Render sits behind a proxy; this makes req.ip the visitor's real IP (used by the review spam guard)
+app.set("trust proxy", 1);
 
 // CLIENT_URL can be a comma-separated list of allowed origins
 const allowedOrigins = (process.env.CLIENT_URL || "")
@@ -44,6 +48,8 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/store", storeRoutes);
 app.use("/api/cheatnotes", cheatNoteRoutes);
+app.use("/api/support", supportRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 // 404 handler for unknown API routes
 app.use("/api", (req, res) => {
