@@ -642,10 +642,128 @@ function saveStoreCart(cart) {
   }
 }
 
-function addToStoreCart(productId) {
+function addToStoreCart(productId, btn) {
   const cart = getStoreCart();
   cart[productId] = (cart[productId] || 0) + 1;
   saveStoreCart(cart);
+
+  // Tell the buyer it worked: toast + button flash + cart badge pop
+  const product = storeProducts.find(p => p.id === productId);
+  const qty = cart[productId];
+  showStoreToast(`${product ? product.name : "Item"} added to cart${qty > 1 ? ` (x${qty})` : ""}`);
+
+  if (btn) {
+    const original = btn.dataset.label || btn.textContent.trim();
+    btn.dataset.label = original;
+    btn.textContent = "✓ Added";
+    btn.classList.add("added");
+    clearTimeout(btn._resetTimer);
+    btn._resetTimer = setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove("added");
+    }, 1200);
+  }
+
+  const badge = document.getElementById("storeCartCount");
+  if (badge) {
+    badge.classList.remove("pop");
+    void badge.offsetWidth; // restart the animation
+    badge.classList.add("pop");
+  }
+}
+
+let storeToastTimer;
+function showStoreToast(text) {
+  let toast = document.getElementById("storeToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "storeToast";
+    toast.className = "store-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<span class="store-toast-tick">✓</span><span></span><button type="button" onclick="openStoreCart()">View Cart</button>`;
+  toast.children[1].textContent = text;
+  toast.classList.add("show");
+  clearTimeout(storeToastTimer);
+  storeToastTimer = setTimeout(() => toast.classList.remove("show"), 2500);
+}
+
+function escapeStoreHtml(str) {
+  return String(str == null ? "" : str).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+/* ---------- RECEIPT ---------- */
+let lastStoreReceiptHtml = "";
+
+function buildReceiptHtml(order) {
+  const fmt = d => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  const rows = order.items.map(i => `
+    <tr>
+      <td>${escapeStoreHtml(i.name)}</td>
+      <td class="num">${i.quantity}</td>
+      <td class="num">₹${i.price}</td>
+      <td class="num">₹${i.price * i.quantity}</td>
+    </tr>`).join("");
+  const payLabel = order.paymentMethod === "UPI" ? "UPI (awaiting verification)" : "Cash on Delivery / Pickup";
+
+  return `
+    <div class="receipt">
+      <h3>GEHU Store — Order Receipt</h3>
+      <p class="receipt-sub">Graphic Era Hill University</p>
+      <div class="receipt-meta">
+        <div><span>Order ID</span><b>${escapeStoreHtml(order._id)}</b></div>
+        <div><span>Date</span><b>${fmt(order.createdAt)}</b></div>
+        <div><span>Customer</span><b>${escapeStoreHtml(order.customerName)}</b></div>
+        <div><span>Phone</span><b>${escapeStoreHtml(order.phone)}</b></div>
+        <div><span>Deliver to</span><b>${escapeStoreHtml(order.address)}</b></div>
+        <div><span>Payment</span><b>${payLabel}</b></div>
+        <div><span>Expected delivery</span><b>Within 7 days (by ${fmt(order.estimatedDelivery || new Date(new Date(order.createdAt).getTime() + 7 * 86400000))})</b></div>
+      </div>
+      <table>
+        <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td colspan="3">Total</td><td class="num">₹${order.totalAmount}</td></tr></tfoot>
+      </table>
+      <p class="receipt-foot">Keep your Order ID — you need it with your Student ID to track this order.</p>
+    </div>`;
+}
+
+function showOrderConfirmation(order) {
+  lastStoreReceiptHtml = buildReceiptHtml(order);
+  const box = document.getElementById("checkoutSuccess");
+  box.innerHTML = `
+    <h4>Order placed! 🎉</h4>
+    <p>Thank you, ${escapeStoreHtml(order.customerName.split(" ")[0])}! Your package will be delivered within 7 days.
+       We've sent a confirmation SMS to <b>${escapeStoreHtml(order.phone)}</b>.</p>
+    ${lastStoreReceiptHtml}
+    <div class="receipt-actions">
+      <button class="store-checkout-btn" onclick="printStoreReceipt()">Download / Print Receipt</button>
+      <button class="store-checkout-btn secondary" onclick="closeCheckoutForm()">Done</button>
+    </div>`;
+  box.classList.add("open");
+}
+
+function printStoreReceipt() {
+  const w = window.open("", "_blank");
+  if (!w) { alert("Please allow pop-ups to download your receipt."); return; }
+  w.document.write(`<!DOCTYPE html><html><head><title>GEHU Store Receipt</title>
+    <style>
+      body{font-family:Arial,sans-serif;color:#111;padding:32px;max-width:640px;margin:auto}
+      h3{margin:0}.receipt-sub{color:#666;margin:2px 0 18px}
+      .receipt-meta div{display:flex;justify-content:space-between;gap:16px;padding:5px 0;border-bottom:1px solid #eee;font-size:14px}
+      .receipt-meta span{color:#666}.receipt-meta b{text-align:right;word-break:break-all}
+      table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14px}
+      th,td{padding:8px 4px;border-bottom:1px solid #ddd;text-align:left}
+      .num{text-align:right}tfoot td{font-weight:bold;font-size:16px;border-bottom:none}
+      .receipt-foot{color:#666;font-size:12px;margin-top:20px}
+    </style></head><body>${lastStoreReceiptHtml}</body></html>`);
+  w.document.close();
+  w.focus();
+  w.print(); // choose "Save as PDF" in the print dialog to download
 }
 
 function changeStoreQty(productId, delta) {
@@ -704,7 +822,7 @@ function renderStoreProducts() {
       <h4>${p.name}</h4>
       <div class="store-price">₹${p.price}</div>
       <div class="store-stock-note">${outOfStock ? "Out of stock" : p.stock + " in stock"}</div>
-      <button class="store-add-btn" ${outOfStock ? "disabled" : ""} onclick="addToStoreCart('${p.id}')">
+      <button class="store-add-btn" ${outOfStock ? "disabled" : ""} onclick="addToStoreCart('${p.id}', this)">
         ${outOfStock ? "Unavailable" : "Add to Cart"}
       </button>
     `;
@@ -859,7 +977,7 @@ function initCheckoutForm() {
         form.reset();
         form.style.display = "none";
         updateStorePaymentUI();
-        document.getElementById("checkoutSuccess").classList.add("open");
+        showOrderConfirmation(data.order);
       } else {
         msg.textContent = data.message || "Could not place order. Please try again.";
       }

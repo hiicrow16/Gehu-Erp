@@ -4,6 +4,9 @@ const router = express.Router();
 const Order = require("../models/Order");
 const { STORE_CATALOG, findProduct } = require("../lib/storeCatalog");
 const { protect, authorize } = require("../middleware/auth");
+const { sendOrderSms } = require("../lib/sms");
+
+const DELIVERY_DAYS = 7;
 
 // GET /api/store/items - public product catalog (no login required)
 router.get("/items", (req, res) => {
@@ -79,7 +82,12 @@ router.post("/orders", async (req, res) => {
       paymentMethod,
       transactionRef: paymentMethod === "UPI" ? transactionRef : undefined,
       paymentStatus: paymentMethod === "UPI" ? "Awaiting Verification" : "Pay on Pickup",
+      estimatedDelivery: new Date(Date.now() + DELIVERY_DAYS * 24 * 60 * 60 * 1000),
     });
+
+    // Text the buyer their confirmation. Not awaited on purpose: a slow or
+    // failing SMS provider must never delay or break a saved order.
+    sendOrderSms(order);
 
     res.status(201).json({ success: true, order });
   } catch (err) {
@@ -126,6 +134,7 @@ router.get("/track", async (req, res) => {
       order: {
         _id: order._id,
         createdAt: order.createdAt,
+        estimatedDelivery: order.estimatedDelivery,
         items: order.items,
         totalAmount: order.totalAmount,
         paymentMethod: order.paymentMethod,

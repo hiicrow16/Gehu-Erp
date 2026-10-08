@@ -34,6 +34,7 @@ const orderSchema = new mongoose.Schema(
       enum: ["Awaiting Verification", "Pay on Pickup", "Paid", "Failed"],
       required: true,
     },
+    estimatedDelivery: { type: Date }, // set at checkout: order date + 7 days
     status: {
       type: String,
       enum: ["Pending", "Processing", "Ready for Pickup", "Completed", "Cancelled"],
