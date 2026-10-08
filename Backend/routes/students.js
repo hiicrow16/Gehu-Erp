@@ -118,7 +118,7 @@ router.post("/", protect, authorize("admin"), async (req, res) => {
           success: false,
           message: field === "username"
             ? "Username already exists"
-            : `Duplicate value on the users "${field}" field (likely a stale database index - see README note)`,
+            : `Duplicate value on the users "${field}" field (leftover database index - restart the backend to clear it)`,
         });
       }
       throw err;
