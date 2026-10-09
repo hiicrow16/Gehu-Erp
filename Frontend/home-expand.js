@@ -32,21 +32,21 @@
    var TEAM = {
     "Hiicrow": {
       bio: "Full-stack developer behind the GEHU Portal. Built the 3D homepage, the dashboards and the backend, then shipped it all live.",
-      instagram: "",          // e.g. "hiicrow"
+      instagram: "hiicrow",          // e.g. "hiicrow"
       github: "hiicrow16",
       linkedin: "",           // e.g. "your-linkedin-name"
       email: ""               // e.g. "you@gmail.com"
     },
     "Garry": {
       bio: "Frontend developer who makes the portal look good and feel smooth, from layouts to every little animation.",
-      instagram: "",
+      instagram: "theycallme_garry__",
       github: "",
       linkedin: "",
       email: ""
     },
     "Rakshit": {
       bio: "Backend developer who builds the APIs and database that keep student data and logins running safely.",
-      instagram: "",
+      instagram: "rakshitjoshi_029",
       github: "",
       linkedin: "",
       email: ""
