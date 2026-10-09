@@ -215,24 +215,35 @@
 @media (prefers-reduced-motion:reduce){.loader-lines,.loader-lines.pulse,.slam-word.hit,.loader-inner.shake{animation:none}}
 
 /* ---------- intro video overlay ---------- */
-html.iv-lock,html.iv-lock body{overflow:hidden}
-.iv{position:fixed;inset:0;z-index:110;background:#050302;display:grid;place-items:center;overflow:hidden;transition:opacity .9s var(--ease),transform .9s var(--ease)}
-.iv.out{opacity:0;transform:scale(1.05);pointer-events:none}
-.iv-bg{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;filter:blur(36px) brightness(.55) saturate(1.35)}
-.iv-card{position:relative;height:min(88svh,780px);aspect-ratio:9/16;border-radius:24px;overflow:hidden;background:#000;box-shadow:0 0 0 1px rgba(255,160,60,.4),0 40px 120px -20px rgba(255,106,26,.5),0 0 90px rgba(255,150,40,.25)}
+html.iv-lock,html.iv-lock body{overflow:hidden;overscroll-behavior:none}
+.iv{position:fixed;inset:0;z-index:110;background:#050302;display:grid;place-items:center;overflow:hidden;touch-action:none;transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.iv.out{opacity:0;transform:scale(1.04);pointer-events:none}
+/* cheap blurred side-fill: blur a tiny copy, then scale it up */
+.iv-bg{position:absolute;left:50%;top:50%;width:18%;height:18%;object-fit:cover;transform:translate(-50%,-50%) scale(6);filter:blur(6px) brightness(.55) saturate(1.35)}
+/* desktop: full-height portrait column (video is portrait) */
+.iv-card{position:relative;height:100vh;height:100dvh;aspect-ratio:9/16;overflow:hidden;background:#000;box-shadow:0 0 0 1px rgba(255,160,60,.35),0 0 120px 10px rgba(255,106,26,.35)}
 .iv-card::after{content:"";position:absolute;inset:auto 0 0 0;height:38%;background:linear-gradient(transparent,rgba(5,3,2,.85));opacity:0;transition:opacity .9s;pointer-events:none}
 .iv.late .iv-card::after{opacity:1}
-.iv-main{display:block;width:100%;height:100%;object-fit:cover}
-.iv-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:10px;padding:16px 18px 44px;background:linear-gradient(rgba(5,3,2,.72),transparent);z-index:2}
+.iv-main{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%;transform:translateZ(0);backface-visibility:hidden}
+.iv-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:10px;padding:calc(16px + env(safe-area-inset-top,0px)) 18px 44px;background:linear-gradient(rgba(5,3,2,.72),transparent);z-index:2}
 .iv-top img{width:34px;height:34px;border-radius:50%;box-shadow:0 0 18px rgba(255,106,26,.5)}
 .iv-top span{display:flex;flex-direction:column;font-family:var(--ff-d);font-weight:800;font-size:1.05rem;line-height:1.05;color:var(--cream)}
 .iv-top small{font:700 .58rem/1.2 var(--ff-b);letter-spacing:.14em;text-transform:uppercase;color:rgba(246,239,232,.85);margin-top:3px}
-.iv-tag{position:absolute;left:0;right:0;bottom:8%;z-index:2;text-align:center;font-family:var(--ff-d);font-weight:800;font-size:clamp(1.15rem,4.6vw,1.7rem);letter-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.8),0 0 28px rgba(255,150,40,.85);opacity:0;transform:translateY(16px);transition:opacity .8s var(--ease),transform .9s var(--ease)}
+.iv-tag{position:absolute;left:0;right:0;bottom:calc(9% + env(safe-area-inset-bottom,0px));z-index:2;text-align:center;font-family:var(--ff-d);font-weight:800;font-size:clamp(1.15rem,4.6vw,1.7rem);letter-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.8),0 0 28px rgba(255,150,40,.85);opacity:0;transform:translateY(16px);transition:opacity .8s var(--ease),transform .9s var(--ease)}
 .iv.late .iv-tag{opacity:1;transform:none}
-.iv-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.1)}
-.iv-bar b{display:block;height:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--amber),var(--flame),var(--red))}
-.iv-skip{position:absolute;right:clamp(14px,3vw,36px);bottom:clamp(18px,4vh,36px);padding:10px 20px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(18,13,11,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--cream);font-weight:700;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .5s,border-color .3s,background .3s}
+.iv-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.1);z-index:4}
+.iv-bar b{display:block;height:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--amber),var(--flame),var(--red));will-change:transform}
+.iv-skip{position:absolute;z-index:4;right:clamp(14px,3vw,36px);bottom:calc(clamp(18px,4vh,36px) + env(safe-area-inset-bottom,0px));padding:11px 20px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(18,13,11,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--cream);font-weight:700;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .5s,border-color .3s,background .3s}
 .iv-skip i{font-style:normal;color:var(--flame)}
 .iv.skipok .iv-skip{opacity:1;pointer-events:auto}
 .iv-skip:hover,.iv-skip:focus-visible{border-color:var(--flame);background:rgba(255,106,26,.2)}
-@media (max-width:700px){.iv-card{width:100vw;height:100svh;aspect-ratio:auto;border-radius:0;box-shadow:none}.iv-bg{display:none}}
+/* tap-to-play (shown only if the browser blocks autoplay) */
+.iv-play{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(5,3,2,.4)}
+.iv.needtap .iv-play{display:flex}
+.iv-play span{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--amber),var(--flame) 55%,var(--red));box-shadow:0 0 0 0 rgba(255,106,26,.6),0 12px 50px rgba(255,90,20,.6);animation:ping 1.8s infinite}
+.iv-play svg{width:38px;height:38px;fill:#1a0b06;margin-left:5px}
+.iv-play em{font-style:normal;font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:.8rem;color:var(--cream)}
+/* phones, and the optional "cover" mode: true full screen */
+.iv.cover .iv-card{width:100vw;height:100vh;height:100dvh;aspect-ratio:auto;box-shadow:none}
+@media (max-width:700px){.iv-card{width:100vw;height:100vh;height:100dvh;aspect-ratio:auto;box-shadow:none}}
+@media (prefers-reduced-motion:reduce){.iv-play span{animation:none}}
