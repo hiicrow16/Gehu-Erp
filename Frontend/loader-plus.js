@@ -66,6 +66,7 @@
   for (var i = 0; i < N; i++) parts.push(spawn(true));
   function frame(now) {
     var dt = Math.min((now - last) / 1000, 0.05); last = now;
+    if (document.documentElement.classList.contains("iv-lock")) { requestAnimationFrame(frame); return; }
     g.clearRect(0, 0, W, H); g.globalCompositeOperation = "lighter";
     var boost = 0.7 + Math.max(p, 0) / 100 * 0.9;
     parts.forEach(function (o, i) {
