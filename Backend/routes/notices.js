@@ -4,10 +4,21 @@ const router = express.Router();
 const Notice = require("../models/Notice");
 const { protect, authorize } = require("../middleware/auth");
 
+// GET /api/notices/public - NO login. Only notices an admin marked audience "public" (homepage ticker).
+router.get("/public", async (req, res) => {
+  try {
+    const rows = await Notice.find({ audience: "public" }).sort({ createdAt: -1 }).limit(5).select("title createdAt");
+    res.setHeader("Cache-Control", "public, max-age=60");
+    res.json({ success: true, notices: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, message: "Could not load notices" });
+  }
+});
+
 // GET /api/notices - returns notices relevant to the logged-in user's role
 router.get("/", protect, async (req, res) => {
   const notices = await Notice.find({
-    $or: [{ audience: "all" }, { audience: req.user.role }],
+    $or: [{ audience: "all" }, { audience: "public" }, { audience: req.user.role }],
   }).sort({ createdAt: -1 });
   res.json({ success: true, notices });
 });

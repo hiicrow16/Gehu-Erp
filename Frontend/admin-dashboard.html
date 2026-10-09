@@ -268,7 +268,7 @@ const CRUD = {
     cols: [["Name", c => c.name], ["Code", c => c.code], ["Department", c => c.department || "-"], ["Duration (yrs)", c => c.durationYears || "-"]] },
   subjects: { api: "/subjects", prop: "subjects", one: "subject", fields: [{ k: "name", l: "Subject name", req: 1 }, { k: "code", l: "Subject code", req: 1 }, { k: "course", l: "Course", opts: () => S.courses.map(c => [c._id, c.name]), get: s => s.course && s.course._id }, { k: "semester", l: "Semester", t: "number", req: 1, min: 1, max: 12 }],
     cols: [["Name", s => s.name], ["Code", s => s.code], ["Course", s => s.course?.name || "-"], ["Semester", s => s.semester]] },
-  notices: { api: "/notices", prop: "notices", one: "notice", fields: [{ k: "title", l: "Title", req: 1 }, { k: "audience", l: "Audience", opts: () => [["all", "Everyone"], ["student", "Students only"], ["faculty", "Faculty only"]], get: n => n.audience || "all" }, { k: "content", l: "Content", t: "textarea", req: 1 }],
+  notices: { api: "/notices", prop: "notices", one: "notice", fields: [{ k: "title", l: "Title", req: 1 }, { k: "audience", l: "Audience", opts: () => [["all", "Everyone"], ["student", "Students only"], ["faculty", "Faculty only"], ["public", "Public (homepage + everyone)"]], get: n => n.audience || "all" }, { k: "content", l: "Content", t: "textarea", req: 1 }],
     cols: [["Title", n => n.title], ["Content", n => n.content.length > 90 ? n.content.slice(0, 90) + "…" : n.content], ["Audience", n => n.audience], ["Posted", n => new Date(n.createdAt).toLocaleDateString()]] }
 };
 async function loadCrud(k) {

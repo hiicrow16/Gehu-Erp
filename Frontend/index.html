@@ -12,6 +12,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="home.css">
   <link rel="stylesheet" href="shell.css">
+  <link rel="stylesheet" href="home-plus.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+  <link rel="preconnect" href="https://gehu-erp-backend.onrender.com" crossorigin>
 <script>try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
 </head>
 <body>
@@ -24,6 +28,8 @@
     <div class="loader-bar"><b id="loaderBar"></b></div>
   </div>
 </div>
+
+<script src="loader-plus.js"></script>
 
 <!-- WEBGL CANVAS (fixed behind everything) -->
 <canvas id="gl" aria-hidden="true"></canvas>
@@ -84,6 +90,17 @@
     <span>Inspire</span><em>✦</em><span>Innovate</span><em>✦</em><span>Impact</span><em>✦</em><span>Transforming dreams into reality</span><em>✦</em>
   </div>
 </div>
+
+<!-- ============ CAMPUS PULSE (live status + public notices) ============ -->
+<section class="pulse" id="pulse" aria-label="Campus pulse" data-state="loading">
+  <div class="wrap">
+    <div class="pulse-bar glass fx">
+      <div class="pulse-status"><i class="pulse-dot"></i><span id="pulseState">Connecting…</span></div>
+      <i class="pulse-sep"></i>
+      <div class="pulse-feed" id="pulseFeed" aria-live="polite"><div class="pulse-item on"><b>Loading campus announcements…</b></div></div>
+    </div>
+  </div>
+</section>
 
 <!-- ============ ABOUT + STATS ============ -->
 <section class="section about" id="about" data-section="1">
@@ -149,6 +166,47 @@
       <a class="program fade-up" href="apply.html"><span class="p-n">02</span><h3>MBA</h3><p>Finance, HR</p><i class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></i></a>
       <a class="program fade-up" href="apply.html"><span class="p-n">03</span><h3>BCA</h3><p>AI, Software Development</p><i class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></i></a>
       <a class="program fade-up" href="apply.html"><span class="p-n">04</span><h3>BBA</h3><p>Business Management</p><i class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROGRAM FINDER ============ -->
+<section class="section" id="finder">
+  <div class="wrap">
+    <div class="finder-shell glass fx">
+      <div class="finder-side">
+        <p class="eyebrow"><span class="pip"></span>Program finder</p>
+        <h2 class="h2">Not sure what to study?</h2>
+        <p class="lead">Answer three quick questions and we'll point you to the right program.</p>
+        <div class="finder-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      </div>
+      <div class="finder-stage" aria-live="polite">
+        <div class="fq" data-q="0"><h3>What do you enjoy most?</h3><div class="fq-opts">
+          <button type="button" class="fq-opt" data-v="code">Building software &amp; AI<small>Apps, data, algorithms</small></button>
+          <button type="button" class="fq-opt" data-v="biz">Business &amp; leadership<small>Money, teams, strategy</small></button>
+          <button type="button" class="fq-opt" data-v="make">Designing &amp; making things<small>Machines, spaces, systems</small></button>
+          <button type="button" class="fq-opt" data-v="sci">Science &amp; health<small>Labs, life sciences, medicine</small></button>
+        </div></div>
+        <div class="fq" data-q="1"><h3>Where are you right now?</h3><div class="fq-opts">
+          <button type="button" class="fq-opt" data-v="school">Finishing / finished 12th<small>Looking for an undergraduate program</small></button>
+          <button type="button" class="fq-opt" data-v="grad">Already have a degree<small>Looking for a postgraduate program</small></button>
+        </div><button type="button" class="fq-back">← Back</button></div>
+        <div class="fq" data-q="2"><h3>Which sounds more like you?</h3><div class="fq-opts">
+          <button type="button" class="fq-opt" data-v="depth">I like maths, physics and how things work</button>
+          <button type="button" class="fq-opt" data-v="apply">I want to build real products early</button>
+          <button type="button" class="fq-opt" data-v="people">I like planning, people and leading</button>
+        </div><button type="button" class="fq-back">← Back</button></div>
+        <div class="fres" hidden>
+          <p class="tag">Your best match</p>
+          <h3>B.Tech</h3>
+          <p class="why"></p>
+          <p class="alt"></p>
+          <div class="hero-cta">
+            <a class="btn btn-solid apply" href="apply.html" data-magnetic><span>Apply</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <button type="button" class="btn btn-outline fres-redo"><span>Start over</span></button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -333,5 +391,7 @@
 <script src="nav-auth.js"></script>
 <script src="shell.js"></script>
 <script type="module" src="home.min.js"></script>
+<script src="home-plus.js" defer></script>
+<script src="home-expand.js" defer></script>
 </body>
 </html>

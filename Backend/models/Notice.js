@@ -6,7 +6,7 @@ const noticeSchema = new mongoose.Schema(
     content: { type: String, required: true },
     audience: {
       type: String,
-      enum: ["all", "student", "faculty"],
+      enum: ["all", "student", "faculty", "public"],
       default: "all",
     },
     postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

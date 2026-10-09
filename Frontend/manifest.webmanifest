@@ -1,0 +1,14 @@
+{
+  "name": "GEHU Portal",
+  "short_name": "GEHU",
+  "description": "Graphic Era Hill University — admissions, student dashboard, store and support.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0908",
+  "theme_color": "#0b0908",
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
