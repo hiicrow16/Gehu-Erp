@@ -68,6 +68,8 @@ td.act{white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap}
 .status-select.status-failed,.status-select.status-cancelled{background-color:rgba(239,68,68,.15);color:#fecaca}
 @media(max-width:860px){.side{transform:translateX(-100%)}.side.open{transform:none}main{margin-left:0;padding:18px}#burger{display:inline-block}}
 </style>
+<script>try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <aside class="side" id="side">
@@ -98,6 +100,7 @@ td.act{white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap}
 </main>
 <div id="modal"></div><div id="toasts"></div>
 
+<script src="shell.js"></script>
 <script src="config.js"></script>
 <script>
 const API = window.API_BASE, $ = s => document.querySelector(s);

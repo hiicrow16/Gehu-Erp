@@ -5,36 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Store — GEHU Portal</title>
   <meta name="description" content="Order college uniforms, books and stationery online — GEHU Portal.">
-  <link rel="icon" href="gehu.png">
+  <link rel="icon" href="img/logo-96.png">
   <link rel="stylesheet" href="style.css">
+<script>try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
+<link rel="stylesheet" href="shell.css">
 </head>
-<body>
-
-<!-- NAVBAR -->
-<header class="top-nav" id="topNav">
-  <div class="nav-logo">
-    <img src="gehu.png" alt="GEHU Logo">
-    <div class="nav-word">GEHU Portal<span>Graphic Era Hill University</span></div>
-  </div>
-
-  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-    <span></span><span></span><span></span>
-  </button>
-
-  <ul class="nav-links" id="navLinks">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="index.html#departments-section">Departments</a></li>
-    <li><a href="store.html">Store</a></li>
-    <li><a href="index.html#faculty-section">Project Member</a></li>
-    <li><a href="index.html#admissions-section">Admissions</a></li>
-    <li><a href="index.html#contact-section">Contact</a></li>
-    <li><a href="index.html#help-section">Help &amp; Support</a></li>
-  </ul>
-
-  <div class="nav-actions">
-    <a href="login.html"><button id="studentBtn">Student / Faculty Login</button></a>
-  </div>
-</header>
+<body class="shell">
 
 <main class="main-content">
 
@@ -43,7 +19,7 @@
   <div class="section-head reveal">
     <span class="eyebrow">College Store</span>
     <h2 class="section-title">Uniforms, Books &amp; Stationery</h2>
-    <p class="section-sub">Order college essentials online — no login needed. Pick up on campus. Already ordered? <a href="index.html#help-section">Track your order</a>.</p>
+    <p class="section-sub">Order college essentials online — no login needed. Pick up on campus. Already ordered? <a href="index.html#help">Track your order</a>.</p>
   </div>
 
   <div class="store-student-banner reveal" id="storeStudentBanner" hidden></div>
@@ -155,6 +131,7 @@
 
 </main>
 
+<script src="shell.js"></script>
 <script src="config.js"></script>
 <script src="script.js"></script>
 <script src="nav-auth.js"></script>

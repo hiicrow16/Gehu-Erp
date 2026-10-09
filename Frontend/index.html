@@ -6,24 +6,20 @@
   <title>GEHU — Graphic Era Hill University</title>
   <meta name="description" content="Graphic Era Hill University — inspire, innovate, impact. Explore departments, programs, campus life and apply for the 2026 session.">
   <meta name="theme-color" content="#0b0908">
-  <link rel="icon" href="img/logo.png">
+  <link rel="icon" href="img/logo-96.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="home.css">
-  <script type="importmap">
-  { "imports": {
-      "three": "./vendor/three/three.module.js",
-      "three/addons/": "./vendor/three/examples/jsm/"
-  } }
-  </script>
+  <link rel="stylesheet" href="shell.css">
+<script>try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
 </head>
 <body>
 
 <!-- PRELOADER -->
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-inner">
-    <img src="img/logo.png" alt="" class="loader-logo">
+    <img src="img/logo.webp" alt="" class="loader-logo">
     <div class="loader-count"><span id="loaderNum">0</span><i>%</i></div>
     <div class="loader-bar"><b id="loaderBar"></b></div>
   </div>
@@ -39,7 +35,7 @@
 <!-- NAV -->
 <header class="nav" id="nav">
   <a href="#top" class="brand" data-magnetic>
-    <img src="img/logo.png" alt="GEHU logo">
+    <img src="img/logo.webp" alt="GEHU logo">
     <span>GEHU<small>Graphic Era Hill University</small></span>
   </a>
   <nav class="nav-links" id="navLinks" aria-label="Primary">
@@ -48,6 +44,7 @@
     <a href="#campus">Campus</a>
     <a href="#programs">Programs</a>
     <a href="#team">Team</a>
+    <a href="#help">Help</a>
     <a href="store.html">Store</a>
   </nav>
   <div class="nav-actions">
@@ -195,16 +192,102 @@
       <h2 class="h2 split">The people behind the portal.</h2>
     </div>
     <div class="team-grid">
-      <figure class="member tilt fade-up"><div class="photo"><img src="img/neeraj.jpg" alt="Hiicrow" loading="lazy"></div><figcaption><h3>Hiicrow</h3><p>Full Dev</p></figcaption></figure>
-      <figure class="member tilt fade-up"><div class="photo"><img src="img/gaurav.jpg" alt="Garry" loading="lazy"></div><figcaption><h3>Garry</h3><p>Frontend</p></figcaption></figure>
-      <figure class="member tilt fade-up"><div class="photo"><img src="img/rakshit.jpg" alt="Rakshit" loading="lazy"></div><figcaption><h3>Rakshit</h3><p>Backend</p></figcaption></figure>
-      <figure class="member tilt fade-up"><div class="photo"><img src="img/deepak.jpg" alt="Deepak" loading="lazy"></div><figcaption><h3>Deepak</h3><p>Backend</p></figcaption></figure>
+      <figure class="member tilt fade-up"><div class="photo"><img src="img/neeraj.webp" alt="Hiicrow" loading="lazy"></div><figcaption><h3>Hiicrow</h3><p>Full Dev</p></figcaption></figure>
+      <figure class="member tilt fade-up"><div class="photo"><img src="img/gaurav.webp" alt="Garry" loading="lazy"></div><figcaption><h3>Garry</h3><p>Frontend</p></figcaption></figure>
+      <figure class="member tilt fade-up"><div class="photo"><img src="img/rakshit.webp" alt="Rakshit" loading="lazy"></div><figcaption><h3>Rakshit</h3><p>Backend</p></figcaption></figure>
+      <figure class="member tilt fade-up"><div class="photo"><img src="img/deepak.webp" alt="Deepak" loading="lazy"></div><figcaption><h3>Deepak</h3><p>Backend</p></figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HELP CENTRE ============ -->
+<section class="section" id="help" data-section="8">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow"><span class="pip"></span>Help &amp; support</p>
+      <h2 class="h2 split">We're here whenever you need us.</h2>
+    </div>
+
+    <div class="channels">
+      <a class="channel glass fade-up" href="mailto:support@hiicrow.site" data-support-email><i>✉</i><div><h4>Email us</h4><p>support@hiicrow.site</p></div></a>
+      <a class="channel glass fade-up" href="https://gehu-erp-backend.onrender.com/api/support/whatsapp" target="_blank" rel="noopener" data-support="whatsapp"><i>💬</i><div><h4>WhatsApp</h4><p>Chat with our team</p></div></a>
+      <a class="channel glass fade-up" href="mailto:info@gehu.ac.in"><i>🏫</i><div><h4>Front office</h4><p>info@gehu.ac.in · 9 AM – 5 PM</p></div></a>
+    </div>
+
+    <div class="help-shell glass fade-up">
+      <div class="h-tabs" role="tablist">
+        <button class="h-tab active" data-tab="faq" role="tab" aria-selected="true">FAQs</button>
+        <button class="h-tab" data-tab="track" role="tab" aria-selected="false">Track order</button>
+        <button class="h-tab" data-tab="ticket" role="tab" aria-selected="false">Raise a ticket</button>
+        <button class="h-tab" data-tab="notes" role="tab" aria-selected="false">Cheat notes</button>
+      </div>
+
+      <div class="h-panel active" id="panel-faq">
+        <div class="faq">
+          <div class="faq-i"><button class="faq-q"><span>How do I reset my student portal password?</span><i>+</i></button><div class="faq-a"><p>Contact the admin office via email or the “Raise a ticket” tab with your Campus ID — a temporary password is issued after identity verification.</p></div></div>
+          <div class="faq-i"><button class="faq-q"><span>Where can I check my attendance percentage?</span><i>+</i></button><div class="faq-a"><p>Log in to the Student Dashboard with your Campus ID — your subject-wise and overall attendance percentage is shown automatically.</p></div></div>
+          <div class="faq-i"><button class="faq-q"><span>How do I track a college store order?</span><i>+</i></button><div class="faq-a"><p>Use the “Track order” tab with the Order ID and Student ID you entered at checkout to see live payment and delivery status.</p></div></div>
+          <div class="faq-i"><button class="faq-q"><span>How do I apply for admission?</span><i>+</i></button><div class="faq-a"><p>Click “Apply for Admission”, fill in your details and preferred course — our admissions team reviews it and reaches out directly.</p></div></div>
+          <div class="faq-i"><button class="faq-q"><span>My payment succeeded but the order still shows pending. What do I do?</span><i>+</i></button><div class="faq-a"><p>UPI confirmations can take a little time to verify manually. If it's still pending after a few hours, raise a ticket with your Order ID and transaction reference.</p></div></div>
+          <div class="faq-i"><button class="faq-q"><span>Who do I contact for faculty-related queries?</span><i>+</i></button><div class="faq-a"><p>Use the “Raise a ticket” tab and select “Faculty / Academics” as the category, or email us directly — queries are routed to the right department.</p></div></div>
+        </div>
+      </div>
+
+      <div class="h-panel" id="panel-track">
+        <form id="trackOrderForm" class="h-form row">
+          <input type="text" id="trackOrderId" placeholder="Order ID" required>
+          <input type="text" id="trackStudentId" placeholder="Student ID" required>
+          <button type="submit" class="btn btn-solid"><span>Track order</span></button>
+        </form>
+        <div id="trackResult" class="track-result"></div>
+      </div>
+
+      <div class="h-panel" id="panel-ticket">
+        <form id="ticketForm" class="h-form" action="https://formspree.io/f/xaqlylzn" method="POST">
+          <input type="hidden" name="_subject" value="Help &amp; Support Ticket — GEHU Portal">
+          <div class="row">
+            <input type="text" name="name" placeholder="Full name" required>
+            <input type="email" name="email" placeholder="Email address" required>
+          </div>
+          <div class="row">
+            <input type="text" name="studentId" placeholder="Campus / Student ID (optional)">
+            <select name="category" required>
+              <option value="" disabled selected>Select category</option>
+              <option>Login / Account</option><option>Attendance / Academics</option><option>Store / Order</option>
+              <option>Admissions</option><option>Faculty / Academics</option><option>Other</option>
+            </select>
+          </div>
+          <textarea name="message" rows="4" placeholder="Describe your issue…" required></textarea>
+          <button type="submit" id="ticketSubmitBtn" class="btn btn-solid"><span>Submit ticket</span></button>
+        </form>
+        <p class="ticket-msg" id="ticketMsg"></p>
+        <div class="ticket-success" id="ticketSuccess"><h4>✅ Ticket received</h4><p>Our support team will get back to you by email shortly.</p></div>
+      </div>
+
+      <div class="h-panel" id="panel-notes">
+        <div class="term-window" id="cheatTerminal">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-title">gehu@portal: ~/cheat-notes</span>
+            <span class="term-admin-badge" id="termAdminBadge" hidden>ADMIN</span>
+          </div>
+          <div class="term-body">
+            <div class="term-line"><span class="term-prompt">$</span> ls cheat-notes/</div>
+            <div id="termNotes"><div class="term-dim">open this tab to load notes…</div></div>
+          </div>
+          <div class="term-foot">
+            <label class="term-grep"><span class="term-prompt">grep</span>
+              <input type="text" id="termSearch" placeholder="search notes…" autocomplete="off" spellcheck="false"></label>
+            <button type="button" class="term-btn" id="termNewBtn" hidden>+ new note</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ============ ADMISSIONS CTA ============ -->
-<section class="cta" id="admissions" data-section="8">
+<section class="cta" id="admissions" data-section="9">
   <div class="wrap cta-inner">
     <p class="eyebrow"><span class="pip"></span>Enrollment</p>
     <h2 class="cta-title">Admissions<br><span class="flame">open now.</span></h2>
@@ -220,7 +303,7 @@
 <footer class="footer" id="contact">
   <div class="wrap footer-grid">
     <div>
-      <a href="#top" class="brand"><img src="img/logo.png" alt=""><span>GEHU<small>Graphic Era Hill University</small></span></a>
+      <a href="#top" class="brand"><img src="img/logo.webp" alt=""><span>GEHU<small>Graphic Era Hill University</small></span></a>
       <p class="foot-note">Inspire. Innovate. Impact.</p>
     </div>
     <div>
@@ -231,8 +314,8 @@
       <h4>Help &amp; support</h4>
       <a href="mailto:info@gehu.ac.in">info@gehu.ac.in</a>
       <a href="mailto:support@hiicrow.site" data-support-email>support@hiicrow.site</a>
-      <a href="index-classic.html#help-section">Help center &amp; order tracking</a>
-      <a href="index-classic.html#notes-section">Cheat notes</a>
+      <a href="#help">Help centre &amp; order tracking</a>
+      <a href="login.html">Student / faculty login</a>
     </div>
   </div>
   <div class="wrap footer-bottom">
@@ -248,6 +331,7 @@
 <script src="vendor/lenis.min.js"></script>
 <script src="config.js"></script>
 <script src="nav-auth.js"></script>
-<script type="module" src="home.js"></script>
+<script src="shell.js"></script>
+<script type="module" src="home.min.js"></script>
 </body>
 </html>

@@ -4,10 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — GEHU Portal</title>
-  <link rel="icon" href="gehu.png">
+  <link rel="icon" href="img/logo-96.png">
   <link rel="stylesheet" href="style.css">
+<script>try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
+<link rel="stylesheet" href="shell.css">
 </head>
-<body>
+<body class="shell">
 <div class="auth-shell">
   <div class="auth-box">
     <div class="nav-logo">
@@ -27,6 +29,7 @@
   </div>
 </div>
 
+<script src="shell.js"></script>
 <script src="config.js"></script>
 <script src="script.js"></script>
 </body>
