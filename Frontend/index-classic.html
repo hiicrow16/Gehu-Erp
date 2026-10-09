@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GEHU Portal — Graphic Era Hill University</title>
+  <meta name="description" content="Graphic Era Hill University student portal — departments, courses, admissions and campus life.">
+  <link rel="icon" href="gehu.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="top-nav" id="topNav">
+  <div class="nav-logo">
+    <img src="gehu.png" alt="GEHU Logo">
+    <div class="nav-word">GEHU Portal<span>Graphic Era Hill University</span></div>
+  </div>
+
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#hero-section">Home</a></li>
+    <li><a href="#departments-section">Departments</a></li>
+    <li><a href="store.html">Store</a></li>
+    <li><a href="#faculty-section">Project Member</a></li>
+    <li><a href="#admissions-section">Admissions</a></li>
+    <li><a href="#contact-section">Contact</a></li>
+    <li><a href="#help-section">Help &amp; Support</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button id="studentBtn">Student / Faculty Login</button>
+  </div>
+
+  <div class="login-panel" id="loginPanel">
+    <h3>Student / Faculty Login</h3>
+    <input id="campusId" placeholder="Campus ID">
+    <input id="password" type="password" placeholder="Password">
+    <button id="homeLoginBtn">Login</button>
+    <small>New Student? Register Later</small>
+  </div>
+</header>
+
+<main class="main-content">
+
+<!-- HERO -->
+<section id="hero-section" class="hero-section">
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+
+  <div class="hero-left reveal">
+    <span class="eyebrow">Graphic Era Hill University</span>
+    <h1>Inspire. Innovate. <span class="flame-text">Impact.</span></h1>
+    <p>Empowering tomorrow's leaders through quality education, research and innovation — on a campus built for engineers, thinkers and builders.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="location.href='apply.html'">Apply for Admission</button>
+      <a class="btn-ghost" href="#departments-section">Explore Departments</a>
+    </div>
+    <div class="trust-strip">
+      <span>NAAC A+ Accredited</span>
+      <span>UGC Approved</span>
+      <span>24×7 Student Support</span>
+    </div>
+  </div>
+
+  <div class="hero-right reveal">
+    <div class="hero-ring">
+      <div class="hero-ring-inner"></div>
+    </div>
+    <div class="hero-floater">
+      <span class="dot"></span>
+      2026 Admissions Now Open
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section reveal">
+  <div class="stats-grid">
+    <div class="stat"><h3 data-count="15000" data-suffix="+">0</h3><p>Students</p></div>
+    <div class="stat"><h3 data-count="500" data-suffix="+">0</h3><p>Faculty</p></div>
+    <div class="stat"><h3 data-count="200" data-suffix="+">0</h3><p>Recruiters</p></div>
+    <div class="stat"><h3 data-count="95" data-suffix="%">0</h3><p>Placement Rate</p></div>
+  </div>
+</section>
+
+<!-- DEPARTMENTS -->
+<section id="departments-section" class="content-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">Academics</span>
+    <h2 class="section-title">Our Academic Departments</h2>
+    <p class="section-sub">Six schools of study, one shared standard of rigor.</p>
+  </div>
+
+  <div class="grid-cards reveal">
+    <div class="card"><h4>Computer Science</h4></div>
+    <div class="card"><h4>Business Administration</h4></div>
+    <div class="card"><h4>Mechanical Engineering</h4></div>
+    <div class="card"><h4>Biotechnology</h4></div>
+    <div class="card"><h4>Architecture</h4></div>
+    <div class="card"><h4>Pharmacy</h4></div>
+  </div>
+</section>
+
+<!-- COURSES -->
+<section class="content-section tight">
+  <div class="section-head reveal">
+    <span class="eyebrow">Programs</span>
+    <h2 class="section-title">Courses Offered</h2>
+  </div>
+  <div class="grid-cards reveal">
+    <div class="course-card"><h4>B.Tech</h4><p>AI, ML, Data Science</p></div>
+    <div class="course-card"><h4>MBA</h4><p>Finance, HR</p></div>
+    <div class="course-card"><h4>BCA</h4><p>AI, Software Development</p></div>
+    <div class="course-card"><h4>BBA</h4><p>Business Management</p></div>
+  </div>
+</section>
+
+<!-- SPOTIFY -->
+<section class="music-section">
+  <div class="music-card reveal">
+    <h3>🎧 Student Lounge</h3>
+    <p>Relax. Focus. Enjoy HiiCROW playlists.</p>
+    <iframe
+      id="spotifyFrame"
+      src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M"
+      width="100%"
+      height="152"
+      frameborder="0"
+      allow="encrypted-media">
+    </iframe>
+  </div>
+</section>
+
+<!-- PROJECT MEMBER -->
+<section id="faculty-section" class="content-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">The Team</span>
+    <h2 class="section-title">Project Member</h2>
+  </div>
+
+  <div class="faculty-grid reveal">
+    <div class="faculty-card">
+      <div class="avatar"><img src="neeraj.jpg" alt="Hiicrow"></div>
+      <h4>Hiicrow</h4>
+      <p>Full Dev</p>
+    </div>
+    <div class="faculty-card">
+      <div class="avatar"><img src="gaurav.jpg" alt="Garry"></div>
+      <h4>Garry</h4>
+      <p>Frontend</p>
+    </div>
+    <div class="faculty-card">
+      <div class="avatar"><img src="rakshit.jpg" alt="Rakshit"></div>
+      <h4>Rakshit</h4>
+      <p>Backend</p>
+    </div>
+    <div class="faculty-card">
+      <div class="avatar"><img src="deepak.jpg" alt="Deepak"></div>
+      <h4>Deepak</h4>
+      <p>Backend</p>
+    </div>
+  </div>
+</section>
+
+<!-- PLACEMENTS -->
+<section class="content-section tight placements-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">Outcomes</span>
+    <h2 class="section-title">Placements</h2>
+  </div>
+  <div class="grid-cards reveal">
+    <div class="card"><h3>₹25 LPA</h3><p>Highest Package</p></div>
+    <div class="card"><h3>Top Companies</h3><p>Amazon, Google, Infosys</p></div>
+    <div class="card"><h3>Internships</h3><p>From 2nd Year</p></div>
+  </div>
+</section>
+
+<!-- CAMPUS LIFE -->
+<section class="content-section tight">
+  <div class="section-head reveal">
+    <span class="eyebrow">Beyond Class</span>
+    <h2 class="section-title">Campus Life</h2>
+  </div>
+  <div class="grid-cards reveal">
+    <div class="card"><h4>Hostel</h4></div>
+    <div class="card"><h4>Sports Complex</h4></div>
+    <div class="card"><h4>Clubs &amp; Events</h4></div>
+    <div class="card"><h4>Modern Labs</h4></div>
+  </div>
+</section>
+
+<!-- STUDENT JOURNEY -->
+<section class="content-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">How It Works</span>
+    <h2 class="section-title">Student Journey</h2>
+  </div>
+
+  <div class="workflow-cards reveal">
+    <div class="workflow-card">
+      <div class="workflow-step">01</div>
+      <h4>Apply for Admission</h4>
+      <p>Submit your online application with required academic details and documents.</p>
+    </div>
+    <div class="workflow-card">
+      <div class="workflow-step">02</div>
+      <h4>Verification &amp; Enrollment</h4>
+      <p>Our admission team verifies your application and confirms your enrollment.</p>
+    </div>
+    <div class="workflow-card">
+      <div class="workflow-step">03</div>
+      <h4>Begin Your Journey</h4>
+      <p>Attend orientation, explore campus life, and start your academic career.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ADMISSIONS CTA -->
+<section id="admissions-section" class="admissions-section">
+  <span class="eyebrow" style="color:#1a0b06;">Enrollment</span>
+  <h2 class="section-title">Admissions Open</h2>
+  <p>Apply now for the 2026 academic session. Scholarships available!</p>
+  <button onclick="location.href='apply.html'">Apply Now →</button>
+</section>
+<div class="cog-seam"></div>
+
+<!-- NEWS -->
+<section class="content-section">
+  <div class="section-head reveal">
+    <span class="eyebrow">Happening Now</span>
+    <h2 class="section-title">Latest News &amp; Events</h2>
+  </div>
+
+  <div class="news-grid reveal">
+    <div class="news-card">
+      <div class="news-img-wrap"><img src="graf.jpg" alt="Graph Fest 2026"></div>
+      <div class="news-body">
+        <h4>Graph Fest 2026</h4>
+        <p>Talwinder is here on 17-04-26</p>
+      </div>
+    </div>
+    <div class="news-card">
+      <div class="news-img-wrap"><img src="cer.jpg" alt="Convocation"></div>
+      <div class="news-body">
+        <h4>Convocation</h4>
+        <p>Graduation ceremony May 12</p>
+      </div>
+    </div>
+    <div class="news-card">
+      <div class="news-img-wrap"><img src="sport.jpg" alt="Sports Day"></div>
+      <div class="news-body">
+        <h4>Sports Day</h4>
+        <p>Annual sports competition</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="content-section tight about-section">
+  <div class="section-head reveal" style="margin-bottom:0;">
+    <span class="eyebrow">Who We Are</span>
+    <h2 class="section-title">About GEHU</h2>
+    <p style="margin-top:16px;">Graphic Era Hill University is committed to excellence in education and research, transforming dreams into reality for every student who walks through its gates.</p>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact-section" class="content-section tight contact-section">
+  <div class="section-head reveal" style="margin-bottom:0;">
+    <span class="eyebrow">Get In Touch</span>
+    <h2 class="section-title">Contact Us</h2>
+    <p style="margin-top:16px;">Email: info@gehu.ac.in</p>
+    <p>Phone: <span data-support-text="phone">+91 XXXXX XXXXX</span></p>
+  </div>
+</section>
+
+<!-- HELP & SUPPORT -->
+<section id="help-section" class="content-section tight">
+  <div class="section-head reveal">
+    <span class="eyebrow">Help &amp; Support</span>
+    <h2 class="section-title">We're here whenever you need us</h2>
+    <p class="section-sub">Browse quick answers, track a store order, or raise a ticket with our support team — all in one place.</p>
+  </div>
+
+  <div class="support-shell reveal">
+
+    <!-- quick contact channels -->
+    <div class="support-channels">
+      <a class="support-channel-card" href="mailto:support@hiicrow.site">
+        <div class="support-channel-icon">✉️</div>
+        <div><h5>Email Us</h5><p>support@hiicrow.site</p></div>
+      </a>
+      <a class="support-channel-card" href="#contact-section" data-support="phone">
+        <div class="support-channel-icon">📞</div>
+        <div><h5>Call Us</h5><p data-support-text="phone">+91 XXXXX XXXXX</p></div>
+      </a>
+      <a class="support-channel-card" href="https://gehu-erp-backend.onrender.com/api/support/whatsapp" target="_blank" rel="noopener" data-support="whatsapp">
+        <div class="support-channel-icon">💬</div>
+        <div><h5>WhatsApp</h5><p>Chat with our team</p></div>
+      </a>
+      <a class="support-channel-card" href="#contact-section">
+        <div class="support-channel-icon">🏫</div>
+        <div><h5>Visit Campus</h5><p>Front office, 9 AM – 5 PM</p></div>
+      </a>
+    </div>
+
+    <!-- tabs -->
+    <div class="support-tabs">
+      <button class="support-tab-btn active" data-tab="faq">FAQs</button>
+      <button class="support-tab-btn" data-tab="track">Track Order</button>
+      <button class="support-tab-btn" data-tab="ticket">Raise a Ticket</button>
+    </div>
+
+    <!-- FAQ panel -->
+    <div class="support-panel active" id="panel-faq">
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question"><span>How do I reset my student portal password?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Contact the admin office via email or the "Raise a Ticket" tab with your Campus ID — a temporary password is issued after identity verification.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>Where can I check my attendance percentage?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Log in to the Student Dashboard with your Campus ID — your subject-wise and overall attendance percentage is shown automatically.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>How do I track a college store order?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Use the "Track Order" tab above with the Order ID and Student ID you entered at checkout to see live payment and delivery status.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>How do I apply for admission?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Click "Apply for Admission" on the homepage, fill in your details and preferred course — our admissions team reviews it and reaches out directly.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>My payment succeeded but the order still shows pending. What do I do?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>UPI confirmations can take a little time to verify manually. If it's still pending after a few hours, raise a ticket with your Order ID and transaction reference.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question"><span>Who do I contact for faculty-related queries?</span><span class="faq-plus">+</span></button>
+          <div class="faq-answer"><p>Use the "Raise a Ticket" tab and select "Faculty / Academics" as the category, or email us directly — queries are routed to the right department.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track order panel -->
+    <div class="support-panel" id="panel-track">
+      <div class="track-card">
+        <form id="trackOrderForm">
+          <input type="text" id="trackOrderId" placeholder="Order ID" required>
+          <input type="text" id="trackStudentId" placeholder="Student ID" required>
+          <button type="submit">Track Order</button>
+        </form>
+        <div id="trackResult"></div>
+      </div>
+    </div>
+
+    <!-- Raise a ticket panel -->
+    <div class="support-panel" id="panel-ticket">
+      <div class="ticket-card">
+        <form id="ticketForm" action="https://formspree.io/f/xaqlylzn" method="POST">
+          <input type="hidden" name="_subject" value="Help &amp; Support Ticket — GEHU Portal">
+          <input type="text" name="name" placeholder="Full Name" required>
+          <input type="email" name="email" placeholder="Email Address" required>
+          <input type="text" name="studentId" placeholder="Campus / Student ID (optional)">
+          <select name="category" required>
+            <option value="" disabled selected>Select Category</option>
+            <option value="Login / Account">Login / Account</option>
+            <option value="Attendance / Academics">Attendance / Academics</option>
+            <option value="Store / Order">Store / Order</option>
+            <option value="Admissions">Admissions</option>
+            <option value="Faculty / Academics">Faculty / Academics</option>
+            <option value="Other">Other</option>
+          </select>
+          <textarea name="message" rows="4" placeholder="Describe your issue…" required></textarea>
+          <button type="submit" id="ticketSubmitBtn">Submit Ticket</button>
+        </form>
+        <p class="ticket-msg" id="ticketMsg"></p>
+        <div class="ticket-success" id="ticketSuccess">
+          <h4>✅ Ticket received</h4>
+          <p>Our support team will get back to you by email shortly.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CHEAT NOTES TERMINAL -->
+<section id="notes-section" class="content-section tight">
+  <div class="section-head reveal">
+    <h2 class="section-title">Cheat Notes</h2>
+    <p class="section-sub">Quick notes, shortcuts and reminders — open to everyone.</p>
+  </div>
+
+  <div class="term-window reveal" id="cheatTerminal">
+    <div class="term-bar">
+      <span class="term-dots"><i></i><i></i><i></i></span>
+      <span class="term-title">gehu@portal: ~/cheat-notes</span>
+      <span class="term-admin-badge" id="termAdminBadge" hidden>ADMIN</span>
+    </div>
+    <div class="term-body" id="termBody">
+      <div class="term-line"><span class="term-prompt">$</span> ls cheat-notes/</div>
+      <div id="termNotes"><div class="term-dim">loading notes…</div></div>
+      <div class="term-line term-last"><span class="term-prompt">$</span> <span class="term-cursor"></span></div>
+    </div>
+    <div class="term-foot">
+      <label class="term-grep"><span class="term-prompt">grep</span>
+        <input type="text" id="termSearch" placeholder="search notes…" autocomplete="off" spellcheck="false">
+      </label>
+      <button type="button" class="term-btn term-admin-only" id="termNewBtn" hidden>+ new note</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2026 Graphic Era Hill University</p>
+    <p>Developed with ❤️ by Hiicrow</p>
+  </div>
+</footer>
+
+</main>
+
+<div class="float-stack">
+  <button class="float-btn back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+  <button class="float-btn help-launcher" id="helpLauncher" aria-label="Need help?">
+    <span class="pulse-dot"></span><span class="launcher-label">Need Help?</span>
+  </button>
+</div>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+<script src="nav-auth.js"></script>
+<script src="feedback.js"></script>
+</body>
+</html>
