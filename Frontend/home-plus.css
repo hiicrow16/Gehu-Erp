@@ -159,3 +159,22 @@
 .t-caret{display:inline-block;width:7px;height:.95em;background:var(--flame);animation:ldCaret 1s steps(1) infinite}
 @keyframes ldCaret{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.ring-ticks,.t-caret,.loader.ld-plus::before{animation:none}}
+
+/* ---------- team cards v2: colourful hover, handle pills ---------- */
+.member::after{display:none}
+.member:nth-child(1){--acc:#ff6a1a}.member:nth-child(2){--acc:#ff3d81}.member:nth-child(3){--acc:#2fc4ff}.member:nth-child(4){--acc:#8dff5a}
+.member{transition:box-shadow .5s var(--ease),border-color .4s,transform .5s var(--ease)}
+.member.tilt::before{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--acc,#ff6a1a) 38%,transparent),transparent 58%)}
+.member:hover,.member.is-open{border-color:var(--acc,var(--flame));box-shadow:0 0 0 1px var(--acc,var(--flame)),0 36px 90px -24px color-mix(in srgb,var(--acc,#ff6a1a) 60%,transparent)}
+.member:hover img,.member.is-open img{filter:saturate(1.3) contrast(1.06) brightness(1.04);transform:scale(1.08)}
+.member:hover figcaption p,.member.is-open figcaption p{color:var(--acc,var(--amber))}
+.member figcaption{transition:background .5s}
+.member.is-open figcaption{background:linear-gradient(180deg,transparent,rgba(11,9,8,.9) 28%,rgba(11,9,8,.96));padding-top:46px}
+/* the expandable wrapper lives inside figcaption for team cards */
+.member.is-open .more{grid-template-rows:1fr}
+.member.is-open .more-in{opacity:1;transition-delay:.1s}
+.member .more p{color:var(--cream);opacity:.9;font-size:.86rem}
+.more-social{flex-direction:column;align-items:flex-start;gap:8px}
+.more-social a.soc{width:auto;height:auto;padding:7px 14px 7px 11px;gap:9px;display:inline-flex;align-items:center;border-radius:999px;border:1px solid color-mix(in srgb,var(--acc,#ff6a1a) 60%,transparent);background:color-mix(in srgb,var(--acc,#ff6a1a) 14%,transparent);font-size:.8rem;font-weight:600}
+.more-social a.soc:hover,.more-social a.soc:focus-visible{background:var(--acc,var(--flame));color:#10090a;transform:translateX(4px)}
+.more-social a.soc svg{flex:none}
