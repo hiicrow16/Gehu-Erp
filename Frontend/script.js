@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
           } else if (data.role === "admin") {
             window.location.href = "admin-dashboard.html";
           } else if (data.role === "faculty") {
-            if (msg) msg.textContent = "Faculty login succeeded, but the faculty dashboard page isn't built yet.";
+            window.location.href = "faculty-dashboard.html";
           }
         } else if (msg) {
           msg.textContent = data.message || "Login failed.";
@@ -209,8 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
           } else if (data.role === "admin") {
             window.location.href = "admin-dashboard.html";
           } else if (data.role === "faculty") {
-            // Faculty dashboard UI isn't built yet — see README "Next phases".
-            if (msg) msg.textContent = "Faculty login succeeded, but the faculty dashboard page isn't built yet.";
+            window.location.href = "faculty-dashboard.html";
           }
         } else if (msg) {
           msg.textContent = data.message || "Login failed.";
@@ -272,15 +271,55 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* =========================
-     APPLY FORM (apply.html) — static, submits via Formspree, no backend
+     APPLY FORM (apply.html) — real submission to the admissions API,
+     with a tracking ID handed back so the applicant can check status later.
   ========================== */
   const applyForm = document.getElementById("applyForm");
   if (applyForm) {
-    applyForm.addEventListener("submit", () => {
-      const btn = applyForm.querySelector("button[type='submit']");
-      if (btn) {
-        btn.textContent = "Submitting…";
-        btn.disabled = true;
+    const docsInput = document.getElementById("applyDocs");
+    const docList = document.getElementById("applyDocList");
+    const errBox = document.getElementById("applyErr");
+    const successBox = document.getElementById("applySuccess");
+    const trackingIdEl = document.getElementById("applyTrackingId");
+    const MAX_FILES = 5, MAX_BYTES = 5 * 1024 * 1024;
+
+    if (docsInput) {
+      docsInput.addEventListener("change", () => {
+        const files = Array.from(docsInput.files || []);
+        errBox.textContent = "";
+        if (files.length > MAX_FILES) { errBox.textContent = `You can attach up to ${MAX_FILES} files.`; docsInput.value = ""; docList.innerHTML = ""; return; }
+        const tooBig = files.find(f => f.size > MAX_BYTES);
+        if (tooBig) { errBox.textContent = `"${tooBig.name}" is over 5MB.`; docsInput.value = ""; docList.innerHTML = ""; return; }
+        docList.innerHTML = files.map(f => `<li>${f.name} (${(f.size / 1024).toFixed(0)} KB)</li>`).join("");
+      });
+    }
+
+    applyForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("applySubmitBtn");
+      errBox.textContent = "";
+      btn.disabled = true;
+      btn.textContent = "Submitting…";
+
+      try {
+        const fd = new FormData(applyForm);
+        const res = await fetch(`${API}/admissions`, { method: "POST", body: fd });
+        const data = await res.json().catch(() => ({ success: false, message: "Server sent an invalid response" }));
+
+        if (!data.success) {
+          errBox.textContent = data.message || "Could not submit your application. Please try again.";
+          btn.disabled = false;
+          btn.textContent = "Apply Now 🚀";
+          return;
+        }
+
+        applyForm.style.display = "none";
+        successBox.style.display = "block";
+        trackingIdEl.textContent = data.trackingId;
+      } catch (err) {
+        errBox.textContent = "Couldn't reach the server. Please try again in a moment.";
+        btn.disabled = false;
+        btn.textContent = "Apply Now 🚀";
       }
     });
   }
@@ -293,6 +332,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const resultBox = document.getElementById("trackResult");
 
     const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+    // Step-by-step progress for the order (statuses come from the server)
+    const trackTimeline = (o) => {
+      const steps = [["Pending", "Placed"], ["Processing", "Processing"], ["Ready for Pickup", "Ready"], ["Completed", "Completed"]];
+      const at = {}; (o.statusHistory || []).forEach(h => { if (!at[h.status]) at[h.status] = h.at; });
+      const idx = steps.findIndex(x => x[0] === o.status);
+      let html = steps.filter(([k], n) => o.status !== "Cancelled" || n === 0 || at[k]).map(([k, l], n) => {
+        const on = o.status === "Cancelled" ? true : n <= idx;
+        return `<div style="flex:1;text-align:center;font-size:11px;${on ? "font-weight:600" : "opacity:.55"}"><div style="width:14px;height:14px;border-radius:50%;margin:0 auto 5px;background:${on ? "#2563eb" : "#cbd5e1"}"></div>${l}${at[k] ? `<div style="font-weight:400;opacity:.7">${new Date(at[k]).toLocaleDateString()}</div>` : ""}</div>`;
+      }).join("");
+      if (o.status === "Cancelled") html += `<div style="flex:1;text-align:center;font-size:11px;font-weight:600;color:#c62828"><div style="width:14px;height:14px;border-radius:50%;margin:0 auto 5px;background:#c62828"></div>Cancelled</div>`;
+      return `<div style="display:flex;margin-top:14px">${html}</div>`;
+    };
 
     trackForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -325,7 +377,21 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="track-row"><span>Payment Status</span><span class="track-badge ${slug(o.paymentStatus)}">${o.paymentStatus}</span></div>
             <div class="track-row"><span>Order Status</span><span class="track-badge ${slug(o.status)}">${o.status}</span></div>
             <div class="track-row track-items"><span>Items</span><span>${itemsList}</span></div>
+            ${o.status === "Cancelled" ? `<div class="track-row"><span>Cancelled</span><span>${(o.cancelReason || "").replace(/</g, "&lt;")}${o.refundStatus === "Refund Due" ? " (refund due)" : ""}</span></div>` : ""}
+            ${trackTimeline(o)}
+            ${o.cancellable ? `<div style="margin-top:12px"><button type="button" id="trackCancelBtn" class="btn-secondary" style="color:#c62828;border:1px solid #c62828;background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer">Cancel this order</button><div style="font-size:12px;opacity:.7;margin-top:6px">You can cancel until the store starts processing your order.</div></div>` : ""}
           `;
+          const cb = document.getElementById("trackCancelBtn");
+          if (cb) cb.addEventListener("click", async () => {
+            if (!confirm("Cancel this order? This can't be undone.")) return;
+            cb.disabled = true;
+            try {
+              const r = await fetch(`${API}/store/orders/${encodeURIComponent(orderId)}/cancel`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ studentId }) });
+              const d = await r.json();
+              alert(d.success ? "Your order has been cancelled." : (d.message || "Could not cancel the order."));
+            } catch (err) { alert("Couldn't reach the server. Try again in a moment."); }
+            trackForm.requestSubmit();
+          });
         }
       } catch (err) {
         resultBox.className = "track-result error";

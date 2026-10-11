@@ -19,7 +19,7 @@
     <h2>🎓 Admission Form</h2>
     <p class="auth-sub">2026 academic session</p>
 
-    <form id="applyForm" action="https://formspree.io/f/xaqlylzn" method="POST">
+    <form id="applyForm">
       <input type="text" name="name" placeholder="Full Name" required>
       <input type="email" name="email" placeholder="Email Address" required>
       <input type="text" name="phone" placeholder="Phone Number" required>
@@ -30,10 +30,23 @@
         <option value="BCA">BCA</option>
         <option value="BBA">BBA</option>
       </select>
-      <button type="submit">Apply Now 🚀</button>
+      <textarea name="message" rows="3" placeholder="Anything you'd like admissions to know (optional)"></textarea>
+      <label class="doc-dropzone">
+        Supporting documents (optional) — marksheets, ID proof, photo. PDF/JPG/PNG, up to 5 files, 5MB each.
+        <input type="file" name="documents" id="applyDocs" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple>
+      </label>
+      <ul class="doc-list" id="applyDocList"></ul>
+      <p class="apply-err" id="applyErr" style="color:#ff9c85;font-size:13px;min-height:16px;margin:4px 0"></p>
+      <button type="submit" id="applySubmitBtn">Apply Now 🚀</button>
     </form>
 
-    <p class="form-note">Submissions are delivered straight to the admissions team — no server required.</p>
+    <div class="tracking-id-box" id="applySuccess" style="display:none">
+      <p>Application submitted! Save your tracking ID — you'll need it to check your status.</p>
+      <div class="tid" id="applyTrackingId"></div>
+      <p style="font-size:12.5px;opacity:.8">Use it with your email under “Track admission” on the Help &amp; Support page.</p>
+    </div>
+
+    <p class="form-note">Your application is reviewed by our admissions team, with status updates you can track anytime.</p>
     <a class="back-link" href="index.html">← Back to home</a>
   </div>
 </div>

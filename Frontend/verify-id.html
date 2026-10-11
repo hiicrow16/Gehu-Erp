@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify Student ID - GEHU</title>
+<style>
+:root{--ink:#0f172a;--mut:#64748b;--ok:#16a34a;--bad:#dc2626;--blue:#2563eb}
+*{box-sizing:border-box}body{margin:0;background:#f4f6fb;font-family:Inter,'Segoe UI',system-ui,sans-serif;color:var(--ink)}
+header{background:linear-gradient(90deg,#1d4ed8,#1e3a8a);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}header a{color:#dbe6ff;text-decoration:none;font-size:14px}
+main{max-width:620px;margin:22px auto;padding:0 14px}
+.card{background:#fff;border:1px solid #e8ecf4;border-radius:16px;padding:18px;margin-bottom:14px}
+input{width:100%;padding:12px;border:1px solid #d5dcea;border-radius:10px;font:inherit}
+.btn{border:0;background:var(--blue);color:#fff;border-radius:10px;padding:11px 16px;font-weight:600;cursor:pointer;font-size:14px}.btn.o{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+video{width:100%;border-radius:12px;background:#000;display:none;margin-top:10px}
+.res{border-radius:16px;padding:20px;color:#fff;display:none}.res.ok{background:linear-gradient(135deg,#16a34a,#15803d)}.res.bad{background:linear-gradient(135deg,#dc2626,#b91c1c)}
+.res h2{margin:0 0 6px;font-size:24px}.res .kv{display:grid;grid-template-columns:120px 1fr;gap:5px 10px;margin-top:12px;font-size:14px}.res .kv span{opacity:.8}
+.hist div{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid #eef2f8;font-size:13.5px}.hist div:first-child{border:0}
+.tag{font-weight:700;font-size:12px}.tag.ok{color:var(--ok)}.tag.bad{color:var(--bad)}
+.hint{font-size:12.5px;color:var(--mut);margin-top:8px}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<header><b>Verify Student ID</b><a id="back" href="index.html">&larr; Back</a></header>
+<main>
+  <div class="card">
+    <label style="font-size:13px;color:var(--mut)">Scan or paste the student's QR code</label>
+    <input id="code" placeholder="Click here, then scan with a handheld scanner, or paste the code" autocomplete="off" autofocus>
+    <div class="row"><button class="btn" onclick="verify()">Verify</button><button class="btn o" id="camBtn" onclick="toggleCam()">Use camera</button></div>
+    <video id="vid" playsinline muted></video>
+    <div class="hint" id="camHint"></div>
+  </div>
+  <div class="res" id="res"></div>
+  <div class="card hist"><b>Recent checks (this session)</b><div id="hist" style="margin-top:6px;color:var(--mut)">Nothing checked yet.</div></div>
+  <div class="hint">Each code works once and expires after 60 seconds. If a check says "already scanned", ask the student to reopen their card. Every check is recorded in the audit log.</div>
+</main>
+<script>
+const API = window.API_BASE, $ = id => document.getElementById(id);
+const role = localStorage.getItem("role");
+if (!["admin", "faculty"].includes(role) || !localStorage.getItem("token")) location.href = "login.html";
+$("back").href = role === "admin" ? "admin-dashboard.html" : "faculty-dashboard.html";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const hist = []; let stream = null, timer = null, busy = false;
+
+async function verify(raw) {
+  const token = (raw || $("code").value).trim(); if (!token || busy) return; busy = true;
+  const box = $("res"); box.style.display = "block"; box.className = "res"; box.style.background = "#64748b"; box.innerHTML = "Checking…";
+  try {
+    const r = await fetch(API + "/idcard/verify", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") }, body: JSON.stringify({ token }) });
+    if (r.status === 401) { localStorage.clear(); location.href = "login.html"; return; }
+    const d = await r.json(); box.style.background = "";
+    if (!d.success) throw new Error(d.message || "Could not verify");
+    if (d.valid) {
+      const s = d.student, exp = d.cardStatus === "Expired";
+      box.className = "res " + (exp ? "bad" : "ok");
+      box.innerHTML = `<h2>${exp ? "✕ Card expired" : "✓ Valid student"}</h2><div style="font-size:18px;font-weight:600">${esc(s.name)}</div>
+        <div class="kv"><span>Student ID</span><b>${esc(s.studentId)}</b><span>Course</span><b>${esc(s.course || "—")}</b><span>Semester</span><b>${esc(s.semester || "—")}</b><span>Department</span><b>${esc(s.department || "—")}</b><span>Valid until</span><b>${s.validUntil ? new Date(s.validUntil).toLocaleDateString() : "—"}</b></div>`;
+      log(exp ? "bad" : "ok", `${s.name} (${s.studentId})`);
+    } else { box.className = "res bad"; box.innerHTML = `<h2>✕ Not valid</h2><div>${esc(d.reason)}</div>`; log("bad", d.reason); }
+  } catch (e) { box.className = "res bad"; box.innerHTML = `<h2>Couldn't check</h2><div>${esc(e.message || "No connection")}</div>`; }
+  $("code").value = ""; $("code").focus(); busy = false;
+}
+function log(kind, text) {
+  hist.unshift([kind, text, new Date().toLocaleTimeString()]);
+  $("hist").innerHTML = hist.slice(0, 10).map(([k, t, w]) => `<div><span>${esc(t)}</span><span><i class="tag ${k}">${k === "ok" ? "VALID" : "REJECTED"}</i> · ${w}</span></div>`).join("");
+}
+$("code").addEventListener("keydown", e => { if (e.key === "Enter") verify(); }); // handheld scanners type the code then press Enter
+
+async function toggleCam() {
+  if (stream) return stopCam();
+  if (!("BarcodeDetector" in window) || !navigator.mediaDevices) { $("camHint").textContent = "This browser can't scan QR codes with the camera. Use a handheld scanner or paste the code (Chrome on Android works)."; return; }
+  try {
+    const det = new BarcodeDetector({ formats: ["qr_code"] });
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    const v = $("vid"); v.srcObject = stream; v.style.display = "block"; await v.play(); $("camBtn").textContent = "Stop camera";
+    timer = setInterval(async () => { try { const f = await det.detect(v); if (f.length && f[0].rawValue.startsWith("GEHUID.")) { stopCam(); verify(f[0].rawValue); } } catch (e) {} }, 300);
+  } catch (e) { $("camHint").textContent = "Camera not available: " + (e.message || "permission denied"); stopCam(); }
+}
+function stopCam() { clearInterval(timer); if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; $("vid").style.display = "none"; $("camBtn").textContent = "Use camera"; }
+</script>
+</body>
+</html>

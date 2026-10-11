@@ -49,10 +49,12 @@ router.post("/", protect, authorize("admin"), async (req, res) => {
 
 // PUT /api/faculty/:id  (admin)
 router.put("/:id", protect, authorize("admin"), async (req, res) => {
-  const { name, email, phone, department, subjects } = req.body;
+  const upd = {};
+  ["name", "email", "phone", "department", "subjects"].forEach((k) => { if (req.body[k] !== undefined) upd[k] = req.body[k]; });
+  if (upd.subjects !== undefined && !Array.isArray(upd.subjects)) return res.status(400).json({ success: false, message: "subjects must be a list" });
   const faculty = await Faculty.findByIdAndUpdate(
     req.params.id,
-    { name, email, phone, department, subjects },
+    upd,
     { new: true, runValidators: true }
   ).populate("subjects");
 

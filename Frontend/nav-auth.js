@@ -3,7 +3,7 @@
    that has the standard #studentBtn in .nav-actions. */
 (function () {
   var AUTH_KEYS = ["token", "role", "username", "profileId", "displayName", "currentStudentProfileId"];
-  var DASH = { student: "student-dashboard.html", admin: "admin-dashboard.html" };
+  var DASH = { student: "student-dashboard.html", admin: "admin-dashboard.html", faculty: "faculty-dashboard.html" };
   var LABEL = { student: "Student", admin: "Admin", faculty: "Faculty" };
 
   function tokenValid(t) {
@@ -26,7 +26,7 @@
       '<button id="studentBtn" type="button" title="' + esc(name) + '">👤 ' + esc(name.length > 18 ? name.slice(0, 17) + "…" : name) + ' ▾</button>' +
       '<div class="nav-user-drop" id="navUserDrop">' +
         '<div class="nud-head"><b>' + esc(name) + '</b><span>' + esc(LABEL[role] || role) + '</span></div>' +
-        (dash ? '<a href="' + dash + '">' + (role === "admin" ? "Admin Dashboard" : "My Dashboard") + '</a>'
+        (dash ? '<a href="' + dash + '">' + (role === "admin" ? "Admin Dashboard" : role === "faculty" ? "Faculty Portal" : "My Dashboard") + '</a>'
               : '<span class="nud-note">Faculty dashboard coming soon</span>') +
         '<button type="button" id="navLogout">Logout</button>' +
       '</div>';

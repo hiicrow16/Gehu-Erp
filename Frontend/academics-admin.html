@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Academics Manager - GEHU</title>
+<style>
+body{margin:0;font-family:Inter,'Segoe UI',system-ui,sans-serif;background:#f4f6fb;color:#0f172a}
+header{background:linear-gradient(90deg,#1d4ed8,#1e3a8a);color:#fff;padding:16px 28px;display:flex;justify-content:space-between;align-items:center}
+header a{color:#dbe6ff;font-size:14px;text-decoration:none}
+main{max-width:980px;margin:24px auto;padding:0 16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tabs button{border:1px solid #dfe5f1;background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600}
+.tabs button.on{background:#2563eb;color:#fff;border-color:#2563eb}
+.card{background:#fff;border:1px solid #e8ecf4;border-radius:16px;padding:20px;margin-bottom:16px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+label{font-size:12px;color:#64748b;display:block;margin-bottom:3px}
+input,select,textarea{width:100%;padding:9px;border:1px solid #dfe5f1;border-radius:8px;font:inherit;box-sizing:border-box}
+.go{margin-top:14px;background:#2563eb;color:#fff;border:0;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer}
+.sec{background:#fff;color:#2563eb;border:1px solid #2563eb;margin-left:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:9px;border-bottom:1px solid #e8ecf4;text-align:left}th{color:#64748b;font-size:12px;text-transform:uppercase}
+.x{color:#dc2626;cursor:pointer;border:0;background:none;font-weight:700}
+#msg{position:fixed;right:18px;bottom:18px;background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;display:none}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<header><b>Academics Manager</b><a href="admin-dashboard.html">&larr; Back</a></header>
+<main>
+  <div class="tabs" id="tabs"></div>
+  <div class="card" id="formCard"></div>
+  <div class="card" id="listCard"></div>
+</main>
+<div id="msg"></div>
+<script>
+const API = window.API_BASE, role = localStorage.getItem("role");
+if (!["admin","faculty"].includes(role) || !localStorage.getItem("token")) location.href = "login.html";
+const H = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` });
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+let courses = [], subjects = [], tab = "timetable";
+
+function toast(m) { const e = $("msg"); e.textContent = m; e.style.display = "block"; setTimeout(() => e.style.display = "none", 2600); }
+async function call(path, method = "GET", body) {
+  const r = await fetch(API + path, { method, headers: H(), body: body ? JSON.stringify(body) : undefined });
+  const d = await r.json().catch(() => ({})); if (!d.success) throw new Error(d.message || "Request failed"); return d;
+}
+const opt = (arr, label) => arr.map(x => `<option value="${x._id}">${esc(label(x))}</option>`).join("");
+const inp = (id, label, type = "text", extra = "") => `<div><label>${label}</label><input id="${id}" type="${type}" ${extra}></div>`;
+
+// Subject dropdown is filtered by the chosen course + semester
+function subjectOptions() {
+  const c = $("course") && $("course").value, s = $("semester") && Number($("semester").value);
+  const list = subjects.filter(x => (!c || (x.course && x.course._id === c)) && (!s || x.semester === s));
+  $("subject").innerHTML = list.length ? opt(list, x => `${x.name} (${x.code})`) : `<option value="">No subjects for this course/semester</option>`;
+}
+const scope = () => `<div><label>Course</label><select id="course" onchange="subjectOptions()">${opt(courses, c => c.name)}</select></div>
+  <div><label>Semester</label><input id="semester" type="number" min="1" max="12" value="1" oninput="subjectOptions()"></div>
+  <div><label>Subject</label><select id="subject"></select></div>`;
+
+const TABS = {
+  timetable: { title: "Timetable", fields: () => scope() + `<div><label>Day</label><select id="dayOfWeek">${DAYS.map((d, i) => `<option value="${i}">${d}</option>`).join("")}</select></div>` + inp("startTime", "Start", "time") + inp("endTime", "End", "time") + inp("room", "Room"),
+    ids: ["course","semester","subject","dayOfWeek","startTime","endTime","room"], cols: ["Subject","Day","Time","Room"],
+    row: x => [x.subject?.name, DAYS[x.dayOfWeek], `${x.startTime}-${x.endTime}`, x.room || "—"] },
+  exams: { title: "Exam", fields: () => scope() + inp("title", "Exam name (e.g. Mid-Term)") + inp("date", "Date", "date") + inp("startTime", "Start time", "time") + inp("venue", "Venue"),
+    ids: ["course","semester","subject","title","date","startTime","venue"], cols: ["Subject","Exam","Date","Venue"],
+    row: x => [x.subject?.name, x.title, new Date(x.date).toLocaleDateString(), x.venue || "—"] },
+  assignments: { title: "Assignment", fields: () => scope() + inp("title", "Title") + inp("dueDate", "Due date", "date") + `<div style="grid-column:1/-1"><label>Description</label><textarea id="description" rows="2"></textarea></div>`,
+    ids: ["course","semester","subject","title","description","dueDate"], cols: ["Subject","Title","Due"],
+    row: x => [x.subject?.name, x.title, new Date(x.dueDate).toLocaleDateString()] },
+  results: { title: "Result", fields: () => `<div><label>Student ID (roll no.)</label><input id="studentId"></div>
+      <div><label>Course</label><select id="course" onchange="subjectOptions()">${opt(courses, c => c.name)}</select></div>
+      <div><label>Semester</label><input id="semester" type="number" min="1" max="12" value="1" oninput="subjectOptions()"></div>
+      <div><label>Subject</label><select id="subject"></select></div>` + inp("examTitle", "Exam name") + inp("marksObtained", "Marks obtained", "number", 'min="0"') + inp("maxMarks", "Max marks", "number", 'min="1"') +
+      `<div><label>Visible to student?</label><select id="published"><option value="false">Draft (hidden)</option><option value="true">Published</option></select></div>`,
+    ids: ["studentId","subject","examTitle","marksObtained","maxMarks","published"], cols: ["Student","Subject","Exam","Marks","Status"],
+    row: x => [`${x.student?.name || "?"} (${x.student?.studentId || ""})`, x.subject?.name, x.examTitle, `${x.marksObtained}/${x.maxMarks}`, x.published ? "Published" : "Draft"] }
+};
+
+function drawTabs() {
+  $("tabs").innerHTML = Object.entries(TABS).map(([k, v]) => `<button class="${k === tab ? "on" : ""}" onclick="tab='${k}';render()">${v.title === "Result" ? "Results" : v.title === "Exam" ? "Exams" : v.title === "Assignment" ? "Assignments" : v.title}</button>`).join("");
+}
+async function render() {
+  drawTabs();
+  const T = TABS[tab];
+  $("formCard").innerHTML = `<h3 style="margin-top:0">Add ${T.title.toLowerCase()}</h3><div class="f">${T.fields()}</div>
+    <button class="go" onclick="save()">Save</button>${tab === "results" ? `<button class="go sec" onclick="publishAll()">Publish all drafts for this subject + exam</button>` : ""}`;
+  subjectOptions(); await loadList();
+}
+async function loadList() {
+  const T = TABS[tab];
+  try {
+    const d = await call(`/academics/${tab}`);
+    $("listCard").innerHTML = d.items.length
+      ? `<table><thead><tr>${T.cols.map(c => `<th>${c}</th>`).join("")}<th></th></tr></thead><tbody>${d.items.map(x => `<tr>${T.row(x).map(v => `<td>${esc(v)}</td>`).join("")}<td><button class="x" onclick="del('${x._id}')">Delete</button></td></tr>`).join("")}</tbody></table>`
+      : `<div style="color:#64748b">Nothing added yet.</div>`;
+  } catch (e) { $("listCard").textContent = e.message; }
+}
+async function save() {
+  const body = {}; TABS[tab].ids.forEach(id => { const v = $(id).value; body[id] = id === "published" ? v === "true" : v; });
+  try { await call(`/academics/${tab}`, "POST", body); toast("Saved"); loadList(); }
+  catch (e) { toast(e.message); }
+}
+async function del(id) { if (!confirm("Delete this entry?")) return; try { await call(`/academics/${tab}/${id}`, "DELETE"); loadList(); } catch (e) { toast(e.message); } }
+async function publishAll() {
+  const subject = $("subject").value, examTitle = $("examTitle").value.trim();
+  if (!subject || !examTitle) return toast("Choose a subject and enter the exam name");
+  try { const d = await call("/academics/results/publish", "PUT", { subject, examTitle }); toast(`Published ${d.published} result(s)`); loadList(); } catch (e) { toast(e.message); }
+}
+(async () => {
+  try {
+    courses = (await call("/courses")).courses; subjects = (await call("/subjects")).subjects;
+    render();
+  } catch (e) { $("formCard").textContent = "Could not load courses/subjects: " + e.message; }
+})();
+</script>
+</body>
+</html>

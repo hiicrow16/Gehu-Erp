@@ -47,6 +47,19 @@ const orderSchema = new mongoose.Schema(
       enum: ["Pending", "Processing", "Ready for Pickup", "Completed", "Cancelled"],
       default: "Pending",
     },
+    // Every status change, for the tracking timeline
+    statusHistory: {
+      type: [{ status: String, at: { type: Date, default: Date.now }, note: String, by: String, _id: false }],
+      default: [],
+    },
+    // Cancellation
+    cancelledBy: { type: String, enum: ["customer", "admin"] },
+    cancelReason: { type: String, trim: true },
+    cancelledAt: { type: Date },
+    refundStatus: { type: String, enum: ["None", "Refund Due", "Refunded"], default: "None" },
+    // Stock bookkeeping (orders placed before stock tracking existed have stockReserved = false and are never restocked)
+    stockReserved: { type: Boolean, default: false },
+    stockRestored: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

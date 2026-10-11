@@ -1,6 +1,7 @@
 # Backend
 Backend/node_modules/
 Backend/.env
+Backend/uploads/
 
 # OS / editor
 .DS_Store

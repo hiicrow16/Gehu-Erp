@@ -220,6 +220,19 @@ router.put("/:id/password", protect, authorize("admin"), async (req, res) => {
 });
 
 // DELETE /api/students/:id  (admin) - removes the student profile and their login
+// PUT /api/students/:id/active  (admin) - disable or re-enable a student's login without deleting anything
+router.put("/:id/active", protect, authorize("admin"), async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
+    const active = !(req.body.isActive === false || req.body.isActive === "false");
+    await User.findByIdAndUpdate(student.user, { isActive: active });
+    res.json({ success: true, isActive: active });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Could not update the account" });
+  }
+});
+
 router.delete("/:id", protect, authorize("admin"), async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);

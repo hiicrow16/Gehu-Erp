@@ -277,6 +277,7 @@
       <div class="h-tabs" role="tablist">
         <button class="h-tab active" data-tab="faq" role="tab" aria-selected="true">FAQs</button>
         <button class="h-tab" data-tab="track" role="tab" aria-selected="false">Track order</button>
+        <button class="h-tab" data-tab="admission" role="tab" aria-selected="false">Track admission</button>
         <button class="h-tab" data-tab="ticket" role="tab" aria-selected="false">Raise a ticket</button>
         <button class="h-tab" data-tab="notes" role="tab" aria-selected="false">Cheat notes</button>
       </div>
@@ -299,6 +300,15 @@
           <button type="submit" class="btn btn-solid"><span>Track order</span></button>
         </form>
         <div id="trackResult" class="track-result"></div>
+      </div>
+
+      <div class="h-panel" id="panel-admission">
+        <form id="trackAdmissionForm" class="h-form row">
+          <input type="text" id="trackAdmTrackingId" placeholder="Tracking ID (e.g. GEHU-ADM-XXXXXXXX)" required>
+          <input type="email" id="trackAdmEmail" placeholder="Email used to apply" required>
+          <button type="submit" class="btn btn-solid"><span>Track application</span></button>
+        </form>
+        <div id="trackAdmResult" class="track-result"></div>
       </div>
 
       <div class="h-panel" id="panel-ticket">

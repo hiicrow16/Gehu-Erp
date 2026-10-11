@@ -265,6 +265,43 @@
   }
 
   /* ============================================================
+     6. TRACK AN ADMISSION APPLICATION (Help & Support tab)
+     ============================================================ */
+  function initAdmissionTrack() {
+    var form = $("#trackAdmissionForm"); if (!form) return;
+    var box = $("#trackAdmResult");
+    var slug = function (s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-"); };
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var trackingId = $("#trackAdmTrackingId").value.trim();
+      var email = $("#trackAdmEmail").value.trim();
+      var btn = $("button[type=submit]", form);
+      btn.disabled = true; btn.textContent = "Checking…";
+      box.className = "track-result"; box.innerHTML = "";
+
+      fetchPlain(API + "/admissions/track?trackingId=" + encodeURIComponent(trackingId) + "&email=" + encodeURIComponent(email))
+        .then(function (d) {
+          if (!d.success) { box.className = "track-result error"; box.textContent = d.message || "No matching application found."; return; }
+          var a = d.application;
+          box.className = "track-result";
+          box.innerHTML =
+            '<div class="track-row"><span>Applicant</span><span>' + esc(a.name) + '</span></div>' +
+            '<div class="track-row"><span>Course</span><span>' + esc(a.course) + '</span></div>' +
+            '<div class="track-row"><span>Submitted</span><span>' + new Date(a.submittedAt).toLocaleDateString() + '</span></div>' +
+            '<div class="track-row"><span>Documents received</span><span>' + a.documentsReceived + '</span></div>' +
+            '<div class="track-row"><span>Status</span><span class="track-badge ' + slug(a.status) + '">' + esc(a.status) + '</span></div>' +
+            (a.status === "Documents Required" && a.reviewNotes ? '<div class="track-row"><span>Note from admissions</span><span>' + esc(a.reviewNotes) + '</span></div>' : "");
+        })
+        .catch(function () { box.className = "track-result error"; box.textContent = "Couldn't reach the server. Try again in a moment."; })
+        .finally(function () { btn.disabled = false; btn.textContent = "Track application"; });
+    });
+  }
+  function fetchPlain(url) {
+    return fetch(url, { headers: { Accept: "application/json" } }).then(function (r) { return r.json(); });
+  }
+
+  /* ============================================================
      5. small polish: skip link, reveal, PWA
      ============================================================ */
   function initPolish() {
@@ -279,6 +316,6 @@
     if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
   }
 
-  function boot() { initPolish(); initPalette(); initPulse(); initFinder(); initRail(); if (window.ScrollTrigger) setTimeout(function () { ScrollTrigger.refresh(); }, 2600); }
+  function boot() { initPolish(); initPalette(); initPulse(); initFinder(); initRail(); initAdmissionTrack(); if (window.ScrollTrigger) setTimeout(function () { ScrollTrigger.refresh(); }, 2600); }
   document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", boot) : boot();
 })();

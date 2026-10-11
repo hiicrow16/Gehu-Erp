@@ -1,84 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Student Dashboard - GEHU</title>
-
-  <style>
-    body {
-      margin: 0; display: flex; font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top left, #0f172a, #020617); color: white;
-    }
-    .sidebar {
-      width: 240px; height: 100vh; background: linear-gradient(180deg, #0f172a, #020617);
-      padding: 20px; position: fixed; display: flex; flex-direction: column;
-      box-shadow: 0 0 25px rgba(0,255,255,0.1);
-    }
-    .sidebar h2 { margin-bottom: 30px; color: #22d3ee; }
-    .sidebar a {
-      color: white; padding: 12px; margin: 6px 0; border-radius: 10px; cursor: pointer;
-      transition: 0.3s; background: rgba(255,255,255,0.05);
-    }
-    .sidebar a:hover { background: linear-gradient(90deg, #06b6d4, #3b82f6); transform: translateX(5px); }
-    .logout { margin-top: auto; background: red; padding: 10px; text-align: center; border-radius: 6px; cursor: pointer; }
-    .main-content { margin-left: 240px; padding: 40px; width: 100%; }
-    .section { display: none; }
-    .section.active { display: block; }
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 30px; }
-    .dashboard-card { background: rgba(255,255,255,0.05); padding: 25px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px); transition: 0.3s; }
-    .dashboard-card:hover { transform: translateY(-5px); box-shadow: 0 0 20px rgba(59,130,246,0.4); }
-    .courses-container { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
-    .course-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; width: 240px; transition: 0.3s; }
-    .course-card:hover { transform: translateY(-5px); box-shadow: 0 0 20px rgba(59,130,246,0.4); }
-    table { margin-top: 20px; width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-    select { padding: 8px; border-radius: 8px; border: none; background: rgba(255,255,255,0.1); color: white; margin-bottom: 10px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Dashboard - GEHU</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#0f172a;--mut:#64748b;--line:#e8ecf4;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--amber:#d97706;--violet:#6366f1}
+*{box-sizing:border-box}
+body{margin:0;display:flex;min-height:100vh;font-family:Inter,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+.sidebar{width:230px;position:fixed;inset:0 auto 0 0;padding:20px 14px;display:flex;flex-direction:column;gap:6px;background:linear-gradient(180deg,#1d4ed8,#1e3a8a);color:#fff}
+.sidebar h2{margin:0 8px 2px;font-size:18px}.sidebar small{margin:0 8px 18px;opacity:.7}
+.sidebar a{padding:11px 14px;border-radius:10px;cursor:pointer;color:#dbe6ff;text-decoration:none;font-size:14px;font-weight:500}
+.sidebar a:hover{background:rgba(255,255,255,.12)}.sidebar a.on{background:#fff;color:#1e3a8a}
+.logout{margin-top:auto;padding:10px;text-align:center;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.14);font-size:14px}
+.main{margin-left:230px;padding:28px 32px;width:calc(100% - 230px)}
+.section{display:none}.section.active{display:block}
+.eyebrow{color:var(--mut);font-size:14px}h1{margin:4px 0 2px;font-size:30px}.sub{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:22px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+.stat .lbl{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+.stat .val{font-size:32px;font-weight:700;margin:6px 0}
+.badge{float:right;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:#eaf0ff;color:var(--blue)}
+.badge.g{background:#e6f7ec;color:var(--green)}.badge.r{background:#fdeaea;color:var(--red)}.badge.a{background:#fdf1dc;color:var(--amber)}
+svg.spark{width:100%;height:36px;display:block}
+.cols{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+@media(max-width:900px){.cols{grid-template-columns:1fr}.sidebar{display:none}.main{margin:0;width:100%;padding:20px}}
+.card h3{margin:0 0 2px;font-size:16px}.card .hint{color:var(--mut);font-size:12px;margin-bottom:14px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line);font-size:14px;gap:10px}
+.row:first-of-type{border-top:0}.row small{color:var(--mut);display:block;font-size:12px}
+.pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px}
+.pill.p{background:#e6f7ec;color:var(--green)}.pill.a{background:#fdeaea;color:var(--red)}
+.bar{height:8px;border-radius:99px;background:#eef1f7;overflow:hidden;margin:6px 0 14px}.bar i{display:block;height:100%;border-radius:99px}
+.bl{display:flex;justify-content:space-between;font-size:13px}
+.alert{display:flex;gap:10px;align-items:flex-start;background:#fff8e6;border:1px solid #f6dfa6;color:#7a5200;border-radius:12px;padding:10px 14px;font-size:13px;margin-top:16px}.alert.r{background:#fdeeee;border-color:#f5c2c2;color:#8a1c1c}
+.now{background:#eef4ff;border-radius:10px;padding-left:8px;padding-right:8px}.tag{font-size:11px;color:var(--blue);font-weight:700}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}.btn:hover{background:#f1f5ff}
+.day{margin:14px 0 4px;font-weight:700;font-size:13px;color:var(--blue)}.done{opacity:.55;text-decoration:line-through}
+.otl{display:flex;margin:14px 0 4px}.ost{flex:1;text-align:center;font-size:11px;color:var(--mut);position:relative}.ost i{display:block;width:14px;height:14px;border-radius:50%;background:#dbe4f5;margin:0 auto 6px;position:relative;z-index:1}.ost:before{content:"";position:absolute;top:6px;left:-50%;width:100%;height:2px;background:#dbe4f5}.ost:first-child:before{display:none}.ost.on{color:var(--ink);font-weight:600}.ost.on i,.ost.on:before{background:var(--blue)}.ost.x{color:var(--red);font-weight:600}.ost.x i,.ost.x:before{background:var(--red)}.ost small{display:block;font-weight:400;color:var(--mut)}
+.ocard{border-top:1px solid var(--line);padding:16px 0}.ocard:first-of-type{border-top:0}
+.empty{color:var(--mut);font-size:13px;padding:8px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mut);font-size:12px;text-transform:uppercase}
+select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;margin:0 8px 12px 0}
+.notice{padding:11px 0;border-top:1px solid var(--line);font-size:14px}.notice:first-of-type{border-top:0}.notice p{margin:4px 0 0;color:var(--mut);font-size:13px}
+</style>
 <script>try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
 <link rel="stylesheet" href="shell.css">
 </head>
-
 <body>
-
 <div class="sidebar">
-  <h2>GEHU Student</h2>
-  <a onclick="showSection('dashboard')">Dashboard</a>
-  <a onclick="showSection('courses')">My Courses</a>
-  <a onclick="showSection('attendance')">Attendance</a>
+  <h2>GEHU Portal</h2><small>Student Portal</small>
+  <a class="on" data-s="dashboard" onclick="showSection('dashboard')">Dashboard</a>
+  <a data-s="courses" onclick="showSection('courses')">My Subjects</a>
+  <a data-s="attendance" onclick="showSection('attendance')">Attendance</a>
+  <a data-s="timetable" onclick="showSection('timetable')">Timetable</a>
+  <a data-s="exams" onclick="showSection('exams')">Exams &amp; Results</a>
+  <a data-s="assign" onclick="showSection('assign')">Assignments</a>
+  <a data-s="notices" onclick="showSection('notices')">Notices</a>
+  <a data-s="orders" onclick="showSection('orders')">My Orders</a>
+  <a href="student-id.html">Digital ID</a>
   <a href="store.html">Store</a>
   <div class="logout" onclick="logout()">Logout</div>
 </div>
 
-<div class="main-content">
-
+<div class="main">
 <section id="dashboard" class="section active">
-  <h1 id="welcomeMsg">Welcome</h1>
-  <div class="card-grid">
-    <div class="dashboard-card">Student ID<br><strong id="dashStudentId">--</strong></div>
-    <div class="dashboard-card">Course<br><strong id="dashCourse">--</strong></div>
-    <div class="dashboard-card">Semester<br><strong id="dashSemester">--</strong></div>
-    <div class="dashboard-card">Attendance<br><strong id="attPercent">--%</strong></div>
+  <div class="eyebrow" id="greet">Hello</div>
+  <h1>Student Dashboard</h1>
+  <div class="sub" id="meta">&nbsp;</div>
+
+  <div id="alerts"></div>
+  <div class="grid">
+    <div class="card stat"><span class="badge" id="b1">SUBJECTS</span><div class="lbl">Enrolled subjects</div><div class="val" id="sSubjects">--</div></div>
+    <div class="card stat"><span class="badge g" id="b2">OVERALL</span><div class="lbl">Attendance</div><div class="val" id="sPct">--%</div><svg class="spark" id="spark" viewBox="0 0 100 30" preserveAspectRatio="none"></svg></div>
+    <div class="card stat"><span class="badge g">PRESENT</span><div class="lbl">Classes attended</div><div class="val" id="sPresent">--</div></div>
+    <div class="card stat"><span class="badge r" id="b4">BELOW 75%</span><div class="lbl">Subjects needing attention</div><div class="val" id="sLow">--</div></div>
+    <div class="card stat"><span class="badge a">PENDING</span><div class="lbl">Pending assignments</div><div class="val" id="sPend">--</div></div>
+    <div class="card stat"><span class="badge">NEXT EXAM</span><div class="lbl">Upcoming exam</div><div class="val" id="sExam" style="font-size:20px;line-height:1.5">--</div></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="card" style="margin-bottom:16px"><h3>Today's Classes</h3><div class="hint" id="todayHint">From your timetable</div><div id="today"></div></div>
+      <div class="card" style="margin-bottom:16px"><h3>Pending Tasks</h3><div class="hint">Assignments not marked done</div><div id="pendMini"></div></div>
+      <div class="card"><h3>Recent Attendance</h3><div class="hint">Your latest records</div><div id="recent"></div></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px"><h3>Attendance by Subject</h3><div class="hint">Minimum 75% recommended</div><div id="bySubject"></div></div>
+      <div class="card" style="margin-bottom:16px"><h3>Upcoming Exams</h3><div class="hint">Next on your schedule</div><div id="examMini"></div></div>
+      <div class="card"><h3>Latest Notices</h3><div class="hint">From admin &amp; faculty</div><div id="noticeMini"></div></div>
+    </div>
   </div>
 </section>
 
 <section id="courses" class="section">
-  <h2>My Courses</h2>
-  <div id="coursesContainer" class="courses-container"></div>
+  <h1 style="font-size:24px">My Subjects</h1>
+  <div class="card" id="coursesContainer"></div>
 </section>
 
 <section id="attendance" class="section">
-  <h2>Attendance</h2>
-  <select id="filterStatus" onchange="applyFilter()">
-    <option>All</option>
-    <option>Present</option>
-    <option>Absent</option>
-  </select>
-  <h3 id="percentage"></h3>
-  <table id="attendanceTable">
-    <thead><tr><th>Date</th><th>Status</th></tr></thead>
-    <tbody></tbody>
-  </table>
+  <h1 style="font-size:24px">Attendance</h1>
+  <div class="card">
+    <select id="fStatus" onchange="renderTable()"><option>All</option><option>Present</option><option>Absent</option></select>
+    <select id="fSubject" onchange="renderTable()"><option value="">All subjects</option></select>
+    <table><thead><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table>
+  </div>
 </section>
 
+<section id="timetable" class="section">
+  <h1 style="font-size:24px">Weekly Timetable</h1>
+  <div class="card" id="ttFull"></div>
+</section>
+
+<section id="exams" class="section">
+  <h1 style="font-size:24px">Exam Schedule</h1>
+  <div class="card" id="examFull"></div>
+  <h1 style="font-size:24px;margin-top:24px">Published Results</h1>
+  <div class="card" id="resFull"></div>
+</section>
+
+<section id="assign" class="section">
+  <h1 style="font-size:24px">Assignments</h1>
+  <div class="card" id="asFull"></div>
+</section>
+
+<section id="orders" class="section">
+  <h1 style="font-size:24px">My Orders</h1>
+  <div class="card" id="ordersBox"></div>
+</section>
+
+<section id="notices" class="section">
+  <h1 style="font-size:24px">Notices</h1>
+  <div class="card" id="noticeFull"></div>
+</section>
 </div>
 
 <script src="shell.js"></script>
@@ -86,119 +139,198 @@
 <script>
 const API = window.API_BASE;
 const token = localStorage.getItem("token");
+if (localStorage.getItem("role") !== "student" || !token) window.location.href = "login.html";
+const H = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const $ = id => document.getElementById(id);
+let records = [], subjects = [], tt = [], exams = [], results = [], assigns = [], lowSubs = [];
+const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const fmtD = d => new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+const t12 = t => { const [h, m] = t.split(":").map(Number); return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; };
 
-/* AUTH GUARD */
-if (localStorage.getItem("role") !== "student" || !token) {
-  window.location.href = "login.html";
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.toggle("active", s.id === id));
+  document.querySelectorAll(".sidebar a[data-s]").forEach(a => a.classList.toggle("on", a.dataset.s === id));
+}
+function logout() { localStorage.clear(); window.location.href = "login.html"; }
+const col = p => p >= 75 ? "var(--green)" : p >= 60 ? "var(--amber)" : "var(--red)";
+
+async function api(path) {
+  try { const r = await fetch(API + path, { headers: H() }); const d = await r.json(); return d.success ? d : null; }
+  catch (e) { return null; }
 }
 
-function authHeaders() {
-  return { Authorization: `Bearer ${localStorage.getItem("token")}` };
+async function init() {
+  const me = await api("/students/me");
+  if (!me) { $("meta").textContent = "Could not load your profile. Please log in again."; return; }
+  const st = me.student;
+  const h = new Date().getHours();
+  $("greet").textContent = `Good ${h < 12 ? "Morning" : h < 17 ? "Afternoon" : "Evening"}, ${st.name}`;
+  $("meta").textContent = [st.studentId, st.course && st.course.name, st.semester && `Semester ${st.semester}`, st.department].filter(Boolean).join(" · ");
+
+  const [sub, att, nt, ttR, exR, reR, asR] = await Promise.all([
+    st.course ? api(`/subjects?course=${st.course._id}${st.semester ? `&semester=${st.semester}` : ""}`) : null,
+    api(`/attendance/student/${st._id}`),
+    api("/notices"),
+    api("/academics/me/timetable"), api("/academics/me/exams"), api("/academics/me/results"), api("/academics/me/assignments")
+  ]);
+  tt = ttR ? ttR.items : []; exams = exR ? exR.items : []; results = reR ? reR.items : []; assigns = asR ? asR.items : [];
+  subjects = sub ? sub.subjects : [];
+  records = att ? att.records : [];
+  renderStats(att ? att.summary : { present: 0, absent: 0, total: 0, percentage: 0 });
+  renderSubjects(); renderRecent(); renderTable(); renderNotices(nt ? nt.notices : []);
+  renderAcademics();
 }
 
-let currentProfileId = null;
-
-/* NAVIGATION */
-function showSection(sectionId) {
-  document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
-  document.getElementById(sectionId).classList.add("active");
-}
-
-function logout() {
-  localStorage.clear();
-  window.location.href = "login.html";
-}
-
-/* LOAD OWN PROFILE + COURSE + SUBJECTS (database-driven, no hardcoded subject map) */
-async function loadProfile() {
-  const res = await fetch(`${API}/students/me`, { headers: authHeaders() });
-  const data = await res.json();
-  if (!data.success) return;
-
-  const student = data.student;
-  currentProfileId = student._id;
-
-  document.getElementById("welcomeMsg").innerText = `Welcome, ${student.name}`;
-  document.getElementById("dashStudentId").innerText = student.studentId;
-  document.getElementById("dashCourse").innerText = student.course ? student.course.name : "Not assigned";
-  document.getElementById("dashSemester").innerText = student.semester || "-";
-
-  const container = document.getElementById("coursesContainer");
-  container.innerHTML = "";
-
-  if (!student.course) {
-    container.innerHTML = "<p>No course assigned yet. Contact admin.</p>";
-  } else {
-    const subRes = await fetch(
-      `${API}/subjects?course=${student.course._id}${student.semester ? `&semester=${student.semester}` : ""}`,
-      { headers: authHeaders() }
-    );
-    const subData = await subRes.json();
-    const subjects = subData.success ? subData.subjects : [];
-
-    const card = document.createElement("div");
-    card.className = "course-card";
-    const list = subjects.length
-      ? subjects.map(s => `<li>${s.name}</li>`).join("")
-      : "<li>No subjects added for this semester yet</li>";
-    card.innerHTML = `<h3>${student.course.name}</h3><ul>${list}</ul>`;
-    container.appendChild(card);
+function renderStats(s) {
+  $("sSubjects").textContent = subjects.length;
+  $("sPresent").textContent = s.present;
+  const pct = $("sPct");
+  pct.textContent = s.total ? s.percentage + "%" : "—";
+  if (s.total) pct.style.color = col(s.percentage);
+  // sparkline: running attendance % over real records, oldest -> newest
+  const ordered = [...records].reverse(); let p = 0; const pts = [];
+  ordered.forEach((r, i) => { if (r.status === "Present") p++; pts.push(p / (i + 1) * 100); });
+  if (pts.length > 1) {
+    const d = pts.map((v, i) => `${(i / (pts.length - 1) * 100).toFixed(1)},${(30 - v * 0.28 - 1).toFixed(1)}`).join(" ");
+    $("spark").innerHTML = `<polyline fill="none" stroke="#2563eb" stroke-width="1.6" points="${d}"/>`;
   }
-
-  await loadAttendance();
 }
 
-/* LOAD ATTENDANCE - real records + computed percentage, no fake fallback data */
-async function loadAttendance() {
-  if (!currentProfileId) return;
-
-  const res = await fetch(`${API}/attendance/student/${currentProfileId}`, { headers: authHeaders() });
-  const data = await res.json();
-  if (!data.success) return;
-
-  renderAttendance(data.records, data.summary.percentage);
-}
-
-function renderAttendance(records, percent) {
-  const tableBody = document.querySelector("#attendanceTable tbody");
-  tableBody.innerHTML = "";
-
-  if (!records.length) {
-    tableBody.innerHTML = `<tr><td colspan="2">No attendance recorded yet</td></tr>`;
-  }
-
+function perSubject() {
+  const m = new Map();
+  subjects.forEach(s => m.set(String(s._id), { name: s.name, code: s.code, p: 0, t: 0 }));
   records.forEach(r => {
-    const dateStr = new Date(r.date).toLocaleDateString();
-    tableBody.innerHTML += `<tr><td>${dateStr}</td><td>${r.status}</td></tr>`;
+    if (!r.subject) return;
+    const k = String(r.subject._id);
+    if (!m.has(k)) m.set(k, { name: r.subject.name, code: r.subject.code, p: 0, t: 0 });
+    const o = m.get(k); o.t++; if (r.status === "Present") o.p++;
   });
-
-  const pctEl = document.getElementById("attPercent");
-  pctEl.innerText = percent + "%";
-  pctEl.style.color = percent < 75 ? "#ff4d6d" : "#00ff88";
-
-  document.getElementById("percentage").innerText = `Attendance: ${percent}%`;
+  return [...m.values()];
 }
 
-async function applyFilter() {
-  if (!currentProfileId) return;
-  const filter = document.getElementById("filterStatus").value;
+function renderSubjects() {
+  const list = perSubject();
+  lowSubs = list.filter(s => s.t && s.p / s.t * 100 < 75);
+  const low = lowSubs.length;
+  $("sLow").textContent = low; $("sLow").style.color = low ? "var(--red)" : "var(--green)";
+  $("bySubject").innerHTML = list.length ? list.map(s => {
+    const pc = s.t ? Math.round(s.p / s.t * 100) : 0;
+    return `<div class="bl"><span>${esc(s.name)}</span><b style="color:${s.t ? col(pc) : "var(--mut)"}">${s.t ? pc + "%" : "No data"}</b></div>
+      <div class="bar"><i style="width:${pc}%;background:${col(pc)}"></i></div>`;
+  }).join("") : `<div class="empty">No subjects yet.</div>`;
 
-  const res = await fetch(`${API}/attendance/student/${currentProfileId}`, { headers: authHeaders() });
-  const data = await res.json();
-  if (!data.success) return;
+  $("coursesContainer").innerHTML = subjects.length
+    ? subjects.map(s => `<div class="row"><div>${esc(s.name)}<small>${esc(s.code)}</small></div><span class="badge">Sem ${esc(s.semester)}</span></div>`).join("")
+    : `<div class="empty">No subjects added for your semester yet. Contact admin.</div>`;
 
-  const filtered = filter === "All" ? data.records : data.records.filter(r => r.status === filter);
-  const tableBody = document.querySelector("#attendanceTable tbody");
-  tableBody.innerHTML = "";
-  filtered.forEach(r => {
-    const dateStr = new Date(r.date).toLocaleDateString();
-    tableBody.innerHTML += `<tr><td>${dateStr}</td><td>${r.status}</td></tr>`;
-  });
+  const f = $("fSubject"), keep = f.value;
+  f.innerHTML = '<option value="">All subjects</option>';
+  list.forEach(s => { const o = document.createElement("option"); o.value = s.name; o.textContent = s.name; f.appendChild(o); });
+  f.value = keep;
 }
 
-/* INIT */
-loadProfile();
+const rowHtml = r => `<div class="row"><div>${esc(r.subject ? r.subject.name : "—")}<small>${new Date(r.date).toLocaleDateString()}</small></div><span class="pill ${r.status === "Present" ? "p" : "a"}">${esc(r.status)}</span></div>`;
+function renderRecent() {
+  $("recent").innerHTML = records.length ? records.slice(0, 6).map(rowHtml).join("") : `<div class="empty">No attendance recorded yet.</div>`;
+}
+function renderTable() {
+  const st = $("fStatus").value, sj = $("fSubject").value;
+  const rows = records.filter(r => (st === "All" || r.status === st) && (!sj || (r.subject && r.subject.name === sj)));
+  $("tbody").innerHTML = rows.length
+    ? rows.map(r => `<tr><td>${new Date(r.date).toLocaleDateString()}</td><td>${esc(r.subject ? r.subject.name : "—")}</td><td><span class="pill ${r.status === "Present" ? "p" : "a"}">${esc(r.status)}</span></td></tr>`).join("")
+    : `<tr><td colspan="3" class="empty">No records</td></tr>`;
+}
+function renderNotices(list) {
+  const item = n => `<div class="notice"><b>${esc(n.title)}</b><p>${esc(n.content)}</p><small style="color:var(--mut)">${new Date(n.createdAt).toLocaleDateString()}</small></div>`;
+  $("noticeMini").innerHTML = list.length ? list.slice(0, 3).map(item).join("") : `<div class="empty">No notices.</div>`;
+  $("noticeFull").innerHTML = list.length ? list.map(item).join("") : `<div class="empty">No notices.</div>`;
+}
+const subName = x => esc(x.subject ? x.subject.name : "—");
+const classRow = (c, now) => `<div class="row ${now ? "now" : ""}"><div>${subName(c)}<small>${esc(c.room || "Room not set")}</small></div><div style="text-align:right">${t12(c.startTime)} – ${t12(c.endTime)}${now ? `<br><span class="tag">NOW</span>` : ""}</div></div>`;
+const taskRow = a => {
+  const days = Math.ceil((new Date(a.dueDate) - Date.now()) / 864e5);
+  const lbl = days < 0 ? `<span class="pill a">Overdue</span>` : days <= 2 ? `<span class="pill a">Due ${days <= 0 ? "today" : "in " + days + "d"}</span>` : `<small>Due ${fmtD(a.dueDate)}</small>`;
+  return `<div class="row"><div class="${a.done ? "done" : ""}">${esc(a.title)}<small>${subName(a)} · due ${fmtD(a.dueDate)}</small></div><div>${lbl}</div></div>`;
+};
+
+function renderAcademics() {
+  const now = new Date(), nowM = now.getHours() * 60 + now.getMinutes();
+  const mins = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+
+  const today = tt.filter(c => c.dayOfWeek === now.getDay());
+  $("todayHint").textContent = `${DAYS[now.getDay()]} · ${today.length} class${today.length === 1 ? "" : "es"}`;
+  $("today").innerHTML = today.length ? today.map(c => classRow(c, nowM >= mins(c.startTime) && nowM < mins(c.endTime))).join("")
+    : `<div class="empty">${tt.length ? "No classes today." : "No timetable published yet."}</div>`;
+
+  const byDay = [1,2,3,4,5,6,0].map(d => [d, tt.filter(c => c.dayOfWeek === d)]).filter(x => x[1].length);
+  $("ttFull").innerHTML = byDay.length ? byDay.map(([d, l]) => `<div class="day">${DAYS[d]}</div>${l.map(c => classRow(c, false)).join("")}`).join("") : `<div class="empty">No timetable published yet.</div>`;
+
+  const up = exams.filter(e => new Date(e.date) >= new Date(new Date().setHours(0,0,0,0)));
+  $("sExam").textContent = up.length ? `${up[0].subject ? up[0].subject.name : up[0].title} · ${fmtD(up[0].date)}` : "None scheduled";
+  const exRow = e => `<div class="row"><div>${subName(e)}<small>${esc(e.title)}${e.venue ? " · " + esc(e.venue) : ""}</small></div><div style="text-align:right">${fmtD(e.date)}${e.startTime ? `<small>${esc(e.startTime)}</small>` : ""}</div></div>`;
+  $("examMini").innerHTML = up.length ? up.slice(0, 3).map(exRow).join("") : `<div class="empty">No upcoming exams.</div>`;
+  $("examFull").innerHTML = exams.length ? exams.map(exRow).join("") : `<div class="empty">No exams scheduled yet.</div>`;
+
+  $("resFull").innerHTML = results.length
+    ? `<table><thead><tr><th>Subject</th><th>Exam</th><th>Marks</th><th>%</th></tr></thead><tbody>${results.map(r => `<tr><td>${subName(r)}</td><td>${esc(r.examTitle)}</td><td>${r.marksObtained}/${r.maxMarks}</td><td>${Math.round(r.marksObtained / r.maxMarks * 100)}%</td></tr>`).join("")}</tbody></table>`
+    : `<div class="empty">No results published yet.</div>`;
+
+  const pend = assigns.filter(a => !a.done);
+  $("sPend").textContent = pend.length;
+  $("pendMini").innerHTML = pend.length ? pend.slice(0, 4).map(taskRow).join("") : `<div class="empty">${assigns.length ? "All caught up 🎉" : "No assignments posted yet."}</div>`;
+  $("asFull").innerHTML = assigns.length
+    ? assigns.map(a => `<div class="row"><div style="flex:1">${taskRow(a).replace(/^<div class="row">|<\/div>$/g, "")}</div><button class="btn" onclick="toggleDone('${a._id}', ${a.done})">${a.done ? "Undo" : "Mark done"}</button></div>`).join("")
+    : `<div class="empty">No assignments posted yet.</div>`;
+
+  // Alerts: only real conditions
+  const al = [];
+  if (lowSubs.length) al.push(["r", `Low attendance in ${lowSubs.map(s => esc(s.name)).join(", ")} (below 75%).`]);
+  const overdue = pend.filter(a => new Date(a.dueDate) < now).length, soon = pend.filter(a => { const d = new Date(a.dueDate) - now; return d >= 0 && d < 2 * 864e5; }).length;
+  if (overdue) al.push(["r", `${overdue} assignment${overdue > 1 ? "s are" : " is"} overdue.`]);
+  if (soon) al.push(["", `${soon} assignment${soon > 1 ? "s are" : " is"} due within 2 days.`]);
+  const nx = up[0]; if (nx && (new Date(nx.date) - now) < 7 * 864e5) al.push(["", `Exam: ${esc(nx.subject ? nx.subject.name : nx.title)} on ${fmtD(nx.date)}.`]);
+  $("alerts").innerHTML = al.map(([c, m]) => `<div class="alert ${c}">⚠ <span>${m}</span></div>`).join("");
+}
+
+async function toggleDone(id, isDone) {
+  const r = await fetch(`${API}/academics/assignments/${id}/done`, { method: isDone ? "DELETE" : "POST", headers: H() });
+  if (r.ok) { const a = assigns.find(x => x._id === id); if (a) a.done = !isDone; renderAcademics(); }
+}
+
+/* ORDERS: history, tracking timeline, cancellation (rules are enforced by the server) */
+const STEPS = [["Pending", "Order placed"], ["Processing", "Processing"], ["Ready for Pickup", "Ready for pickup"], ["Completed", "Completed"]];
+function timeline(o) {
+  const at = {}; (o.statusHistory || []).forEach(h => { if (!at[h.status]) at[h.status] = h.at; });
+  const cancelled = o.status === "Cancelled";
+  const idx = STEPS.findIndex(x => x[0] === o.status);
+  let steps = STEPS.map(([k, l], i) => `<div class="ost ${!cancelled && i <= idx ? "on" : cancelled && at[k] ? "on" : ""}"><i></i>${l}${at[k] ? `<small>${fmtD(at[k])}</small>` : ""}</div>`);
+  if (cancelled) steps = STEPS.filter(([k], n) => n === 0 || at[k]).map(([k, l]) => `<div class="ost on"><i></i>${l}${at[k] ? `<small>${fmtD(at[k])}</small>` : ""}</div>`).concat(`<div class="ost x"><i></i>Cancelled<small>${o.cancelledBy === "admin" ? "by store" : "by you"}</small></div>`);
+  return `<div class="otl">${steps.join("")}</div>`;
+}
+async function loadOrders() {
+  const d = await api("/store/orders/mine");
+  const list = d ? d.orders : [];
+  $("ordersBox").innerHTML = !d ? `<div class="empty">Could not load your orders.</div>` : list.length ? list.map(o => `<div class="ocard">
+    <div class="row" style="border:0;padding:0"><div><b>Order #${esc(o._id.slice(-6))}</b><small>${fmtD(o.createdAt)} · ${o.items.map(i => esc(i.name) + " ×" + i.quantity).join(", ")}</small></div><div style="text-align:right"><b>₹${o.totalAmount}</b><small>${esc(o.paymentMethod)} · ${esc(o.paymentStatus)}</small></div></div>
+    ${timeline(o)}
+    ${o.status === "Cancelled" ? `<div class="sub">Reason: ${esc(o.cancelReason || "—")}${o.refundStatus === "Refund Due" ? " · Refund due: the store will refund your payment" : o.refundStatus === "Refunded" ? " · Refunded" : ""}</div>` : o.estimatedDelivery && o.status !== "Completed" ? `<div class="sub">Estimated ready by ${fmtD(o.estimatedDelivery)}</div>` : ""}
+    ${o.cancellable ? `<div style="margin-top:8px"><button class="btn" style="color:var(--red)" onclick="cancelOrder('${o._id}')">Cancel order</button> <small style="color:var(--mut)">Possible only until the store starts processing.</small></div>` : ""}
+  </div>`).join("") : `<div class="empty">You haven't placed any store orders yet. <a href="store.html">Visit the store</a></div>`;
+}
+async function cancelOrder(id) {
+  if (!confirm("Cancel this order? This can't be undone.")) return;
+  const reason = prompt("Reason (optional):") || "";
+  const r = await fetch(`${API}/store/orders/${id}/cancel`, { method: "POST", headers: { ...H(), "Content-Type": "application/json" }, body: JSON.stringify({ reason }) });
+  const d = await r.json().catch(() => ({}));
+  alert(d.success ? "Order cancelled." : (d.message || "Could not cancel the order."));
+  loadOrders();
+}
+
+init(); loadOrders();
+// Live updates: pick up faculty changes (attendance, assignments, results, notices) without a manual reload
+setInterval(() => { if (!document.hidden) { init(); loadOrders(); } }, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) init(); });
 </script>
-
 </body>
 </html>

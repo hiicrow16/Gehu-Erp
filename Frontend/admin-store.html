@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store Manager - GEHU Admin</title>
+<style>
+:root{--ink:#0f172a;--mut:#64748b;--line:#e8ecf4;--blue:#2563eb;--red:#dc2626;--green:#16a34a;--amber:#d97706}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,'Segoe UI',system-ui,sans-serif;background:#f4f6fb;color:var(--ink)}
+header{background:linear-gradient(90deg,#1d4ed8,#1e3a8a);color:#fff;padding:16px 28px;display:flex;justify-content:space-between;align-items:center}header a{color:#dbe6ff;text-decoration:none;font-size:14px}
+main{max-width:1150px;margin:22px auto;padding:0 16px}
+.tabs{display:flex;gap:8px;margin-bottom:16px}.tabs button{border:1px solid #dfe5f1;background:#fff;border-radius:999px;padding:8px 18px;cursor:pointer;font-weight:600}.tabs button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.st b{display:block;font-size:26px;margin-top:2px}.st span{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+input,select{padding:8px 10px;border:1px solid #dfe5f1;border-radius:8px;font:inherit;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}th{font-size:12px;color:var(--mut);text-transform:uppercase}
+.scroll{overflow-x:auto}
+.pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#eaf0ff;color:var(--blue);white-space:nowrap}
+.pill.g{background:#e6f7ec;color:var(--green)}.pill.r{background:#fdeaea;color:var(--red)}.pill.a{background:#fdf1dc;color:var(--amber)}.pill.m{background:#eef1f7;color:var(--mut)}
+.btn{border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:13px}.btn.o{background:#fff;color:var(--blue)}.btn.d{background:#fff;color:var(--red);border-color:#f1c5c5}.btn:disabled{opacity:.45;cursor:not-allowed}
+.drawer{position:fixed;inset:0 0 0 auto;width:min(520px,100%);background:#fff;box-shadow:-8px 0 30px rgba(15,23,42,.18);padding:22px;overflow:auto;transform:translateX(105%);transition:.25s;z-index:20}.drawer.on{transform:none}
+.veil{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;z-index:19}.veil.on{display:block}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:14px;margin:10px 0}.kv span{color:var(--mut)}
+h3{margin:18px 0 6px;font-size:15px}
+.tl{list-style:none;padding:0;margin:8px 0}.tl li{position:relative;padding:0 0 12px 22px;font-size:13px}.tl li:before{content:"";position:absolute;left:3px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--blue)}.tl li:after{content:"";position:absolute;left:7px;top:15px;bottom:-2px;width:2px;background:#dbe4f5}.tl li:last-child:after{display:none}.tl li.x:before{background:var(--red)}.tl small{color:var(--mut);display:block}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.hint{font-size:12px;color:var(--mut);margin-top:6px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:30}
+td input[type=number]{width:84px}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<header><b>Store Manager</b><a href="admin-dashboard.html">&larr; Back to admin</a></header>
+<main>
+  <div class="tabs"><button id="tOrders" class="on" onclick="tab('orders')">Orders</button><button id="tStock" onclick="tab('stock')">Stock</button></div>
+
+  <div id="vOrders">
+    <div class="stats" id="oStats"></div>
+    <div class="card">
+      <div class="bar">
+        <select id="fStatus" onchange="drawOrders()"><option value="">All statuses</option><option>Pending</option><option>Processing</option><option>Ready for Pickup</option><option>Completed</option><option>Cancelled</option></select>
+        <select id="fPay" onchange="drawOrders()"><option value="">All payments</option><option>Awaiting Verification</option><option>Pay on Pickup</option><option>Paid</option><option>Failed</option></select>
+        <select id="fRef" onchange="drawOrders()"><option value="">Refunds: any</option><option>Refund Due</option></select>
+        <input id="fQ" placeholder="Search order ID, name, student ID, phone" style="flex:1;min-width:220px" oninput="drawOrders()">
+        <button class="btn o" onclick="loadOrders()">Refresh</button>
+      </div>
+      <div class="scroll"><table><thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th></th></tr></thead><tbody id="oBody"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="vStock" style="display:none">
+    <div class="stats" id="sStats"></div>
+    <div class="card">
+      <div class="bar"><label><input type="checkbox" id="lowOnly" onchange="drawStock()"> Show only low / out of stock</label><button class="btn o" onclick="loadStock()">Refresh</button></div>
+      <div class="scroll"><table><thead><tr><th>Product</th><th>Category</th><th>In stock</th><th>Sold</th><th>Low-stock level</th><th>Set stock to</th><th>Add / remove</th></tr></thead><tbody id="sBody"></tbody></table></div>
+      <div class="hint">Customers can't buy more than what's in stock. "Add / remove" is safest while orders are coming in (e.g. +50 for a delivery, -2 for damaged items). Cancelled orders put their units back automatically.</div>
+    </div>
+  </div>
+</main>
+
+<div class="veil" id="veil" onclick="closeD()"></div>
+<aside class="drawer" id="drawer"></aside>
+<div id="toast"></div>
+
+<script>
+const API = window.API_BASE;
+if (localStorage.getItem("role") !== "admin" || !localStorage.getItem("token")) location.href = "login.html";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const rs = n => "₹" + Number(n || 0).toLocaleString("en-IN");
+const dt = d => new Date(d).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const NEXT = { "Pending": ["Processing", "Start processing"], "Processing": ["Ready for Pickup", "Mark ready for pickup"], "Ready for Pickup": ["Completed", "Mark completed"] };
+let orders = [], stock = [], openId = null;
+
+function toast(m) { const e = $("toast"); e.textContent = m; e.style.display = "block"; setTimeout(() => e.style.display = "none", 3000); }
+async function call(path, method = "GET", body) {
+  const r = await fetch(API + path, { method, headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` }, body: body ? JSON.stringify(body) : undefined });
+  const d = await r.json().catch(() => ({})); if (!d.success) throw new Error(d.message || "Request failed"); return d;
+}
+function tab(t) { $("vOrders").style.display = t === "orders" ? "" : "none"; $("vStock").style.display = t === "stock" ? "" : "none"; $("tOrders").classList.toggle("on", t === "orders"); $("tStock").classList.toggle("on", t === "stock"); if (t === "stock") loadStock(); }
+const sc = s => ({ Pending: "a", Processing: "", "Ready for Pickup": "", Completed: "g", Cancelled: "r" }[s] || "m");
+const pc = s => ({ Paid: "g", "Awaiting Verification": "a", Failed: "r", "Pay on Pickup": "m" }[s] || "m");
+
+/* ---------- ORDERS ---------- */
+async function loadOrders() {
+  try { orders = (await call("/store/orders")).orders; } catch (e) { return toast(e.message); }
+  drawOrders(); if (openId) openOrder(openId, true);
+}
+function drawOrders() {
+  const live = orders.filter(o => o.status !== "Cancelled");
+  $("oStats").innerHTML = [
+    ["Total orders", orders.length], ["Pending", orders.filter(o => o.status === "Pending").length],
+    ["Awaiting payment check", orders.filter(o => o.paymentStatus === "Awaiting Verification" && o.status !== "Cancelled").length],
+    ["Refunds due", orders.filter(o => o.refundStatus === "Refund Due").length],
+    ["Order value (excl. cancelled)", rs(live.reduce((s, o) => s + o.totalAmount, 0))]
+  ].map(([l, v]) => `<div class="card st"><span>${l}</span><b>${v}</b></div>`).join("");
+  const st = $("fStatus").value, py = $("fPay").value, rf = $("fRef").value, q = $("fQ").value.trim().toLowerCase();
+  const rows = orders.filter(o => (!st || o.status === st) && (!py || o.paymentStatus === py) && (!rf || o.refundStatus === rf) &&
+    (!q || [o._id, o.customerName, o.studentId, o.phone, o.email].some(v => String(v || "").toLowerCase().includes(q))));
+  $("oBody").innerHTML = rows.length ? rows.map(o => `<tr>
+    <td><b>#${esc(o._id.slice(-6))}</b></td><td>${dt(o.createdAt)}</td><td>${esc(o.customerName)}<br><small style="color:var(--mut)">${esc(o.studentId || "guest")}</small></td>
+    <td>${o.items.reduce((s, i) => s + i.quantity, 0)}</td><td>${rs(o.totalAmount)}</td>
+    <td>${esc(o.paymentMethod)}<br><span class="pill ${pc(o.paymentStatus)}">${esc(o.paymentStatus)}</span></td>
+    <td><span class="pill ${sc(o.status)}">${esc(o.status)}</span>${o.refundStatus === "Refund Due" ? '<br><span class="pill r">Refund due</span>' : ""}</td>
+    <td><button class="btn o" onclick="openOrder('${o._id}')">Open</button></td></tr>`).join("") : `<tr><td colspan="8" style="color:var(--mut)">No orders match.</td></tr>`;
+}
+function openOrder(id, keep) {
+  const o = orders.find(x => x._id === id); if (!o) return closeD();
+  openId = id;
+  const hist = (o.statusHistory && o.statusHistory.length ? o.statusHistory : [{ status: "Pending", at: o.createdAt, note: "Order placed" }]);
+  const final = ["Completed", "Cancelled"].includes(o.status), nx = NEXT[o.status];
+  const needPay = nx && nx[0] === "Processing" && o.paymentMethod === "UPI" && o.paymentStatus !== "Paid";
+  $("drawer").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Order #${esc(o._id.slice(-6))}</h2><button class="btn o" onclick="closeD()">Close</button></div>
+    <div class="hint">${esc(o._id)} · placed ${dt(o.createdAt)}</div>
+    <h3>Customer</h3><div class="kv"><span>Name</span><b>${esc(o.customerName)}</b><span>Student ID</span><div>${esc(o.studentId || "—")}</div><span>Phone</span><div>${esc(o.phone)}</div><span>Email</span><div>${esc(o.email)}</div><span>Address</span><div>${esc(o.address)}</div></div>
+    <h3>Items</h3><table>${o.items.map(i => `<tr><td>${esc(i.name)}${i.size ? " · " + esc(i.size) : ""}${i.color ? " · " + esc(i.color) : ""}</td><td>×${i.quantity}</td><td>${rs(i.price * i.quantity)}</td></tr>`).join("")}</table>
+    <div class="kv"><span>Subtotal</span><div>${rs(o.subtotal ?? o.totalAmount)}</div><span>Discount</span><div>${o.discountAmount ? "−" + rs(o.discountAmount) + " (" + esc(o.discountLabel || o.couponCode || "") + ")" : "—"}</div><span>Total</span><b>${rs(o.totalAmount)}</b></div>
+    <h3>Payment</h3><div class="kv"><span>Method</span><div>${esc(o.paymentMethod)}</div><span>Status</span><div><span class="pill ${pc(o.paymentStatus)}">${esc(o.paymentStatus)}</span></div>${o.transactionRef ? `<span>UPI ref</span><div>${esc(o.transactionRef)}</div>` : ""}<span>Refund</span><div>${esc(o.refundStatus || "None")}</div></div>
+    ${o.status === "Cancelled" ? `<div class="kv"><span>Cancelled by</span><div>${esc(o.cancelledBy || "—")}</div><span>Reason</span><div>${esc(o.cancelReason || "—")}</div></div>` : ""}
+    <h3>Timeline</h3><ul class="tl">${hist.map(h => `<li class="${h.status === "Cancelled" ? "x" : ""}"><b>${esc(h.note && h.status === "Pending" ? h.note : h.status)}</b>${h.note && h.status !== "Pending" ? " – " + esc(h.note) : ""}<small>${dt(h.at)}${h.by ? " · " + esc(h.by) : ""}</small></li>`).join("")}</ul>
+    <h3>Actions</h3><div class="act">
+      ${o.paymentMethod === "UPI" && o.paymentStatus === "Awaiting Verification" && o.status !== "Cancelled" ? `<button class="btn" onclick="patch('${o._id}',{paymentStatus:'Paid'})">Mark payment Paid</button><button class="btn d" onclick="patch('${o._id}',{paymentStatus:'Failed'})">Payment failed</button>` : ""}
+      ${nx ? `<button class="btn" ${needPay ? "disabled" : ""} onclick="patch('${o._id}',{status:'${nx[0]}'})">${nx[1]}</button>` : ""}
+      ${!final ? `<button class="btn d" onclick="cancelO('${o._id}')">Cancel order</button>` : ""}
+      ${o.refundStatus === "Refund Due" ? `<button class="btn" onclick="patch('${o._id}',{refundStatus:'Refunded'})">Mark refund paid</button>` : ""}
+    </div>
+    ${needPay ? `<div class="hint">Verify the UPI payment first, then you can start processing.</div>` : ""}
+    ${final ? `<div class="hint">This order is ${o.status.toLowerCase()} — its status is final.</div>` : ""}`;
+  $("drawer").classList.add("on"); $("veil").classList.add("on");
+}
+function closeD() { openId = null; $("drawer").classList.remove("on"); $("veil").classList.remove("on"); }
+async function patch(id, body) {
+  try { const d = await call("/store/orders/" + id, "PATCH", body); const i = orders.findIndex(o => o._id === id); orders[i] = d.order; drawOrders(); openOrder(id, true); toast("Order updated"); } catch (e) { toast(e.message); }
+}
+function cancelO(id) { const r = prompt("Reason for cancelling this order (the customer will see it):"); if (r && r.trim()) patch(id, { status: "Cancelled", reason: r.trim() }); }
+
+/* ---------- STOCK ---------- */
+async function loadStock() { try { stock = (await call("/store/stock")).items; } catch (e) { return toast(e.message); } drawStock(); }
+const level = p => p.stock <= 0 ? ["Out of stock", "r"] : p.stock <= p.lowStockAt ? ["Low", "a"] : ["OK", "g"];
+function drawStock() {
+  const out = stock.filter(p => p.stock <= 0).length, low = stock.filter(p => p.stock > 0 && p.stock <= p.lowStockAt).length;
+  $("sStats").innerHTML = [["Products", stock.length], ["Out of stock", out], ["Low stock", low], ["Units in stock", stock.reduce((s, p) => s + p.stock, 0)]].map(([l, v]) => `<div class="card st"><span>${l}</span><b>${v}</b></div>`).join("");
+  const rows = stock.filter(p => !$("lowOnly").checked || p.stock <= p.lowStockAt);
+  $("sBody").innerHTML = rows.map(p => { const [t, c] = level(p); return `<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.category)}</td>
+    <td><span class="pill ${c}">${p.stock}</span> <small style="color:var(--mut)">${t}</small></td><td>${p.sold}</td>
+    <td><input type="number" min="0" value="${p.lowStockAt}" onchange="saveLow('${p.productId}',this.value)"></td>
+    <td><input type="number" min="0" id="set_${p.productId}" placeholder="${p.stock}"> <button class="btn o" onclick="setStock('${p.productId}')">Set</button></td>
+    <td><input type="number" id="add_${p.productId}" placeholder="+/-"> <button class="btn o" onclick="addStock('${p.productId}')">Apply</button></td></tr>`; }).join("") || `<tr><td colspan="7" style="color:var(--mut)">Nothing low or out of stock.</td></tr>`;
+}
+async function stockCall(id, body, msg) { try { await call("/store/stock/" + id, "PATCH", body); toast(msg); loadStock(); } catch (e) { toast(e.message); } }
+function setStock(id) { const v = $("set_" + id).value; if (v === "") return toast("Enter the new stock number"); stockCall(id, { stock: Number(v) }, "Stock set"); }
+function addStock(id) { const v = $("add_" + id).value; if (v === "") return toast("Enter a number to add (or a negative number to remove)"); stockCall(id, { adjust: Number(v) }, "Stock updated"); }
+function saveLow(id, v) { stockCall(id, { lowStockAt: Number(v) }, "Low-stock level saved"); }
+
+loadOrders();
+</script>
+</body>
+</html>

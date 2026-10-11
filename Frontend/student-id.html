@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Digital Student ID - GEHU</title>
+<style>
+:root{--navy:#0b3d91;--ink:#0f172a;--mut:#64748b;--ok:#16a34a;--bad:#dc2626}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#dfe6f3;font-family:Inter,'Segoe UI',system-ui,sans-serif;color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:18px 14px 30px}
+.top{width:100%;max-width:420px;display:flex;justify-content:space-between;font-size:14px;margin-bottom:12px}.top a{color:var(--navy);text-decoration:none;font-weight:600}
+.card{width:100%;max-width:420px;background:#fff;border-radius:26px;overflow:hidden;box-shadow:0 18px 50px rgba(11,61,145,.25)}
+.head{background:linear-gradient(135deg,#0b3d91,#1d5fd0);color:#fff;padding:22px 22px 70px;position:relative}
+.brand{display:flex;justify-content:space-between;align-items:center;font-weight:700;letter-spacing:.4px}.brand small{font-weight:600;opacity:.85}
+.who{display:flex;gap:16px;align-items:center;margin-top:20px}
+.av{width:78px;height:92px;border-radius:40px;background:#fff;color:var(--navy);display:grid;place-items:center;font-size:30px;font-weight:700;flex:none}
+.who b{display:block;font-size:20px;line-height:1.2}.who span{opacity:.85;font-size:14px}
+.qrbox{margin:-48px 22px 0;background:#fff;border-radius:18px;padding:14px;box-shadow:0 8px 24px rgba(15,23,42,.12);text-align:center;position:relative}
+.qrbox h4{margin:0 0 8px;color:var(--navy);font-size:13px;letter-spacing:.5px}
+canvas{width:220px;height:220px;image-rendering:pixelated;display:block;margin:0 auto}
+.stale{position:absolute;inset:36px 14px 44px;background:rgba(255,255,255,.93);display:none;align-items:center;justify-content:center;text-align:center;font-weight:600;color:var(--bad);border-radius:10px;padding:14px}
+.meter{height:5px;border-radius:9px;background:#e5ebf6;overflow:hidden;margin:10px 4px 6px}.meter i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#1d5fd0,#22c55e);transform-origin:left}
+.live{font-size:12px;color:var(--mut);display:flex;justify-content:space-between}.live b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.det{padding:16px 22px 8px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eef2f8;font-size:14px}.row span{color:var(--navy);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.3px}.row b{text-align:right;font-weight:500}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}.pill.ok{background:#e4f7ea;color:var(--ok)}.pill.bad{background:#fdeaea;color:var(--bad)}
+.foot{padding:6px 22px 20px;font-size:12px;color:var(--mut);line-height:1.5}
+.msg{max-width:420px;text-align:center;color:var(--mut);font-size:12.5px;margin-top:14px}
+</style>
+<script>try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
+<link rel="stylesheet" href="shell.css">
+</head>
+<body>
+<div class="top"><a href="student-dashboard.html">&larr; Dashboard</a><a href="#" onclick="load();return false">Refresh now</a></div>
+<div class="card">
+  <div class="head">
+    <div class="brand"><span>GEHU</span><small>DIGITAL STUDENT ID</small></div>
+    <div class="who"><div class="av" id="av">–</div><div><b id="nm">Loading…</b><span id="sid"></span></div></div>
+  </div>
+  <div class="qrbox">
+    <h4>STUDENT ID QR</h4>
+    <canvas id="qr" width="220" height="220"></canvas>
+    <div class="stale" id="stale">Code expired.<br>Reconnect to the internet to refresh.</div>
+    <div class="meter"><i id="bar"></i></div>
+    <div class="live"><span>New code in <b id="cd">–</b>s</span><span>Live: <b id="clock">--:--:--</b></span></div>
+  </div>
+  <div class="det" id="det"></div>
+  <div class="foot">This card certifies that the holder is a student of GEHU. Show the QR to staff to verify. The code changes every 30 seconds, so screenshots won't work.</div>
+</div>
+<div class="msg" id="msg"></div>
+<script src="shell.js"></script>
+<script src="config.js"></script>
+<script src="vendor/qrcode.js"></script>
+<script>
+const API = window.API_BASE, $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+if (localStorage.getItem("role") !== "student" || !localStorage.getItem("token")) location.href = "login.html";
+let expiresAt = 0, nextAt = 0, busy = false;
+
+function drawQR(text) {
+  const m = GehuQR.matrix(text), n = m.length, c = $("qr"), ctx = c.getContext("2d"), q = 4, px = Math.floor(220 / (n + 2 * q));
+  const size = px * (n + 2 * q); c.width = c.height = size; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, size, size); ctx.fillStyle = "#000";
+  for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (m[r][k]) ctx.fillRect((k + q) * px, (r + q) * px, px, px);
+}
+function showCard(c) {
+  $("av").textContent = c.name.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+  $("nm").textContent = c.name; $("sid").textContent = c.studentId;
+  const st = !c.active ? ["Account disabled", "bad"] : c.expired ? ["Card expired", "bad"] : ["Valid", "ok"];
+  const rows = [["Student ID", c.studentId], ["Name", c.name], ["Course", c.course || "—"], ["Semester", c.semester || "—"], ["Department", c.department || "—"], ["Admission year", c.admissionYear || "—"],
+    ["Valid until", c.validUntil ? new Date(c.validUntil).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }) : "—"]];
+  $("det").innerHTML = rows.map(([a, b]) => `<div class="row"><span>${a}</span><b>${esc(b)}</b></div>`).join("") + `<div class="row"><span>Status</span><b><i class="pill ${st[1]}">${st[0]}</i></b></div>`;
+}
+async function load() {
+  if (busy) return; busy = true;
+  try {
+    const r = await fetch(API + "/idcard/me", { headers: { Authorization: "Bearer " + localStorage.getItem("token") }, cache: "no-store" });
+    if (r.status === 401) { localStorage.clear(); location.href = "login.html"; return; }
+    const d = await r.json();
+    if (!d.success) throw new Error(d.message);
+    showCard(d.card);
+    // use the time left on the code, measured with the server's clock, so a wrong phone clock can't hide an expired code
+    expiresAt = Date.now() + (d.expiresAt - d.serverTime); nextAt = Date.now() + d.refreshSeconds * 1000;
+    drawQR(d.token); $("msg").textContent = ""; $("stale").style.display = "none";
+  } catch (e) { $("msg").textContent = "Couldn't refresh your code: " + (e.message || "no connection") + ". Retrying…"; nextAt = Date.now() + 5000; }
+  busy = false;
+}
+setInterval(() => {
+  const now = Date.now(), left = Math.max(0, Math.ceil((nextAt - now) / 1000));
+  $("cd").textContent = left; $("bar").style.transform = `scaleX(${Math.max(0, Math.min(1, (nextAt - now) / 30000))})`;
+  $("clock").textContent = new Date().toLocaleTimeString();
+  if (expiresAt && now > expiresAt) $("stale").style.display = "flex";
+  if (now >= nextAt) load();
+}, 250);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+load();
+</script>
+</body>
+</html>

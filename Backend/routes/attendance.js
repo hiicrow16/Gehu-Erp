@@ -3,7 +3,59 @@ const router = express.Router();
 
 const Attendance = require("../models/Attendance");
 const Faculty = require("../models/Faculty");
+const Subject = require("../models/Subject");
+const Student = require("../models/Student");
 const { protect, authorize } = require("../middleware/auth");
+const { record: auditRecord } = require("../lib/audit");
+
+// Faculty may only mark/view attendance for subjects assigned to them (admin: any)
+async function canManage(req, subjectId) {
+  if (req.user.role === "admin") return true;
+  const f = await Faculty.findOne({ user: req.user.id });
+  return !!f && f.subjects.map(String).includes(String(subjectId));
+}
+
+// POST /api/attendance/bulk  { subject, date, records: [{ student, status }] } - whole class at once
+router.post("/bulk", protect, authorize("faculty", "admin"), async (req, res) => {
+  try {
+    const { subject, date, records } = req.body;
+    const d = new Date(date);
+    if (!subject || isNaN(d) || !Array.isArray(records)) {
+      return res.status(400).json({ success: false, message: "subject, date and records are required" });
+    }
+    if (!(await canManage(req, subject))) return res.status(403).json({ success: false, message: "You are not assigned to this subject" });
+    const sub = await Subject.findById(subject);
+    if (!sub) return res.status(404).json({ success: false, message: "Subject not found" });
+    const valid = new Set((await Student.find({ course: sub.course, semester: sub.semester }).select("_id")).map((x) => String(x._id)));
+    const faculty = await Faculty.findOne({ user: req.user.id });
+    const ops = records
+      .filter((r) => valid.has(String(r.student)) && ["Present", "Absent"].includes(r.status))
+      .map((r) => ({
+        updateOne: {
+          filter: { student: r.student, subject, date: d },
+          update: { $set: { status: r.status, markedBy: faculty ? faculty._id : undefined } },
+          upsert: true,
+        },
+      }));
+    const ids = ops.map((o) => o.updateOne.filter.student);
+    const prevDocs = await Attendance.find({ subject, date: d, student: { $in: ids } }).select("student status");
+    const prev = Object.fromEntries(prevDocs.map((x) => [String(x.student), x.status]));
+    if (ops.length) await Attendance.bulkWrite(ops);
+    if (ops.length) {
+      const changedOps = ops.filter((o) => prev[String(o.updateOne.filter.student)] !== o.updateOne.update.$set.status);
+      const names = Object.fromEntries((await Student.find({ _id: { $in: changedOps.map((o) => o.updateOne.filter.student) } }).select("name studentId")).map((x) => [String(x._id), `${x.studentId} - ${x.name}`]));
+      const present = ops.filter((o) => o.updateOne.update.$set.status === "Present").length;
+      await auditRecord(req, {
+        action: "mark-attendance", entity: "Attendance", entityId: subject,
+        summary: `Marked ${sub.name} on ${d.toISOString().slice(0, 10)}: ${present} present, ${ops.length - present} absent (${changedOps.length} changed)`,
+        changes: changedOps.map((o) => ({ label: names[String(o.updateOne.filter.student)], field: "status", from: prev[String(o.updateOne.filter.student)] || "not marked", to: o.updateOne.update.$set.status })),
+      });
+    }
+    res.json({ success: true, saved: ops.length });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Could not save attendance" });
+  }
+});
 
 // POST /api/attendance  (faculty, admin) - mark one student present/absent for a subject/date
 router.post("/", protect, authorize("faculty", "admin"), async (req, res) => {
@@ -13,14 +65,24 @@ router.post("/", protect, authorize("faculty", "admin"), async (req, res) => {
       return res.status(400).json({ success: false, message: "student, subject, date and status are required" });
     }
 
+    if (!(await canManage(req, subject))) return res.status(403).json({ success: false, message: "You are not assigned to this subject" });
     const faculty = await Faculty.findOne({ user: req.user.id });
 
+    const was = await Attendance.findOne({ student, subject, date: new Date(date) }).select("status");
     const record = await Attendance.findOneAndUpdate(
       { student, subject, date: new Date(date) },
       { status, markedBy: faculty ? faculty._id : undefined },
       { new: true, upsert: true, runValidators: true }
     );
 
+    if (!was || was.status !== record.status) {
+      const [st, sb] = await Promise.all([Student.findById(student).select("name studentId"), Subject.findById(subject).select("name")]);
+      await auditRecord(req, {
+        action: "mark-attendance", entity: "Attendance", entityId: subject,
+        summary: `Marked ${st ? st.name : "student"} ${record.status} in ${sb ? sb.name : "subject"} on ${new Date(date).toISOString().slice(0, 10)}`,
+        changes: [{ label: st ? `${st.studentId} - ${st.name}` : String(student), field: "status", from: was ? was.status : "not marked", to: record.status }],
+      });
+    }
     res.status(201).json({ success: true, record });
   } catch (err) {
     res.status(500).json({ success: false, message: "Could not mark attendance" });
@@ -53,6 +115,7 @@ router.get("/student/:studentId", protect, async (req, res) => {
 
 // GET /api/attendance/subject/:subjectId?date=YYYY-MM-DD  (faculty, admin)
 router.get("/subject/:subjectId", protect, authorize("faculty", "admin"), async (req, res) => {
+  if (!(await canManage(req, req.params.subjectId))) return res.status(403).json({ success: false, message: "You are not assigned to this subject" });
   const filter = { subject: req.params.subjectId };
   if (req.query.date) filter.date = new Date(req.query.date);
 
