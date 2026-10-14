@@ -9,8 +9,8 @@ const Assignment = require("../models/Assignment");
 const Submission = require("../models/Submission");
 const Subject = require("../models/Subject");
 const Faculty = require("../models/Faculty");
-const { record: auditRecord } = require("../lib/audit");
 const { protect, authorize } = require("../middleware/auth");
+const { logAudit } = require("../middleware/audit");
 
 const staff = [protect, authorize("admin", "faculty")];
 const wrap = (fn) => (req, res) =>
@@ -149,16 +149,20 @@ router.post("/results", ...staff, wrap(async (req, res) => {
   if (!sub || !st) return res.status(404).json({ success: false, message: "Subject or student not found" });
   if (String(st.course) !== String(sub.course) || st.semester !== sub.semester) return bad(res, "That student is not in this subject's course/semester");
   if (Number(marksObtained) > Number(maxMarks)) return bad(res, "Marks cannot exceed max marks");
-  const was = await Result.findOne({ student: st._id, subject, examTitle });
+  const before = await Result.findOne({ student: st._id, subject, examTitle }).lean();
   const item = await Result.findOneAndUpdate(
     { student: st._id, subject, examTitle },
     { marksObtained, maxMarks, published: !!published },
     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
   );
-  const label = `${st.studentId} - ${st.name}`, ch = [];
-  if (!was || was.marksObtained !== item.marksObtained) ch.push({ label, field: "marks", from: was ? was.marksObtained : "none", to: item.marksObtained });
-  if ((was ? was.published : false) !== item.published) ch.push({ label, field: "published", from: was ? was.published : false, to: item.published });
-  if (ch.length) await auditRecord(req, { action: "enter-marks", entity: "Result", entityId: subject, summary: `Entered ${sub.name} marks for "${examTitle}" - ${label}`, changes: ch });
+  logAudit(req, {
+    action: before ? "update" : "create",
+    entityType: "Result",
+    entityId: item._id,
+    entityLabel: `${st.name} (${st.studentId}) — ${sub.name} — ${examTitle}`,
+    before: before ? { marksObtained: before.marksObtained, maxMarks: before.maxMarks, published: before.published } : null,
+    after: { marksObtained: item.marksObtained, maxMarks: item.maxMarks, published: item.published },
+  });
   res.status(201).json({ success: true, item });
 }));
 
@@ -177,18 +181,13 @@ router.post("/results/bulk", ...staff, wrap(async (req, res) => {
     if (!valid.has(String(e.student)) || isNaN(m) || m < 0 || m > max) return bad(res, "Invalid marks entry (must be between 0 and max marks)");
     ops.push({ updateOne: { filter: { student: e.student, subject, examTitle: String(examTitle).trim() }, update: { $set: { marksObtained: m, maxMarks: max, published: !!published } }, upsert: true } });
   }
-  const prevRows = await Result.find({ subject, examTitle: String(examTitle).trim(), student: { $in: ops.map((o) => o.updateOne.filter.student) } }).populate("student", "name studentId");
-  const prev = Object.fromEntries(prevRows.map((r) => [String(r.student._id), r]));
   if (ops.length) await Result.bulkWrite(ops);
-  const changes = [];
-  const nameOf = Object.fromEntries((await Student.find({ _id: { $in: ops.map((o) => o.updateOne.filter.student) } }).select("name studentId")).map((x) => [String(x._id), `${x.studentId} - ${x.name}`]));
-  ops.forEach((o) => {
-    const sid = String(o.updateOne.filter.student), p = prev[sid], n = o.updateOne.update.$set, label = nameOf[sid];
-    if (!p || p.marksObtained !== n.marksObtained) changes.push({ label, field: "marks", from: p ? p.marksObtained : "none", to: n.marksObtained });
-    if (p && p.maxMarks !== n.maxMarks) changes.push({ label, field: "max marks", from: p.maxMarks, to: n.maxMarks });
-    if ((p ? p.published : false) !== n.published) changes.push({ label, field: "published", from: p ? p.published : false, to: n.published });
+  logAudit(req, {
+    action: "update",
+    entityType: "Result",
+    entityLabel: `Bulk entry — ${sub.name} — ${examTitle} (${ops.length} student${ops.length === 1 ? "" : "s"})`,
+    after: { subject: sub.name, examTitle, maxMarks: max, published: !!published, count: ops.length },
   });
-  if (changes.length) await auditRecord(req, { action: "enter-marks", entity: "Result", entityId: subject, summary: `Entered ${sub.name} marks for "${String(examTitle).trim()}" (${ops.length} students, ${changes.length} change(s))${published ? ", published" : ", saved as draft"}`, changes });
   res.json({ success: true, saved: ops.length });
 }));
 
@@ -206,19 +205,29 @@ router.get("/results", ...staff, wrap(async (req, res) => {
 router.put("/results/publish", ...staff, wrap(async (req, res) => {
   const { subject, examTitle } = req.body;
   if (!owns(await mySubjectIds(req), subject)) return deny(res);
-  const drafts = await Result.find({ subject, examTitle, published: false }).populate("student", "name studentId");
   const r = await Result.updateMany({ subject, examTitle }, { published: true });
-  if (drafts.length) await auditRecord(req, { action: "publish-results", entity: "Result", entityId: subject, summary: `Published ${drafts.length} result(s) for "${examTitle}"`, changes: drafts.map((x) => ({ label: x.student ? `${x.student.studentId} - ${x.student.name}` : String(x.student), field: "published", from: false, to: true })) });
+  const subDoc = await Subject.findById(subject).select("name");
+  logAudit(req, {
+    action: "update",
+    entityType: "Result",
+    entityLabel: `Published all results — ${subDoc ? subDoc.name : subject} — ${examTitle} (${r.modifiedCount} updated)`,
+    after: { subject: subDoc ? subDoc.name : subject, examTitle, published: true, count: r.modifiedCount },
+  });
   res.json({ success: true, published: r.modifiedCount });
 }));
 
 router.delete("/results/:id", ...staff, wrap(async (req, res) => {
-  const doc = await Result.findById(req.params.id);
+  const doc = await Result.findById(req.params.id).populate("subject", "name").populate("student", "name studentId");
   if (!doc) return res.status(404).json({ success: false, message: "Not found" });
-  if (!owns(await mySubjectIds(req), doc.subject)) return deny(res);
-  const owner = await Student.findById(doc.student).select("name studentId");
+  if (!owns(await mySubjectIds(req), doc.subject?._id)) return deny(res);
+  logAudit(req, {
+    action: "delete",
+    entityType: "Result",
+    entityId: doc._id,
+    entityLabel: `${doc.student?.name || "?"} (${doc.student?.studentId || "?"}) — ${doc.subject?.name || "?"} — ${doc.examTitle}`,
+    before: { marksObtained: doc.marksObtained, maxMarks: doc.maxMarks, published: doc.published },
+  });
   await doc.deleteOne();
-  await auditRecord(req, { action: "delete-result", entity: "Result", entityId: doc.subject, summary: `Deleted result "${doc.examTitle}" for ${owner ? owner.studentId + " - " + owner.name : "a student"}`, changes: [{ label: owner ? `${owner.studentId} - ${owner.name}` : "student", field: "marks", from: doc.marksObtained, to: "deleted" }] });
   res.json({ success: true });
 }));
 

@@ -6,7 +6,8 @@ const attendanceSchema = new mongoose.Schema(
     subject: { type: mongoose.Schema.Types.ObjectId, ref: "Subject", required: true },
     date: { type: Date, required: true },
     status: { type: String, enum: ["Present", "Absent"], required: true },
-    markedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Faculty" },
+    method: { type: String, enum: ["manual", "face"], default: "manual" },
+    markedBy:{ type: mongoose.Schema.Types.ObjectId, ref: "Faculty" },
   },
   { timestamps: true }
 );

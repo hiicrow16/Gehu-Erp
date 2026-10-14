@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Face Attendance - GEHU</title>
+<style>
+:root{--bg:#eaf2f3;--ink:#17323a;--mut:#64808a;--line:#e3ecee;--teal:#3b7f86;--teal2:#2f6a70;--ok:#16a34a;--bad:#dc2626}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',system-ui,sans-serif}
+header{background:var(--teal);color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header a{color:#e4f3f4;text-decoration:none;font-size:14px;margin-left:16px}
+main{max-width:1100px;margin:22px auto;padding:0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;align-items:end}
+label{font-size:12px;color:var(--mut);display:block;margin-bottom:3px}
+select,input[type=date]{width:100%;padding:9px 10px;border:1px solid #d5e2e5;border-radius:8px;font:inherit;background:#fff}
+.btn{border:0;background:var(--teal);color:#fff;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:14px}
+.btn:hover{background:var(--teal2)}.btn.o{background:#fff;color:var(--teal);border:1px solid var(--teal)}.btn:disabled{opacity:.5;cursor:default}
+.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.cam{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:4/3}
+.cam video,.cam canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam video{transform:scaleX(-1)}.cam canvas{transform:scaleX(-1)}
+#msg{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.7));font-size:14px;z-index:2}
+.stat{display:flex;gap:18px;margin:10px 0;font-size:14px;color:var(--mut)}.stat b{color:var(--ink);font-size:22px;display:block}
+.list{max-height:460px;overflow:auto}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border-bottom:1px solid var(--line);font-size:14px}
+.row small{color:var(--mut)}.row.here{background:#f0fdf4}
+.pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}.pill.y{background:#dcfce7;color:#166534}.pill.n{background:#f1f5f9;color:#64748b}.pill.w{background:#fef3c7;color:#92400e}
+.opt{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin-top:12px}.opt label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:13px;margin:0}
+#toast{position:fixed;right:18px;bottom:18px;background:#17323a;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:9}
+</style>
+</head>
+<body>
+<header><b>Face Attendance</b><span><a id="back" href="faculty-dashboard.html">Dashboard</a><a id="enrolLink" href="admin-face.html" style="display:none">Enrol faces</a></span></header>
+<main>
+  <div class="card">
+    <div class="f">
+      <div id="modeBox" style="display:none"><label>Mode</label><select id="mode" onchange="modeChanged()"><option value="class">Class attendance (students)</option><option value="faculty">Faculty check-in (gate)</option></select></div>
+      <div id="subBox"><label>Subject</label><select id="sub"></select></div>
+      <div id="dateBox"><label>Date</label><input type="date" id="date"></div>
+      <div><button class="btn" id="start" onclick="start()">Start camera</button> <button class="btn o" id="stop" onclick="stop()" disabled>Stop</button></div>
+    </div>
+    <div class="opt">
+      <label><input type="checkbox" id="live" checked> Require a blink (blocks photos held up to the camera)</label>
+      <span id="models">Loading face models…</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="cam"><video id="v" playsinline muted></video><canvas id="c"></canvas><div id="msg">Press “Start camera”.</div></div>
+      <div class="stat"><div><b id="nHere">0</b>recognised</div><div><b id="nTotal">0</b>on roster</div><div><b id="nNo">0</b>no face on file</div></div>
+      <div id="classActions"><button class="btn o" id="fin" onclick="finish()" disabled>Mark everyone else Absent &amp; finish</button></div>
+    </div>
+    <div class="card"><b id="listTitle">Roster</b><div class="list" id="list"></div></div>
+  </div>
+</main>
+<div id="toast"></div>
+
+<script src="config.js"></script>
+<script src="vendor/face-api/face-api.js"></script>
+<script>
+const API = window.API_BASE, $ = id => document.getElementById(id);
+const role = localStorage.getItem("role");
+if (!["faculty", "admin"].includes(role) || !localStorage.getItem("token")) location.href = "login.html";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+async function call(path, method = "GET", body) {
+  const r = await fetch(API + path, { method, headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` }, body: body ? JSON.stringify(body) : undefined });
+  const d = await r.json().catch(() => ({})); if (!d.success) throw new Error(d.message || "Request failed"); return d;
+}
+function toast(m) { const t = $("toast"); t.textContent = m; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 3500); }
+const say = m => $("msg").textContent = m;
+
+const MATCH_DISTANCE = 0.5;   // lower = stricter (0.6 is the library default)
+const NEED_FRAMES = 3;        // same person must be seen in 3 frames in a row
+const EAR_CLOSED = 0.21, EAR_OPEN = 0.26;
+
+let roster = [], matcher = null, stream = null, running = false, modelsReady = false;
+let streak = {}, blinkState = {}, here = new Map(), pendingSave = new Set(), saved = new Set(), saveTimer = null;
+
+if (role === "admin") { $("modeBox").style.display = ""; $("enrolLink").style.display = ""; $("back").href = "admin-dashboard.html"; }
+$("date").value = new Date().toISOString().slice(0, 10);
+
+(async () => {
+  try {
+    const base = "vendor/face-api/model";
+    await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(base), faceapi.nets.faceLandmark68Net.loadFromUri(base), faceapi.nets.faceRecognitionNet.loadFromUri(base)]);
+    modelsReady = true; $("models").textContent = "Face models ready ✓";
+  } catch (e) { $("models").textContent = "Could not load face models: " + e.message; }
+  try {
+    const subs = role === "admin" ? (await call("/subjects")).subjects : (await call("/academics/faculty/subjects")).items;
+    $("sub").innerHTML = subs.length ? subs.map(s => `<option value="${s._id}">${esc(s.name)} (${esc(s.code)}) — ${esc(s.course ? s.course.name : "?")} Sem ${s.semester}</option>`).join("") : `<option value="">No subjects available</option>`;
+  } catch (e) { toast(e.message); }
+})();
+
+const mode = () => (role === "admin" && $("mode").value === "faculty") ? "faculty" : "class";
+function modeChanged() {
+  const f = mode() === "faculty";
+  $("subBox").style.display = f ? "none" : ""; $("dateBox").style.display = f ? "none" : ""; $("classActions").style.display = f ? "none" : "";
+  $("listTitle").textContent = f ? "Faculty today" : "Roster";
+}
+
+async function loadRoster() {
+  if (mode() === "faculty") {
+    roster = (await call("/face/roster/faculty")).roster;
+    const today = (await call("/face/faculty-attendance")).records;
+    today.forEach(r => { if (r.faculty) { here.set(String(r.faculty._id), new Date(r.checkIn)); saved.add(String(r.faculty._id)); } });
+  } else {
+    if (!$("sub").value) throw new Error("Choose a subject first");
+    roster = (await call(`/face/roster/subject/${$("sub").value}`)).roster;
+    try { // already-present students for that day stay ticked
+      const prev = (await call(`/attendance/subject/${$("sub").value}?date=${$("date").value}`)).records;
+      prev.filter(r => r.status === "Present" && r.student).forEach(r => { here.set(String(r.student._id), new Date()); saved.add(String(r.student._id)); });
+    } catch (e) {}
+  }
+  const labeled = roster.filter(p => p.descriptor).map(p => new faceapi.LabeledFaceDescriptors(String(p.id), [new Float32Array(p.descriptor)]));
+  matcher = labeled.length ? new faceapi.FaceMatcher(labeled, MATCH_DISTANCE) : null;
+  $("nTotal").textContent = roster.length; $("nNo").textContent = roster.filter(p => !p.descriptor).length;
+  renderList();
+}
+
+function renderList() {
+  const rows = [...roster].sort((a, b) => (here.has(String(b.id)) - here.has(String(a.id))) || String(a.code).localeCompare(String(b.code)));
+  $("list").innerHTML = rows.map(p => {
+    const h = here.has(String(p.id));
+    return `<div class="row ${h ? "here" : ""}"><div><b>${esc(p.name)}</b><br><small>${esc(p.code)}</small></div>
+      <span class="pill ${h ? "y" : p.descriptor ? "n" : "w"}">${h ? "Present" : p.descriptor ? "Waiting" : "No face on file"}</span></div>`;
+  }).join("") || `<div class="row">Nobody on this roster.</div>`;
+  $("nHere").textContent = here.size;
+}
+
+async function start() {
+  if (!modelsReady) return toast("Face models are still loading");
+  try {
+    here = new Map(); saved = new Set(); pendingSave = new Set(); streak = {}; blinkState = {};
+    await loadRoster();
+    if (!matcher) say("Nobody on this roster has a face on file yet — enrol ID photos first.");
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+    $("v").srcObject = stream; await $("v").play();
+    running = true; $("start").disabled = true; $("stop").disabled = false; $("fin").disabled = mode() === "faculty";
+    ["sub", "date", "mode"].forEach(i => { const e = $(i); if (e) e.disabled = true; });
+    say($("live").checked ? "Look at the camera and blink once." : "Look at the camera.");
+    loop();
+  } catch (e) {
+    toast(e.name === "NotAllowedError" ? "Camera permission was denied" : e.message);
+  }
+}
+async function stop() {
+  running = false; clearTimeout(saveTimer); await flush();
+  if (stream) stream.getTracks().forEach(t => t.stop()); stream = null;
+  $("start").disabled = false; $("stop").disabled = true;
+  ["sub", "date", "mode"].forEach(i => { const e = $(i); if (e) e.disabled = false; });
+  const c = $("c"); c.getContext("2d").clearRect(0, 0, c.width, c.height); say("Stopped.");
+}
+
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+function ear(p) { return (dist(p[1], p[5]) + dist(p[2], p[4])) / (2 * dist(p[0], p[3])); }
+
+async function loop() {
+  if (!running) return;
+  const v = $("v"), c = $("c");
+  if (v.videoWidth) {
+    if (c.width !== v.videoWidth) { c.width = v.videoWidth; c.height = v.videoHeight; }
+    const ctx = c.getContext("2d"); ctx.clearRect(0, 0, c.width, c.height);
+    try {
+      const found = await faceapi.detectAllFaces(v, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceLandmarks().withFaceDescriptors();
+      const seen = new Set();
+      for (const f of found) {
+        const b = f.detection.box; let label = "Unknown", color = "#f59e0b";
+        const m = matcher ? matcher.findBestMatch(f.descriptor) : null;
+        if (m && m.label !== "unknown") {
+          const id = m.label, p = roster.find(x => String(x.id) === id); seen.add(id);
+          label = p ? p.name : id; color = "#16a34a";
+          if (!here.has(id)) {
+            streak[id] = (streak[id] || 0) + 1;
+            const e = (ear(f.landmarks.getLeftEye()) + ear(f.landmarks.getRightEye())) / 2, st = blinkState[id] || (blinkState[id] = { closed: false, blinked: false });
+            if (e < EAR_CLOSED) st.closed = true; else if (e > EAR_OPEN && st.closed) st.blinked = true;
+            const needBlink = $("live").checked;
+            if (needBlink && !st.blinked) { label += " — blink to confirm"; color = "#3b82f6"; }
+            if (streak[id] >= NEED_FRAMES && (!needBlink || st.blinked)) accept(id, p);
+          } else label += " ✓";
+        }
+        ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.strokeRect(b.x, b.y, b.width, b.height);
+        ctx.save(); ctx.scale(-1, 1); ctx.fillStyle = color; ctx.font = "bold 18px sans-serif";
+        ctx.fillText(label, -(b.x + b.width), Math.max(18, b.y - 8)); ctx.restore();
+      }
+      Object.keys(streak).forEach(id => { if (!seen.has(id)) { streak[id] = 0; if (blinkState[id] && !here.has(id)) blinkState[id] = { closed: false, blinked: false }; } });
+      if (!found.length && !here.size) say($("live").checked ? "Look at the camera and blink once." : "Look at the camera.");
+    } catch (e) { console.error(e); }
+  }
+  setTimeout(loop, 120);
+}
+
+function accept(id, p) {
+  here.set(id, new Date()); pendingSave.add(id); renderList();
+  say(`✓ ${p ? p.name : "Recognised"} — marked ${mode() === "faculty" ? "checked in" : "present"}`);
+  clearTimeout(saveTimer); saveTimer = setTimeout(flush, 1500);
+}
+async function flush() {
+  const ids = [...pendingSave]; if (!ids.length) return; pendingSave.clear();
+  try {
+    if (mode() === "faculty") {
+      for (const id of ids) await call("/face/faculty-checkin", "POST", { faculty: id });
+    } else {
+      await call("/face/mark", "POST", { subject: $("sub").value, date: $("date").value, students: ids });
+    }
+    ids.forEach(i => saved.add(i));
+  } catch (e) { ids.forEach(i => pendingSave.add(i)); toast("Could not save, will retry: " + e.message); saveTimer = setTimeout(flush, 5000); }
+}
+
+async function finish() {
+  const absent = roster.filter(p => !here.has(String(p.id))).length;
+  if (!confirm(`Mark the ${absent} student(s) not recognised as Absent and save?\n\nTip: students without a face on file should be marked by hand afterwards.`)) return;
+  await flush();
+  try {
+    const records = roster.map(p => ({ student: p.id, status: here.has(String(p.id)) ? "Present" : "Absent" }));
+    const d = await call("/attendance/bulk", "POST", { subject: $("sub").value, date: $("date").value, records });
+    toast(`Attendance saved for ${d.saved} student(s)`); stop();
+  } catch (e) { toast(e.message); }
+}
+window.addEventListener("beforeunload", () => { if (stream) stream.getTracks().forEach(t => t.stop()); });
+modeChanged();
+</script>
+</body>
+</html>

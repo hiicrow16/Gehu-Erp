@@ -7,7 +7,7 @@ const { protect, authorize } = require("../middleware/auth");
 // GET /api/notices/public - NO login. Only notices an admin marked audience "public" (homepage ticker).
 router.get("/public", async (req, res) => {
   try {
-    const rows = await Notice.find({ audience: "public" }).sort({ createdAt: -1 }).limit(5).select("title createdAt");
+    const rows = await Notice.find({ audience: "public" }).sort({ createdAt: -1 }).limit(5).select("title content createdAt");
     res.setHeader("Cache-Control", "public, max-age=60");
     res.json({ success: true, notices: rows });
   } catch (e) {

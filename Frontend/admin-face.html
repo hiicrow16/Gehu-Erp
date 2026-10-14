@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Face Enrolment - GEHU</title>
+<style>
+:root{--bg:#eaf2f3;--ink:#17323a;--mut:#64808a;--line:#e3ecee;--teal:#3b7f86;--teal2:#2f6a70;--ok:#16a34a;--bad:#dc2626}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',system-ui,sans-serif}
+header{background:var(--teal);color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header a{color:#e4f3f4;text-decoration:none;font-size:14px;margin-left:16px}
+main{max-width:1000px;margin:22px auto;padding:0 14px}
+h1{margin:0 0 4px;font-size:24px}.sub{color:var(--mut);font-size:14px;margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{border:1px solid var(--teal);background:#fff;color:var(--teal);border-radius:99px;padding:8px 18px;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--teal);color:#fff}
+.btn{border:0;background:var(--teal);color:#fff;border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer;font-size:13px}
+.btn:hover{background:var(--teal2)}.btn.o{background:#fff;color:var(--teal);border:1px solid var(--teal)}.btn.d{background:#fff;color:var(--bad);border:1px solid #f1c5c5}
+.btn:disabled{opacity:.5;cursor:default}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--mut);text-transform:uppercase}
+.pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}.pill.y{background:#dcfce7;color:#166534}.pill.n{background:#fee2e2;color:#991b1b}
+.thumb{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#e4f3f4}
+input[type=search]{padding:9px 10px;border:1px solid #d5e2e5;border-radius:8px;font:inherit;min-width:220px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+#log{font-size:13px;max-height:220px;overflow:auto;margin-top:10px}#log div{padding:3px 0;border-top:1px solid #f0f5f6}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.note{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+#toast{position:fixed;right:18px;bottom:18px;background:#17323a;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:9}
+</style>
+</head>
+<body>
+<header><b>Face Enrolment — from ID-card photos</b><span><a href="admin-dashboard.html">Dashboard</a><a href="face-attendance.html">Face Attendance</a></span></header>
+<main>
+  <h1>Enrol faces</h1>
+  <div class="sub">Each person's ID-card photo becomes their face template. Attendance cameras then match live faces against it.</div>
+  <div class="note"><b>Privacy:</b> face templates are biometric data. Enrol only people who have consented (add this to your admission / joining form), keep admin access limited, and delete a profile when someone leaves.</div>
+
+  <div class="tabs"><button id="tS" class="on" onclick="setKind('student')">Students</button><button id="tF" onclick="setKind('faculty')">Faculty</button></div>
+
+  <div class="card">
+    <b>Bulk enrol</b>
+    <div class="sub" style="margin:4px 0 10px">Select many ID photos at once. Name each file with the person's ID, e.g. <code>GEHU2301.jpg</code> — it is matched to the Student ID / Faculty ID automatically.</div>
+    <input type="file" id="bulk" accept="image/*" multiple style="display:none" onchange="bulkEnrol(this.files)">
+    <button class="btn" onclick="$('bulk').click()">Choose photos…</button>
+    <span id="models" class="sub" style="margin-left:10px">Loading face models…</span>
+    <div id="log"></div>
+  </div>
+
+  <div class="card">
+    <div class="bar"><input type="search" id="q" placeholder="Search name or ID" oninput="render()"><span id="count" class="sub" style="margin:0"></span></div>
+    <table><thead><tr><th></th><th>ID</th><th>Name</th><th>Details</th><th>Face</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+  </div>
+</main>
+<div id="toast"></div>
+<input type="file" id="one" accept="image/*" style="display:none">
+
+<script src="config.js"></script>
+<script src="vendor/face-api/face-api.js"></script>
+<script>
+const API = window.API_BASE, $ = id => document.getElementById(id);
+if (localStorage.getItem("role") !== "admin" || !localStorage.getItem("token")) location.href = "login.html";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const token = () => localStorage.getItem("token");
+async function call(path, method = "GET", body) {
+  const r = await fetch(API + path, { method, headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: body ? JSON.stringify(body) : undefined });
+  const d = await r.json().catch(() => ({})); if (!d.success) throw new Error(d.message || "Request failed"); return d;
+}
+function toast(m) { const t = $("toast"); t.textContent = m; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 3500); }
+
+let kind = "student", people = [], ready = false, photoUrls = {};
+
+// ---- face models (self-hosted in vendor/face-api/model) ----
+(async () => {
+  try {
+    const base = "vendor/face-api/model";
+    await Promise.all([faceapi.nets.ssdMobilenetv1.loadFromUri(base), faceapi.nets.faceLandmark68Net.loadFromUri(base), faceapi.nets.faceRecognitionNet.loadFromUri(base)]);
+    ready = true; $("models").textContent = "Face models ready ✓";
+  } catch (e) { $("models").textContent = "Could not load face models: " + e.message; }
+})();
+
+function loadImg(file) {
+  return new Promise((res, rej) => { const u = URL.createObjectURL(file), i = new Image(); i.onload = () => { URL.revokeObjectURL(u); res(i); }; i.onerror = () => rej(new Error("Not a readable image")); i.src = u; });
+}
+// Downscale to max 480px JPEG: small to store, plenty for matching and for a visual check
+function shrink(img, max = 480) {
+  const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
+  c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); return c;
+}
+// -> { descriptor, photo } or throws a readable error
+async function analyse(file) {
+  if (!ready) throw new Error("Face models are still loading");
+  const canvas = shrink(await loadImg(file));
+  const faces = await faceapi.detectAllFaces(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.6 })).withFaceLandmarks().withFaceDescriptors();
+  if (faces.length === 0) throw new Error("no clear face found");
+  if (faces.length > 1) throw new Error("more than one face in the photo");
+  const f = faces[0], b = f.detection.box;
+  if (b.width < canvas.width * 0.15) throw new Error("face is too small in the photo");
+  return { descriptor: Array.from(f.descriptor), photo: canvas.toDataURL("image/jpeg", 0.85) };
+}
+async function enrol(person, file) {
+  const a = await analyse(file);
+  await call("/face/enroll", "POST", { kind, personId: person.id, descriptor: a.descriptor, photo: a.photo });
+}
+
+// ---- list ----
+function setKind(k) { kind = k; $("tS").classList.toggle("on", k === "student"); $("tF").classList.toggle("on", k === "faculty"); load(); }
+async function load() {
+  $("rows").innerHTML = `<tr><td colspan="6" class="sub">Loading…</td></tr>`;
+  try { people = (await call(`/face/people?kind=${kind}`)).people; } catch (e) { people = []; toast(e.message); }
+  render();
+}
+function render() {
+  const q = $("q").value.trim().toLowerCase();
+  const list = people.filter(p => !q || p.name.toLowerCase().includes(q) || String(p.code).toLowerCase().includes(q));
+  const n = people.filter(p => p.enrolled).length;
+  $("count").textContent = `${n} of ${people.length} enrolled`;
+  $("rows").innerHTML = list.map(p => `<tr>
+    <td>${p.enrolled ? `<img class="thumb" data-p="${p.profileId}" alt="">` : `<div class="thumb"></div>`}</td>
+    <td>${esc(p.code)}</td><td>${esc(p.name)}</td><td>${esc(p.info)}</td>
+    <td><span class="pill ${p.enrolled ? "y" : "n"}">${p.enrolled ? "Enrolled" : "Not enrolled"}</span></td>
+    <td style="white-space:nowrap"><button class="btn o" onclick="pick('${p.id}')">${p.enrolled ? "Replace photo" : "Upload ID photo"}</button>
+    ${p.enrolled ? `<button class="btn d" onclick="del('${p.profileId}')">Remove</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="6" class="sub">Nobody found.</td></tr>`;
+  document.querySelectorAll("img[data-p]").forEach(loadThumb);
+}
+// Photos need the auth header, so fetch as blobs
+async function loadThumb(img) {
+  const id = img.dataset.p;
+  if (!photoUrls[id]) {
+    try { const r = await fetch(`${API}/face/photo/${id}`, { headers: { Authorization: `Bearer ${token()}` } }); if (!r.ok) return; photoUrls[id] = URL.createObjectURL(await r.blob()); } catch (e) { return; }
+  }
+  img.src = photoUrls[id];
+}
+function pick(id) {
+  const inp = $("one"); inp.value = "";
+  inp.onchange = async () => {
+    const f = inp.files[0]; if (!f) return;
+    const p = people.find(x => x.id === id);
+    try { toast("Checking photo…"); await enrol(p, f); delete photoUrls[p.profileId]; toast(`Enrolled ${p.name}`); load(); } catch (e) { toast(`${p.name}: ${e.message}`); }
+  };
+  inp.click();
+}
+async function del(profileId) {
+  if (!confirm("Remove this face profile and its stored photo?")) return;
+  try { await call(`/face/${profileId}`, "DELETE"); delete photoUrls[profileId]; toast("Removed"); load(); } catch (e) { toast(e.message); }
+}
+async function bulkEnrol(files) {
+  const log = $("log"); log.innerHTML = "";
+  const line = (t, c) => { const d = document.createElement("div"); d.className = c || ""; d.textContent = t; log.prepend(d); };
+  let ok = 0, fail = 0;
+  for (const f of files) {
+    const stem = f.name.replace(/\.[^.]+$/, "").trim().toLowerCase();
+    const p = people.find(x => String(x.code).toLowerCase() === stem);
+    if (!p) { line(`✗ ${f.name}: no ${kind} with ID "${stem}"`, "bad"); fail++; continue; }
+    try { await enrol(p, f); line(`✓ ${f.name} → ${p.name}`, "ok"); ok++; } catch (e) { line(`✗ ${f.name} (${p.name}): ${e.message}`, "bad"); fail++; }
+  }
+  line(`Done: ${ok} enrolled, ${fail} failed`);
+  $("bulk").value = ""; photoUrls = {}; load();
+}
+load();
+</script>
+</body>
+</html>

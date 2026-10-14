@@ -189,3 +189,60 @@ hosting for the static frontend — then point your domain at them.
   it as `*` in production.
 - `.env` is not included in this zip; only `.env.example` is. Generate a
   fresh `JWT_SECRET` for production rather than reusing any example value.
+
+---
+
+## Face-recognition attendance (added)
+
+Uses the photo on each person's **ID card** as their face template — students and faculty.
+
+**Pages**
+- `Frontend/admin-face.html` (admin) — upload ID photos one by one, or bulk-select many files named by ID
+  (e.g. `GEHU2301.jpg` → matched to Student ID / Faculty ID). Rejects photos with no face or several faces.
+- `Frontend/face-attendance.html` (faculty + admin) — open the camera, pick subject/date; recognised students
+  are marked Present automatically. "Mark everyone else Absent & finish" closes the session.
+  Admin can switch to **Faculty check-in** mode (gate camera, first scan of the day is kept).
+- Links added to the faculty sidebar and the admin dashboard.
+
+**How it works**
+- Face detection/matching runs in the browser (self-hosted `@vladmandic/face-api` in `Frontend/vendor/face-api`,
+  no third-party calls). Only a 128-number template + a small resized ID photo is stored (MongoDB, `FaceProfile`).
+- Match must be seen in 3 consecutive frames, distance < 0.5, plus an optional blink check against held-up photos.
+- Backend: `Backend/routes/face.js` (`/api/face/*`), models `FaceProfile`, `FacultyAttendance`; `Attendance.method` is now `manual|face`.
+- No new env vars or npm packages needed. Redeploy the backend and frontend.
+
+**Limits / be aware**
+- Blink check is basic liveness, not bank-grade; a video of the person can still fool it. Use with a teacher present.
+- Accuracy depends on the ID photo quality (clear, front-facing, one face) and classroom lighting.
+- Face templates are biometric data: get consent, restrict admin access, delete profiles when people leave.
+- Not tested here against a real MongoDB or real faces (no DB/camera in the build sandbox) — test with 3-4 people first.
+
+## Homepage redesign notes
+- `Frontend/index.html`, `gehu.css`, `gehu.js` — editorial homepage (Newsreader + Public Sans, self-hosted in `fonts/`; palette #F7F6F2 / #17243A / #252525 / #777873, burgundy #7B2230 accent).
+- Login, apply, store, help/tracking, notices feed and face-attendance links are unchanged.
+- Only four real photographs exist in the project (campus lawn, lecture hall, volleyball, Grafest poster). To add labs / library / hostel photos, drop real images in `Frontend/img/` and add a `<figure class="photo">` where the comment in the Campus section says.
+- `index-classic.html` and `index-dark.html` are the earlier versions, kept for reference.
+
+---
+
+## Homepage pass 2 (Oct 2026): what changed, how to run and test
+
+**Files changed**
+- `Frontend/index.html` — unverified Grafest date removed (now "April 2026"; poster caption no longer claims a year); eligibility/address corrections from the earlier fact-check.
+- `Frontend/gehu.css` — hero perspective for the depth effect; tighter staggered Campus-life layout; Research rows react on hover; optional `.p-photo` slot for program photographs; reduced-motion rules extended; signed-in menu label in sentence case.
+- `Frontend/gehu.js` — `heroDepth()` (the one 3D effect) and `mobilePortal()` (phone menu links signed-in users to their own dashboard).
+- `README.md` — this section.
+
+**The 3D effect**: the hero photograph turns up to about 1° toward the mouse while the headline block moves a few pixels the opposite way. CSS transforms only (no Three.js — a single photo has no depth data, and a 3D library would add hundreds of KB for no visible gain). Mouse only; off on touch devices and under `prefers-reduced-motion`.
+
+**Adding program photographs** (none exist in the project yet): put a real GEHU photo in `Frontend/img/programs/` (WebP, about 1200x800) and add this as the first child of the matching `<a class="program">` in `index.html`:
+`<div class="p-photo"><img src="img/programs/btech.webp" alt="Describe the photo" width="1200" height="800" loading="lazy" decoding="async"></div>`
+Hover zoom and spacing are already styled.
+
+**Run locally**
+1. Backend: copy `Backend/.env.example` to `Backend/.env`, fill in real values, then `cd Backend && npm install && npm run dev`.
+2. Frontend: serve the `Frontend/` folder (e.g. `npx serve Frontend` or VS Code Live Server). `Frontend/config.js` sets `API_BASE`; point it at `http://localhost:5000/api` for local work and add your frontend origin to `CLIENT_URL`.
+
+**Test checklist**: nav links and mobile menu; Apply links (`apply.html?course=...`); program finder; notices strip and news list (needs a public notice in the database); Help tabs (FAQ, track order, track admission, ticket, cheat notes); login for student, faculty and admin; open the page with "reduce motion" enabled in the OS and confirm nothing moves.
+
+**Not verified**: admission deadlines (the official site lists none), the exact Grafest dates, placement figures, and anything that needs the live database or backend.

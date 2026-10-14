@@ -1,8 +1,8 @@
 /* GEHU Portal service worker: fast repeat visits + offline fallback.
    Network-first for pages/code (so deploys always show up), stale-while-revalidate for img/ and vendor/.
    API calls (other origin) are never touched. Bump V to force-clear old caches. */
-const V = "gehu-v2";
-const SHELL = ["./", "index.html", "home.css", "home-plus.css", "home-plus.js", "shell.css", "config.js", "img/logo.webp", "img/logo-96.png"];
+const V = "gehu-v3";
+const SHELL = ["./", "index.html", "gehu.css", "gehu.js", "help.min.js", "shell.css", "config.js", "img/logo.webp", "img/logo-96.png"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(V).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => {
   e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((x) => x !== V).map((x) => caches.delete(x)))).then(() => self.clients.claim()));

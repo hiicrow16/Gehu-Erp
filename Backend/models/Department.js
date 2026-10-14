@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 
+// A managed reference list so "department" is picked from one canonical set
+// instead of being freely typed on every Course/Faculty/Student form.
+// Course/Faculty/Student still store department as plain text (no schema
+// migration), but the admin UI now sources that text from here.
 const departmentSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, unique: true, trim: true }, // e.g. "Computer Science"
-    code: { type: String, required: true, unique: true, trim: true, uppercase: true }, // e.g. "CSE"
-    head: { type: String, trim: true }, // head of department (free text)
-    description: { type: String, trim: true },
+    name: { type: String, required: true, unique: true, trim: true },
+    code: { type: String, trim: true },
   },
   { timestamps: true }
 );

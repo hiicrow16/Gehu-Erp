@@ -27,3 +27,19 @@ window.SUPPORT = {
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", apply); else apply();
 })();
+
+/* ------------------------------------------------------------------
+   HOMEPAGE CONTENT YOU CAN FILL IN (both are empty on purpose: the
+   homepage only shows verified information)
+------------------------------------------------------------------- */
+// Real photographs for the Campus and facilities grid (library, labs, hostels...).
+// Put the files in Frontend/img and list them here:
+// window.GEHU_GALLERY = [
+//   { src: "img/library.webp", alt: "Reading hall of the central library", caption: "Library" },
+//   { src: "img/laboratory.webp", alt: "A teaching laboratory", caption: "Laboratories" }
+// ];
+window.GEHU_GALLERY = [];
+
+// Placement / achievement figures. Each needs a value, a label and a source (with year).
+// window.GEHU_FIGURES = [{ value: "2,270+", label: "Offers made", source: "Placement report 2025" }];
+window.GEHU_FIGURES = [];

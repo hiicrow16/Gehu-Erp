@@ -4,6 +4,7 @@ const router = express.Router();
 const User = require("../models/User");
 const Student = require("../models/Student");
 const { protect, authorize } = require("../middleware/auth");
+const { logAudit } = require("../middleware/audit");
 
 // Student logins that no Student profile points to.
 async function findOrphanLogins() {
@@ -168,6 +169,7 @@ router.put("/:id", protect, authorize("admin"), async (req, res) => {
 
     const student = await Student.findById(req.params.id);
     if (!student) return res.status(404).json({ success: false, message: "Student not found" });
+    const before = { name: student.name, email: student.email, phone: student.phone, course: student.course, semester: student.semester, department: student.department, admissionYear: student.admissionYear };
 
     if (username) {
       const trimmed = String(username).trim();
@@ -185,6 +187,15 @@ router.put("/:id", protect, authorize("admin"), async (req, res) => {
     )
       .populate("course")
       .populate("user", "username isActive");
+
+    logAudit(req, {
+      action: "update",
+      entityType: "Student",
+      entityId: updated._id,
+      entityLabel: `${updated.name} (${updated.studentId})`,
+      before,
+      after: { name, email, phone, course, semester, department, admissionYear },
+    });
 
     res.json({ success: true, student: updated });
   } catch (err) {
@@ -213,6 +224,13 @@ router.put("/:id/password", protect, authorize("admin"), async (req, res) => {
     user.password = password; // pre-save hook rehashes this
     await user.save();
 
+    logAudit(req, {
+      action: "update",
+      entityType: "Student",
+      entityId: student._id,
+      entityLabel: `${student.name} (${student.studentId}) — password reset`,
+    });
+
     res.json({ success: true, message: "Password updated" });
   } catch (err) {
     res.status(500).json({ success: false, message: "Could not update password" });
@@ -220,19 +238,6 @@ router.put("/:id/password", protect, authorize("admin"), async (req, res) => {
 });
 
 // DELETE /api/students/:id  (admin) - removes the student profile and their login
-// PUT /api/students/:id/active  (admin) - disable or re-enable a student's login without deleting anything
-router.put("/:id/active", protect, authorize("admin"), async (req, res) => {
-  try {
-    const student = await Student.findById(req.params.id);
-    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
-    const active = !(req.body.isActive === false || req.body.isActive === "false");
-    await User.findByIdAndUpdate(student.user, { isActive: active });
-    res.json({ success: true, isActive: active });
-  } catch (err) {
-    res.status(500).json({ success: false, message: "Could not update the account" });
-  }
-});
-
 router.delete("/:id", protect, authorize("admin"), async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);
@@ -240,6 +245,14 @@ router.delete("/:id", protect, authorize("admin"), async (req, res) => {
 
     await Student.deleteOne({ _id: student._id });
     await User.deleteOne({ _id: student.user });
+
+    logAudit(req, {
+      action: "delete",
+      entityType: "Student",
+      entityId: student._id,
+      entityLabel: `${student.name} (${student.studentId})`,
+      before: { name: student.name, studentId: student.studentId, email: student.email, course: student.course, semester: student.semester },
+    });
 
     res.json({ success: true, message: "Student deleted" });
   } catch (err) {

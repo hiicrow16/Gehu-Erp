@@ -2,6 +2,7 @@
   "name": "gehu-portal-frontend",
   "private": true,
   "scripts": {
+    "build:help": "esbuild src-home/help-entry.js --bundle --minify --format=iife --target=es2020 --outfile=Frontend/help.min.js",
     "build:home": "esbuild src-home/home.src.js --bundle --minify --format=esm --target=es2020 --outfile=Frontend/home.min.js"
   },
   "dependencies": { "three": "0.170.0" },

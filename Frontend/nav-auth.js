@@ -23,7 +23,7 @@
     var dash = DASH[role];
     wrap.style.position = "relative";
     wrap.innerHTML =
-      '<button id="studentBtn" type="button" title="' + esc(name) + '">👤 ' + esc(name.length > 18 ? name.slice(0, 17) + "…" : name) + ' ▾</button>' +
+      '<button id="studentBtn" type="button" title="' + esc(name) + '">' + esc(name.length > 18 ? name.slice(0, 17) + "…" : name) + ' <span aria-hidden="true">▾</span></button>' +
       '<div class="nav-user-drop" id="navUserDrop">' +
         '<div class="nud-head"><b>' + esc(name) + '</b><span>' + esc(LABEL[role] || role) + '</span></div>' +
         (dash ? '<a href="' + dash + '">' + (role === "admin" ? "Admin Dashboard" : role === "faculty" ? "Faculty Portal" : "My Dashboard") + '</a>'

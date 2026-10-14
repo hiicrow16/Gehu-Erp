@@ -1,210 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>GEHU — Graphic Era Hill University</title>
-  <meta name="description" content="Graphic Era Hill University — inspire, innovate, impact. Explore departments, programs, campus life and apply for the 2026 session.">
-  <meta name="theme-color" content="#0b0908">
-  <link rel="icon" href="img/logo-96.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="home.css">
-  <link rel="stylesheet" href="shell.css">
-  <link rel="stylesheet" href="home-plus.css">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="img/icon-192.png">
-  <link rel="preconnect" href="https://gehu-erp-backend.onrender.com" crossorigin>
-<script>try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Graphic Era Hill University — Dehradun, Bhimtal, Haldwani</title>
+<meta name="description" content="Graphic Era Hill University is a private university in Uttarakhand with campuses in Dehradun, Bhimtal and Haldwani. Explore programs, campus life and apply for the 2026 session.">
+<meta name="theme-color" content="#F7F6F2">
+<link rel="icon" href="img/logo-96.png">
+<link rel="preload" href="fonts/newsreader-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="gehu.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="preload" as="image" href="img/hero-wide.webp" media="(min-width: 761px)" type="image/webp">
+<link rel="preconnect" href="https://gehu-erp-backend.onrender.com" crossorigin>
+<script>document.documentElement.classList.add("js");try{if(sessionStorage.getItem("gehu-nav"))document.documentElement.classList.add("entering")}catch(e){}</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<!-- PRELOADER -->
-<div class="loader" id="loader" aria-hidden="true">
-  <div class="loader-inner">
-    <img src="img/logo.webp" alt="" class="loader-logo">
-    <div class="loader-count"><span id="loaderNum">0</span><i>%</i></div>
-    <div class="loader-bar"><b id="loaderBar"></b></div>
+<!-- ============ HEADER ============ -->
+<header class="site-header" id="siteHeader">
+  <div class="bar">
+    <a href="#top" class="brand" aria-label="Graphic Era Hill University, home">
+      <img src="img/logo-96.png" width="40" height="40" alt="">
+      <span class="brand-text"><b>Graphic Era</b><i>Hill University</i></span>
+    </a>
+    <nav class="primary" id="primaryNav" aria-label="Primary">
+      <a href="#academics">Academics</a>
+      <a href="#admissions">Admissions</a>
+      <a href="#research">Research</a>
+      <a href="#student-life">Campus Life</a>
+      <a href="#placements">Placements</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a href="login.html" class="portal-m">Student Portal</a>
+    </nav>
+    <div class="nav-actions"><a id="studentBtn" href="login.html" class="portal">Student Portal</a></div>
+    <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="primaryNav"><i></i><i></i></button>
   </div>
-</div>
-
-<script src="loader-plus.js"></script>
-<script src="intro-video.js"></script>
-
-<!-- WEBGL CANVAS (fixed behind everything) -->
-<canvas id="gl" aria-hidden="true"></canvas>
-<div class="vignette" aria-hidden="true"></div>
-<div class="grain" aria-hidden="true"></div>
-<div class="cursor" id="cursor" aria-hidden="true"><span></span></div>
-<div class="progress" id="progress" aria-hidden="true"><b></b></div>
-
-<!-- NAV -->
-<header class="nav" id="nav">
-  <a href="#top" class="brand" data-magnetic>
-    <img src="img/logo.webp" alt="GEHU logo">
-    <span>GEHU<small>Graphic Era Hill University</small></span>
-  </a>
-  <nav class="nav-links" id="navLinks" aria-label="Primary">
-    <a href="#about">Discover</a>
-    <a href="#departments">Departments</a>
-    <a href="#campus">Campus</a>
-    <a href="#programs">Programs</a>
-    <a href="#team">Team</a>
-    <a href="#help">Help</a>
-    <a href="store.html">Store</a>
-  </nav>
-  <div class="nav-actions">
-    <a class="btn btn-ghost-sm" href="apply.html">Apply</a>
-    <div class="nav-actions-login"><button id="studentBtn" class="btn btn-solid-sm" type="button">Student / Faculty Login</button></div>
-  </div>
-  <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><i></i><i></i></button>
 </header>
 
-<main id="top">
-
+<main id="main">
 <!-- ============ HERO ============ -->
-<section class="hero" id="hero" data-section="0">
-  <div class="hero-inner">
-    <p class="eyebrow reveal-line"><span class="pip"></span>Admissions open · 2026 session</p>
-    <h1 class="hero-title" aria-label="Inspire. Innovate. Impact.">
-      <span class="line"><span class="word">Inspire.</span></span>
-      <span class="line"><span class="word">Innovate.</span></span>
-      <span class="line"><span class="word flame">Impact.</span></span>
-    </h1>
-    <p class="hero-sub reveal-line">Empowering tomorrow's leaders through quality education, research and innovation — on a campus built for engineers, thinkers and builders.</p>
-    <div class="hero-cta reveal-line">
-      <a href="apply.html" class="btn btn-solid" data-magnetic><span>Apply for Admission</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      <a href="#departments" class="btn btn-outline" data-magnetic><span>Explore Departments</span></a>
+<section class="hero" id="top" aria-labelledby="heroTitle">
+  <div class="hero-media" aria-hidden="true">
+    <picture>
+      <source media="(max-width: 760px)" srcset="img/hero-tall.webp" type="image/webp">
+      <source srcset="img/hero-wide.webp" type="image/webp">
+      <img src="img/hero-wide.jpg" alt="" width="1400" height="1000" fetchpriority="high" decoding="async" data-parallax="0.18">
+    </picture>
+  </div>
+  <div class="hero-scrim" aria-hidden="true"></div>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="kicker">Admissions open · 2026 session</p>
+      <h1 id="heroTitle">Where Ambition<br>Meets Innovation.</h1>
+      <p class="hero-intro">Graphic Era Hill University is a private university in Uttarakhand, with campuses in Dehradun, Bhimtal and Haldwani.</p>
+      <div class="actions">
+        <a href="#academics" class="btn btn-light">Explore Academics</a>
+        <a href="#admissions" class="btn btn-line-light">Admissions</a>
+      </div>
     </div>
+    <p class="hero-credit">The GEHU lawn, Dehradun campus</p>
   </div>
-  <div class="hero-badges reveal-line">
-    <span>NAAC A+ Accredited</span><span>UGC Approved</span><span>24×7 Student Support</span>
-  </div>
-  <a href="#about" class="scroll-hint" aria-label="Scroll down"><span>Scroll</span><i></i></a>
 </section>
 
-<!-- ============ MARQUEE ============ -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track">
-    <span>Inspire</span><em>✦</em><span>Innovate</span><em>✦</em><span>Impact</span><em>✦</em><span>Transforming dreams into reality</span><em>✦</em>
-    <span>Inspire</span><em>✦</em><span>Innovate</span><em>✦</em><span>Impact</span><em>✦</em><span>Transforming dreams into reality</span><em>✦</em>
+<!-- ============ NOTICE STRIP (live public notices from the portal) ============ -->
+<aside class="strip" id="pulse" aria-label="Latest announcements" hidden>
+  <div class="wrap strip-in">
+    <span class="strip-label">Announcement</span>
+    <div class="strip-feed" id="pulseFeed" aria-live="polite"></div>
+    <a href="#news" class="strip-more">All news</a>
   </div>
-</div>
+</aside>
 
-<!-- ============ CAMPUS PULSE (live status + public notices) ============ -->
-<section class="pulse" id="pulse" aria-label="Campus pulse" data-state="loading">
+<!-- ============ ABOUT ============ -->
+<section class="section about" id="about" aria-labelledby="aboutTitle">
   <div class="wrap">
-    <div class="pulse-bar glass fx">
-      <div class="pulse-status"><i class="pulse-dot"></i><span id="pulseState">Connecting…</span></div>
-      <i class="pulse-sep"></i>
-      <div class="pulse-feed" id="pulseFeed" aria-live="polite"><div class="pulse-item on"><b>Loading campus announcements…</b></div></div>
+    <div class="about-grid">
+      <div class="about-copy">
+        <p class="label">About the university</p>
+        <h2 id="aboutTitle" class="h2">A university in the hills, built around its students.</h2>
+        <div class="prose">
+          <p>Graphic Era Hill University was founded in 2011 as a private university in Dehradun, Uttarakhand. Today it teaches across three campuses — Dehradun, Bhimtal and Haldwani — in engineering, computer applications, management and other disciplines.</p>
+          <p>Admission is based on merit in the qualifying examination, and the application is completed online.</p>
+        </div>
+        <a href="https://www.gehu.ac.in" class="text-link" target="_blank" rel="noopener">Visit the official university website</a>
+      </div>
+      <figure class="photo reveal-img about-photo" data-tilt>
+        <div class="frame"><img src="img/cer.webp" alt="Students in a lecture hall at GEHU with red and blue wall panels" width="1400" height="1050" loading="lazy" decoding="async" data-parallax="0.06"></div>
+        <figcaption>A lecture hall at GEHU</figcaption>
+      </figure>
     </div>
+    <dl class="facts reveal">
+      <div><dt>Founded</dt><dd>2011</dd></div>
+      <div><dt>Campuses</dt><dd>Dehradun · Bhimtal · Haldwani</dd></div>
+      <div><dt>State</dt><dd>Uttarakhand, India</dd></div>
+      <div><dt>Admission</dt><dd>Merit of the qualifying examination</dd></div>
+    </dl>
   </div>
 </section>
 
-<!-- ============ ABOUT + STATS ============ -->
-<section class="section about" id="about" data-section="1">
-  <div class="wrap two-col">
-    <div class="about-copy">
-      <p class="eyebrow"><span class="pip"></span>Who we are</p>
-      <h2 class="h2 split">A university built to turn ambition into outcomes.</h2>
-      <p class="lead fade-up">Graphic Era Hill University is committed to excellence in education and research, transforming dreams into reality for every student who walks through its gates.</p>
-    </div>
-    <div class="stats glass fade-up">
-      <div class="stat"><b data-count="15000" data-suffix="+">0</b><span>Students</span></div>
-      <div class="stat"><b data-count="500" data-suffix="+">0</b><span>Faculty</span></div>
-      <div class="stat"><b data-count="200" data-suffix="+">0</b><span>Recruiters</span></div>
-      <div class="stat"><b data-count="95" data-suffix="%">0</b><span>Placement rate</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ DEPARTMENTS ============ -->
-<section class="section" id="departments" data-section="2">
+<!-- ============ ACADEMICS ============ -->
+<section class="section academics" id="academics" aria-labelledby="acTitle">
   <div class="wrap">
-    <div class="head">
-      <p class="eyebrow"><span class="pip"></span>Academics</p>
-      <h2 class="h2 split">Six schools of study, one shared standard of rigor.</h2>
+    <div class="section-head">
+      <p class="label">Academics</p>
+      <h2 id="acTitle" class="h2">Programs</h2>
+      <p class="section-note">A selection of undergraduate and postgraduate programs. Availability differs by campus; the Admissions Office confirms current intake.</p>
     </div>
-    <div class="dept-grid">
-      <article class="tilt glass fade-up" data-n="01"><div class="ico"><svg viewBox="0 0 48 48"><rect x="6" y="9" width="36" height="24" rx="3"/><path d="M16 41h16M24 33v8M17 19l-4 4 4 4M31 19l4 4-4 4M26 17l-4 12"/></svg></div><h3>Computer Science</h3><p>AI, machine learning, systems and software engineering.</p></article>
-      <article class="tilt glass fade-up" data-n="02"><div class="ico"><svg viewBox="0 0 48 48"><path d="M8 38V20M20 38V12M32 38V24M44 38H4"/><path d="M8 20l12-8 12 12 10-10"/></svg></div><h3>Business Administration</h3><p>Management, finance and leadership for the real world.</p></article>
-      <article class="tilt glass fade-up" data-n="03"><div class="ico"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="7"/><path d="M24 6v6M24 36v6M6 24h6M36 24h6M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4"/></svg></div><h3>Mechanical Engineering</h3><p>Design, thermal systems, robotics and manufacturing.</p></article>
-      <article class="tilt glass fade-up" data-n="04"><div class="ico"><svg viewBox="0 0 48 48"><path d="M16 6c0 12 16 12 16 24s-16 12-16 12M32 6c0 12-16 12-16 24s16 12 16 12M18 14h12M18 34h12M16 24h16"/></svg></div><h3>Biotechnology</h3><p>Genomics, bioprocessing and life-science research.</p></article>
-      <article class="tilt glass fade-up" data-n="05"><div class="ico"><svg viewBox="0 0 48 48"><path d="M6 42h36M10 42V22l14-12 14 12v20M18 42V28h12v14"/></svg></div><h3>Architecture</h3><p>Spaces, structures and sustainable design thinking.</p></article>
-      <article class="tilt glass fade-up" data-n="06"><div class="ico"><svg viewBox="0 0 48 48"><rect x="8" y="20" width="32" height="12" rx="6" transform="rotate(-35 24 26)"/><path d="M17 17l14 18" transform="rotate(0)"/></svg></div><h3>Pharmacy</h3><p>Pharmaceutics, clinical practice and drug discovery.</p></article>
-    </div>
-  </div>
-</section>
 
-<!-- ============ CAMPUS (3D photo corridor, driven by scroll) ============ -->
-<section class="corridor" id="campus" data-section="3">
-  <div class="corridor-sticky">
-    <div class="corridor-head">
-      <p class="eyebrow"><span class="pip"></span>Beyond class</p>
-      <h2 class="h2">Campus life,<br><span class="flame">in motion.</span></h2>
+    <div class="programs">
+      <a class="program reveal" href="apply.html?course=B.Tech">
+        <span class="p-level">Undergraduate · 4 years</span>
+        <h3>B.Tech</h3>
+        <p>Engineering degrees including Computer Science with specialisations such as AI &amp; Machine Learning, Cyber Security, and AI &amp; Data Science.</p>
+        <span class="p-meta">Eligibility: 12th with Physics, Chemistry, Mathematics</span>
+        <span class="p-go">Apply for B.Tech</span>
+      </a>
+      <a class="program reveal" href="apply.html?course=BCA">
+        <span class="p-level">Undergraduate</span>
+        <h3>BCA</h3>
+        <p>Computer applications with a software-development focus, including AI and data-oriented options.</p>
+        <span class="p-meta">Eligibility: 12th in any stream</span>
+        <span class="p-go">Apply for BCA</span>
+      </a>
+      <a class="program reveal" href="apply.html?course=BBA">
+        <span class="p-level">Undergraduate</span>
+        <h3>BBA</h3>
+        <p>Foundations of business management: accounting, marketing, people and planning.</p>
+        <span class="p-meta">Eligibility: confirm with the Admissions Office</span>
+        <span class="p-go">Apply for BBA</span>
+      </a>
+      <a class="program reveal" href="apply.html?course=MBA">
+        <span class="p-level">Postgraduate · 2 years</span>
+        <h3>MBA</h3>
+        <p>Postgraduate management with specialisations including Finance and HR.</p>
+        <span class="p-meta">Eligibility: graduation in any stream</span>
+        <span class="p-go">Apply for MBA</span>
+      </a>
     </div>
-    <div class="corridor-captions" id="corridorCaps">
-      <div class="cap is-on"><h3>I ♥ GEHU</h3><p>Hostel, labs, sports complex and clubs — a campus that never sits still.</p></div>
-      <div class="cap"><h3>Graph Fest 2026</h3><p>Talwinder is here on 17-04-26.</p></div>
-      <div class="cap"><h3>Convocation</h3><p>Graduation ceremony, May 12.</p></div>
-      <div class="cap"><h3>Sports Day</h3><p>The annual sports competition.</p></div>
-    </div>
-    <div class="corridor-count"><b id="corNow">01</b><span>/ 04</span></div>
-  </div>
-</section>
 
-<!-- ============ PROGRAMS ============ -->
-<section class="section" id="programs" data-section="4">
-  <div class="wrap">
-    <div class="head">
-      <p class="eyebrow"><span class="pip"></span>Programs</p>
-      <h2 class="h2 split">Courses offered.</h2>
-    </div>
-    <div class="program-list">
-      <a class="program fade-up" href="apply.html"><span class="p-n">01</span><h3>B.Tech</h3><p>AI, ML, Data Science</p><i class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></i></a>
-      <a class="program fade-up" href="apply.html"><span class="p-n">02</span><h3>MBA</h3><p>Finance, HR</p><i class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></i></a>
-      <a class="program fade-up" href="apply.html"><span class="p-n">03</span><h3>BCA</h3><p>AI, Software Development</p><i class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></i></a>
-      <a class="program fade-up" href="apply.html"><span class="p-n">04</span><h3>BBA</h3><p>Business Management</p><i class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></i></a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ PROGRAM FINDER ============ -->
-<section class="section" id="finder">
-  <div class="wrap">
-    <div class="finder-shell glass fx">
+    <!-- Program finder (kept from the previous homepage) -->
+    <div class="finder" id="finder">
       <div class="finder-side">
-        <p class="eyebrow"><span class="pip"></span>Program finder</p>
-        <h2 class="h2">Not sure what to study?</h2>
-        <p class="lead">Answer three quick questions and we'll point you to the right program.</p>
+        <h3 class="h3">Not sure which program?</h3>
+        <p>Three short questions. The result is a starting point — the Admissions Office can advise on the rest.</p>
         <div class="finder-dots" aria-hidden="true"><i></i><i></i><i></i></div>
       </div>
       <div class="finder-stage" aria-live="polite">
-        <div class="fq" data-q="0"><h3>What do you enjoy most?</h3><div class="fq-opts">
-          <button type="button" class="fq-opt" data-v="code">Building software &amp; AI<small>Apps, data, algorithms</small></button>
-          <button type="button" class="fq-opt" data-v="biz">Business &amp; leadership<small>Money, teams, strategy</small></button>
-          <button type="button" class="fq-opt" data-v="make">Designing &amp; making things<small>Machines, spaces, systems</small></button>
-          <button type="button" class="fq-opt" data-v="sci">Science &amp; health<small>Labs, life sciences, medicine</small></button>
+        <div class="fq" data-q="0"><h4>What do you enjoy most?</h4><div class="fq-opts">
+          <button type="button" class="fq-opt" data-v="code">Building software and AI<small>Apps, data, algorithms</small></button>
+          <button type="button" class="fq-opt" data-v="biz">Business and leadership<small>Money, teams, strategy</small></button>
+          <button type="button" class="fq-opt" data-v="make">Designing and making things<small>Machines, spaces, systems</small></button>
+          <button type="button" class="fq-opt" data-v="sci">Science and health<small>Labs, life sciences, medicine</small></button>
         </div></div>
-        <div class="fq" data-q="1"><h3>Where are you right now?</h3><div class="fq-opts">
-          <button type="button" class="fq-opt" data-v="school">Finishing / finished 12th<small>Looking for an undergraduate program</small></button>
+        <div class="fq" data-q="1"><h4>Where are you right now?</h4><div class="fq-opts">
+          <button type="button" class="fq-opt" data-v="school">Finishing or finished 12th<small>Looking for an undergraduate program</small></button>
           <button type="button" class="fq-opt" data-v="grad">Already have a degree<small>Looking for a postgraduate program</small></button>
         </div><button type="button" class="fq-back">← Back</button></div>
-        <div class="fq" data-q="2"><h3>Which sounds more like you?</h3><div class="fq-opts">
+        <div class="fq" data-q="2"><h4>Which sounds more like you?</h4><div class="fq-opts">
           <button type="button" class="fq-opt" data-v="depth">I like maths, physics and how things work</button>
           <button type="button" class="fq-opt" data-v="apply">I want to build real products early</button>
           <button type="button" class="fq-opt" data-v="people">I like planning, people and leading</button>
         </div><button type="button" class="fq-back">← Back</button></div>
         <div class="fres" hidden>
-          <p class="tag">Your best match</p>
-          <h3>B.Tech</h3>
+          <p class="tag">Suggested program</p>
+          <h4>B.Tech</h4>
           <p class="why"></p>
           <p class="alt"></p>
-          <div class="hero-cta">
-            <a class="btn btn-solid apply" href="apply.html" data-magnetic><span>Apply</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-            <button type="button" class="btn btn-outline fres-redo"><span>Start over</span></button>
+          <div class="actions">
+            <a class="btn btn-solid apply" href="apply.html"><span>Apply</span></a>
+            <button type="button" class="btn btn-line fres-redo"><span>Start over</span></button>
           </div>
         </div>
       </div>
@@ -212,68 +180,190 @@
   </div>
 </section>
 
-<!-- ============ JOURNEY (horizontal scroll) ============ -->
-<section class="journey" id="journey" data-section="5">
-  <div class="journey-sticky">
-    <div class="journey-head">
-      <p class="eyebrow"><span class="pip"></span>How it works</p>
-      <h2 class="h2">Your student journey.</h2>
+<!-- ============ CAMPUS & FACILITIES ============ -->
+<section class="section campus" id="campus" aria-labelledby="campusTitle">
+  <div class="wrap">
+    <div class="section-head split-head">
+      <div>
+        <p class="label">Campus and facilities</p>
+        <h2 id="campusTitle" class="h2">Three campuses, one standard of study.</h2>
+      </div>
+      <p class="section-note">Classrooms, computer centres, libraries, hostels and playing fields, spread across Dehradun, Bhimtal and Haldwani.</p>
     </div>
-    <div class="journey-track" id="journeyTrack">
-      <article class="step glass"><span class="step-n">01</span><h3>Apply for Admission</h3><p>Submit your online application with required academic details and documents.</p></article>
-      <article class="step glass"><span class="step-n">02</span><h3>Verification &amp; Enrollment</h3><p>Our admission team verifies your application and confirms your enrollment.</p></article>
-      <article class="step glass"><span class="step-n">03</span><h3>Begin Your Journey</h3><p>Attend orientation, explore campus life, and start your academic career.</p></article>
-      <article class="step step-cta glass"><h3>Ready to start?</h3><p>Scholarships available for the 2026 session.</p><a href="apply.html" class="btn btn-solid" data-magnetic><span>Apply now</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></article>
+
+    <!-- To add photographs of laboratories, the library or hostels, add another <figure class="photo"> here with a real GEHU image. -->
+    <div class="mosaic">
+      <figure class="photo reveal-img m-b" data-tilt>
+        <div class="frame"><img src="img/campus.webp" alt="The I love GEHU sign on a lawn in front of a red campus building" width="1400" height="1867" loading="lazy" decoding="async" data-parallax="0.05"></div>
+        <figcaption>The Dehradun campus lawn</figcaption>
+      </figure>
+      <div class="campus-list m-text">
+        <div class="reveal">
+          <h3>Dehradun</h3>
+          <p>Bell Road, Clement Town</p>
+        </div>
+        <div class="reveal">
+          <h3>Bhimtal</h3>
+          <p>Sattal Road, Bhimtal, Nainital</p>
+        </div>
+        <div class="reveal">
+          <h3>Haldwani</h3>
+          <p>Tularampur, near Mahalaxmi Temple</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============ OUTCOMES ============ -->
-<section class="section" id="outcomes" data-section="6">
+<!-- ============ RESEARCH & INNOVATION ============ -->
+<section class="section research dark" id="research" aria-labelledby="resTitle">
   <div class="wrap">
-    <div class="head">
-      <p class="eyebrow"><span class="pip"></span>Outcomes</p>
-      <h2 class="h2 split">Placements that speak for themselves.</h2>
-    </div>
-    <div class="outcome-grid">
-      <div class="outcome glass fade-up"><b>₹25 LPA</b><span>Highest package</span></div>
-      <div class="outcome glass fade-up"><b>Top Companies</b><span>Amazon, Google, Infosys</span></div>
-      <div class="outcome glass fade-up"><b>Internships</b><span>From 2nd year</span></div>
+    <div class="research-grid">
+      <div>
+        <p class="label">Research and innovation</p>
+        <h2 id="resTitle" class="h2">Areas of specialisation</h2>
+        <p class="prose-lg">Students specialise within their degree. These are the areas the university lists in its program brochure; for current research centres, publications and projects, the official website is the authoritative source.</p>
+        <a href="https://www.gehu.ac.in" class="text-link" target="_blank" rel="noopener">Research at GEHU, on the official site</a>
+      </div>
+      <ul class="areas">
+        <li class="reveal"><h3>Computer Science &amp; Engineering</h3><p>AI &amp; Machine Learning · Cyber Security · AI &amp; Data Science</p></li>
+        <li class="reveal"><h3>Mechanical Engineering</h3><p>Electric Vehicles · Mechatronics · Automobile · Robotics &amp; Automation</p></li>
+        <li class="reveal"><h3>Civil Engineering</h3><p>Construction Management · GIS &amp; Remote Sensing · Environmental Engineering</p></li>
+        <li class="reveal"><h3>Electronics &amp; Communication</h3><p>VLSI</p></li>
+      </ul>
     </div>
   </div>
 </section>
 
-<!-- ============ TEAM ============ -->
-<section class="section" id="team" data-section="7">
+<!-- ============ STUDENT LIFE ============ -->
+<section class="section life" id="student-life" aria-labelledby="lifeTitle">
   <div class="wrap">
-    <div class="head">
-      <p class="eyebrow"><span class="pip"></span>The team</p>
-      <h2 class="h2 split">The people behind the portal.</h2>
+    <div class="section-head">
+      <p class="label">Campus life</p>
+      <h2 id="lifeTitle" class="h2">Beyond the classroom</h2>
     </div>
-    <div class="team-grid">
-      <figure class="member tilt fade-up"><div class="photo"><img src="img/neeraj.webp" alt="Hiicrow" loading="lazy"></div><figcaption><h3>Hiicrow</h3><p>Full Dev</p></figcaption></figure>
-      <figure class="member tilt fade-up"><div class="photo"><img src="img/gaurav.webp" alt="Garry" loading="lazy"></div><figcaption><h3>Garry</h3><p>Frontend</p></figcaption></figure>
-      <figure class="member tilt fade-up"><div class="photo"><img src="img/rakshit.webp" alt="Rakshit" loading="lazy"></div><figcaption><h3>Rakshit</h3><p>Backend</p></figcaption></figure>
-      <figure class="member tilt fade-up"><div class="photo"><img src="img/deepak.webp" alt="Deepak" loading="lazy"></div><figcaption><h3>Deepak</h3><p>Backend</p></figcaption></figure>
+    <div class="life-grid">
+      <figure class="photo reveal-img l-sport" data-tilt>
+        <div class="frame"><img src="img/sport.webp" alt="Two GEHU volleyball players holding trophies and a certificate of merit" width="1179" height="1669" loading="lazy" decoding="async"></div>
+        <figcaption>Volleyball players with a certificate of merit</figcaption>
+      </figure>
+      <div class="life-text">
+        <h3 class="h3">Sport, culture and community</h3>
+        <p>Sports teams, an annual sports competition and the Grafest cultural festival sit alongside clubs and student-run projects — this portal among them.</p>
+        <ul class="plain-list">
+          <li><b>Grafest</b> — the university's annual cultural festival; the 2026 edition took place in April.</li>
+          <li><b>Sports</b> — the annual sports competition and university teams.</li>
+          <li><b>Convocation</b> — the graduation ceremony for each year's graduates.</li>
+        </ul>
+      </div>
+      <figure class="photo reveal-img l-fest" data-tilt>
+        <div class="frame"><img src="img/graf.webp" alt="Poster for Grafest featuring the performer Talwiinder" width="1179" height="1310" loading="lazy" decoding="async"></div>
+        <figcaption>Grafest poster</figcaption>
+      </figure>
     </div>
   </div>
 </section>
 
-<!-- ============ HELP CENTRE ============ -->
-<section class="section" id="help" data-section="8">
+<!-- ============ PLACEMENTS ============ -->
+<section class="section placements" id="placements" aria-labelledby="plTitle">
   <div class="wrap">
-    <div class="head">
-      <p class="eyebrow"><span class="pip"></span>Help &amp; support</p>
-      <h2 class="h2 split">We're here whenever you need us.</h2>
+    <div class="pl-grid">
+      <div>
+        <p class="label">Placements and achievements</p>
+        <h2 id="plTitle" class="h2">Outcomes, reported with a source.</h2>
+      </div>
+      <div class="prose">
+        <p>Placement figures — offers, recruiters, packages — are compiled by the university's Training &amp; Placement Cell each year. We publish a number here only when it has been released together with its year and source.</p>
+        <p>For the current placement report, please contact the Admissions Office or see the official website.</p>
+        <div class="figures" id="figures" hidden></div>
+        <div class="actions left">
+          <a class="btn btn-line" href="mailto:enquiry@gehu.ac.in?subject=Placement%20report%20request">Request the placement report</a>
+          <a class="text-link" href="https://www.gehu.ac.in" target="_blank" rel="noopener">Official website</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ADMISSIONS ============ -->
+<section class="section admissions dark" id="admissions" aria-labelledby="admTitle">
+  <div class="wrap">
+    <div class="section-head split-head">
+      <div>
+        <p class="label">Admissions</p>
+        <h2 id="admTitle" class="h2">Admissions are open for 2026.</h2>
+      </div>
+      <p class="section-note">Applications are assessed on merit in the qualifying examination and completed online.</p>
+    </div>
+
+    <ol class="steps">
+      <li class="reveal"><span class="n">1</span><h3>Apply online</h3><p>Submit the application with your academic details, preferred program and supporting documents.</p></li>
+      <li class="reveal"><span class="n">2</span><h3>Verification</h3><p>The Admissions Office checks your documents and may ask for anything missing. You can track the status with your tracking ID.</p></li>
+      <li class="reveal"><span class="n">3</span><h3>Enrolment</h3><p>On confirmation you complete enrolment, attend orientation and begin the session.</p></li>
+    </ol>
+
+    <div class="adm-grid">
+      <div>
+        <h3 class="h3">Eligibility at a glance</h3>
+        <table class="elig">
+          <thead><tr><th scope="col">Program</th><th scope="col">Qualification</th><th scope="col">Merit based on</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">B.Tech</th><td>12th with Physics, Chemistry, Mathematics</td><td>12th aggregate; JEE Main / Advanced</td></tr>
+            <tr><th scope="row">BCA</th><td>12th in any stream</td><td>12th aggregate</td></tr>
+            <tr><th scope="row">BBA</th><td colspan="2">Confirm with the Admissions Office</td></tr>
+            <tr><th scope="row">MBA</th><td>Graduation in any stream</td><td>Graduation percentage; CAT / MAT / XAT / CMAT</td></tr>
+          </tbody>
+        </table>
+        <p class="fine">Source: <a href="https://d.gehu.ac.in/uploads/doc/GEHU-Brochure.pdf" target="_blank" rel="noopener">GEHU brochure</a>. Criteria can change; confirm with the Admissions Office before applying.</p>
+      </div>
+      <div class="adm-side">
+        <h3 class="h3">Important dates</h3>
+        <p>Application deadlines and counselling schedules are announced by the Admissions Office and may differ by program and campus.</p>
+        <p class="contact-line"><b>Admissions helpline</b><br><a href="tel:18002701280">1800 270 1280</a> · <a href="mailto:enquiry@gehu.ac.in">enquiry@gehu.ac.in</a></p>
+        <div class="actions left">
+          <a href="apply.html" class="btn btn-light">Apply now</a>
+          <a href="#help" class="btn btn-line-light" data-help-tab="admission">Track an application</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NEWS & EVENTS ============ -->
+<section class="section news" id="news" aria-labelledby="newsTitle">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="label">News and events</p>
+      <h2 id="newsTitle" class="h2">Latest from campus</h2>
+    </div>
+    <ul class="news-list" id="newsList">
+      <li class="news-item reveal">
+        <time datetime="2026-04">Apr 2026</time>
+        <div><span class="tag">Event</span><h3><a href="#student-life">Grafest 2026</a></h3><p>The annual cultural festival. The festival poster features the performer Talwiinder.</p></div>
+      </li>
+    </ul>
+    <p class="fine" id="newsStatus">Notices posted by the university for the public appear here automatically.</p>
+  </div>
+</section>
+
+<!-- ============ HELP & SUPPORT (kept from previous homepage) ============ -->
+<section class="section help" id="help" aria-labelledby="helpTitle">
+  <div class="wrap">
+    <div class="section-head split-head">
+      <div>
+        <p class="label">Help and support</p>
+        <h2 id="helpTitle" class="h2">Questions, orders and applications</h2>
+      </div>
+      <p class="section-note">Track a store order or an admission application, raise a ticket, or browse common questions.</p>
     </div>
 
     <div class="channels">
-      <a class="channel glass fade-up" href="mailto:support@hiicrow.site" data-support-email><i>✉</i><div><h4>Email us</h4><p>support@hiicrow.site</p></div></a>
-      <a class="channel glass fade-up" href="https://gehu-erp-backend.onrender.com/api/support/whatsapp" target="_blank" rel="noopener" data-support="whatsapp"><i>💬</i><div><h4>WhatsApp</h4><p>Chat with our team</p></div></a>
-      <a class="channel glass fade-up" href="mailto:info@gehu.ac.in"><i>🏫</i><div><h4>Front office</h4><p>info@gehu.ac.in · 9 AM – 5 PM</p></div></a>
+      <a class="channel" href="mailto:support@hiicrow.site" data-support-email><b>Portal support</b><span>support@hiicrow.site</span></a>
+      <a class="channel" href="https://gehu-erp-backend.onrender.com/api/support/whatsapp" target="_blank" rel="noopener" data-support="whatsapp"><b>WhatsApp</b><span>Chat with the support team</span></a>
+      <a class="channel" href="mailto:enquiry@gehu.ac.in"><b>University enquiries</b><span>enquiry@gehu.ac.in</span></a>
     </div>
 
-    <div class="help-shell glass fade-up">
+    <div class="help-shell">
       <div class="h-tabs" role="tablist">
         <button class="h-tab active" data-tab="faq" role="tab" aria-selected="true">FAQs</button>
         <button class="h-tab" data-tab="track" role="tab" aria-selected="false">Track order</button>
@@ -287,7 +377,7 @@
           <div class="faq-i"><button class="faq-q"><span>How do I reset my student portal password?</span><i>+</i></button><div class="faq-a"><p>Contact the admin office via email or the “Raise a ticket” tab with your Campus ID — a temporary password is issued after identity verification.</p></div></div>
           <div class="faq-i"><button class="faq-q"><span>Where can I check my attendance percentage?</span><i>+</i></button><div class="faq-a"><p>Log in to the Student Dashboard with your Campus ID — your subject-wise and overall attendance percentage is shown automatically.</p></div></div>
           <div class="faq-i"><button class="faq-q"><span>How do I track a college store order?</span><i>+</i></button><div class="faq-a"><p>Use the “Track order” tab with the Order ID and Student ID you entered at checkout to see live payment and delivery status.</p></div></div>
-          <div class="faq-i"><button class="faq-q"><span>How do I apply for admission?</span><i>+</i></button><div class="faq-a"><p>Click “Apply for Admission”, fill in your details and preferred course — our admissions team reviews it and reaches out directly.</p></div></div>
+          <div class="faq-i"><button class="faq-q"><span>How do I apply for admission?</span><i>+</i></button><div class="faq-a"><p>Click “Apply now”, fill in your details and preferred course — our admissions team reviews it and reaches out directly.</p></div></div>
           <div class="faq-i"><button class="faq-q"><span>My payment succeeded but the order still shows pending. What do I do?</span><i>+</i></button><div class="faq-a"><p>UPI confirmations can take a little time to verify manually. If it's still pending after a few hours, raise a ticket with your Order ID and transaction reference.</p></div></div>
           <div class="faq-i"><button class="faq-q"><span>Who do I contact for faculty-related queries?</span><i>+</i></button><div class="faq-a"><p>Use the “Raise a ticket” tab and select “Faculty / Academics” as the category, or email us directly — queries are routed to the right department.</p></div></div>
         </div>
@@ -295,8 +385,8 @@
 
       <div class="h-panel" id="panel-track">
         <form id="trackOrderForm" class="h-form row">
-          <input type="text" id="trackOrderId" placeholder="Order ID" required>
-          <input type="text" id="trackStudentId" placeholder="Student ID" required>
+          <input type="text" id="trackOrderId" placeholder="Order ID" aria-label="Order ID" required>
+          <input type="text" id="trackStudentId" placeholder="Student ID" aria-label="Student ID" required>
           <button type="submit" class="btn btn-solid"><span>Track order</span></button>
         </form>
         <div id="trackResult" class="track-result"></div>
@@ -304,8 +394,8 @@
 
       <div class="h-panel" id="panel-admission">
         <form id="trackAdmissionForm" class="h-form row">
-          <input type="text" id="trackAdmTrackingId" placeholder="Tracking ID (e.g. GEHU-ADM-XXXXXXXX)" required>
-          <input type="email" id="trackAdmEmail" placeholder="Email used to apply" required>
+          <input type="text" id="trackAdmTrackingId" placeholder="Tracking ID (e.g. GEHU-ADM-XXXXXXXX)" aria-label="Tracking ID" required>
+          <input type="email" id="trackAdmEmail" placeholder="Email used to apply" aria-label="Email used to apply" required>
           <button type="submit" class="btn btn-solid"><span>Track application</span></button>
         </form>
         <div id="trackAdmResult" class="track-result"></div>
@@ -315,22 +405,22 @@
         <form id="ticketForm" class="h-form" action="https://formspree.io/f/xaqlylzn" method="POST">
           <input type="hidden" name="_subject" value="Help &amp; Support Ticket — GEHU Portal">
           <div class="row">
-            <input type="text" name="name" placeholder="Full name" required>
-            <input type="email" name="email" placeholder="Email address" required>
+            <input type="text" name="name" placeholder="Full name" aria-label="Full name" required>
+            <input type="email" name="email" placeholder="Email address" aria-label="Email address" required>
           </div>
           <div class="row">
-            <input type="text" name="studentId" placeholder="Campus / Student ID (optional)">
-            <select name="category" required>
+            <input type="text" name="studentId" placeholder="Campus / Student ID (optional)" aria-label="Campus or student ID">
+            <select name="category" aria-label="Category" required>
               <option value="" disabled selected>Select category</option>
               <option>Login / Account</option><option>Attendance / Academics</option><option>Store / Order</option>
               <option>Admissions</option><option>Faculty / Academics</option><option>Other</option>
             </select>
           </div>
-          <textarea name="message" rows="4" placeholder="Describe your issue…" required></textarea>
+          <textarea name="message" rows="4" placeholder="Describe your issue…" aria-label="Describe your issue" required></textarea>
           <button type="submit" id="ticketSubmitBtn" class="btn btn-solid"><span>Submit ticket</span></button>
         </form>
         <p class="ticket-msg" id="ticketMsg"></p>
-        <div class="ticket-success" id="ticketSuccess"><h4>✅ Ticket received</h4><p>Our support team will get back to you by email shortly.</p></div>
+        <div class="ticket-success" id="ticketSuccess"><h4>Ticket received</h4><p>Our support team will get back to you by email shortly.</p></div>
       </div>
 
       <div class="h-panel" id="panel-notes">
@@ -345,8 +435,7 @@
             <div id="termNotes"><div class="term-dim">open this tab to load notes…</div></div>
           </div>
           <div class="term-foot">
-            <label class="term-grep"><span class="term-prompt">grep</span>
-              <input type="text" id="termSearch" placeholder="search notes…" autocomplete="off" spellcheck="false"></label>
+            <label class="term-grep"><span class="term-prompt">grep</span> <input type="text" id="termSearch" placeholder="search notes…" autocomplete="off" spellcheck="false"></label>
             <button type="button" class="term-btn" id="termNewBtn" hidden>+ new note</button>
           </div>
         </div>
@@ -354,55 +443,72 @@
     </div>
   </div>
 </section>
-
-<!-- ============ ADMISSIONS CTA ============ -->
-<section class="cta" id="admissions" data-section="9">
-  <div class="wrap cta-inner">
-    <p class="eyebrow"><span class="pip"></span>Enrollment</p>
-    <h2 class="cta-title">Admissions<br><span class="flame">open now.</span></h2>
-    <p class="lead">Apply now for the 2026 academic session. Scholarships available!</p>
-    <div class="hero-cta">
-      <a href="apply.html" class="btn btn-solid btn-lg" data-magnetic><span>Apply now</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      <a href="login.html" class="btn btn-outline btn-lg" data-magnetic><span>Student login</span></a>
-    </div>
-  </div>
-</section>
+</main>
 
 <!-- ============ FOOTER ============ -->
 <footer class="footer" id="contact">
-  <div class="wrap footer-grid">
-    <div>
-      <a href="#top" class="brand"><img src="img/logo.webp" alt=""><span>GEHU<small>Graphic Era Hill University</small></span></a>
-      <p class="foot-note">Inspire. Innovate. Impact.</p>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href="#top" class="brand" aria-label="Back to top"><img src="img/logo-96.png" width="40" height="40" alt=""><span class="brand-text"><b>Graphic Era</b><i>Hill University</i></span></a>
+        <p>Dehradun · Bhimtal · Haldwani<br>Uttarakhand, India</p>
+        <p class="foot-phone"><a href="tel:18002701280">1800 270 1280</a><br><a href="mailto:enquiry@gehu.ac.in">enquiry@gehu.ac.in</a></p>
+      </div>
+      <div>
+        <h4>Campuses</h4>
+        <address>
+          <p><b>Dehradun</b><br>Society Area, Bell Road, Clement Town, Dehradun</p>
+          <p><b>Bhimtal</b><br>Sattal Road, Bhimtal, Nainital</p>
+          <p><b>Haldwani</b><br>Tularampur, near Mahalaxmi Temple, Haldwani</p>
+        </address>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <a href="#academics">Academics</a>
+        <a href="apply.html">Apply for admission</a>
+        <a href="store.html">College store</a>
+        <a href="login.html">Student / faculty login</a>
+        <a href="#help">Help and support</a>
+      </div>
+      <div>
+        <h4>Departments</h4>
+        <a href="#research">Computer Science &amp; Engineering</a>
+        <a href="#research">Mechanical Engineering</a>
+        <a href="#research">Civil Engineering</a>
+        <a href="#research">Electronics &amp; Communication</a>
+        <a href="#academics">BCA, BBA and MBA</a>
+      </div>
+      <div>
+        <h4>Follow</h4>
+        <a href="https://www.instagram.com/graphicerahilluniversity" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.linkedin.com/company/graphic-era-hilluniversity" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.youtube.com/GEHUDehradun" target="_blank" rel="noopener">YouTube</a>
+        <a href="https://www.facebook.com/gehu.official" target="_blank" rel="noopener">Facebook</a>
+        <a href="https://twitter.com/gehudehradun" target="_blank" rel="noopener">X</a>
+      </div>
     </div>
-    <div>
-      <h4>Explore</h4>
-      <a href="#departments">Departments</a><a href="#programs">Programs</a><a href="store.html">College store</a><a href="apply.html">Admissions</a>
+
+    <div class="team-line">
+      <p>This portal is built and maintained by students:</p>
+      <ul>
+        <li><img src="img/neeraj.webp" width="32" height="32" alt="" loading="lazy"><span>Hiicrow <i>Full stack</i></span></li>
+        <li><img src="img/gaurav.webp" width="32" height="32" alt="" loading="lazy"><span>Garry <i>Frontend</i></span></li>
+        <li><img src="img/rakshit.webp" width="32" height="32" alt="" loading="lazy"><span>Rakshit <i>Backend</i></span></li>
+        <li><img src="img/deepak.webp" width="32" height="32" alt="" loading="lazy"><span>Deepak <i>Backend</i></span></li>
+      </ul>
     </div>
-    <div>
-      <h4>Help &amp; support</h4>
-      <a href="mailto:info@gehu.ac.in">info@gehu.ac.in</a>
-      <a href="mailto:support@hiicrow.site" data-support-email>support@hiicrow.site</a>
-      <a href="#help">Help centre &amp; order tracking</a>
-      <a href="login.html">Student / faculty login</a>
+
+    <div class="foot-bottom">
+      <span>© 2026 Graphic Era Hill University</span>
+      <span><a href="https://www.gehu.ac.in" target="_blank" rel="noopener">Policies and regulations</a> · <a href="https://www.gehu.ac.in" target="_blank" rel="noopener">Official website</a></span>
     </div>
-  </div>
-  <div class="wrap footer-bottom">
-    <span>© 2026 Graphic Era Hill University</span>
-    <span>Developed with <i class="heart">♥</i> by Hiicrow</span>
   </div>
 </footer>
 
-</main>
-
-<script src="vendor/gsap.min.js"></script>
-<script src="vendor/ScrollTrigger.min.js"></script>
-<script src="vendor/lenis.min.js"></script>
 <script src="config.js"></script>
 <script src="nav-auth.js"></script>
 <script src="shell.js"></script>
-<script type="module" src="home.min.js"></script>
-<script src="home-plus.js" defer></script>
-<script src="home-expand.js" defer></script>
+<script src="help.min.js" defer></script>
+<script src="gehu.js" defer></script>
 </body>
 </html>
