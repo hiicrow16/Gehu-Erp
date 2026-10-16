@@ -81,30 +81,32 @@ td.act{white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap}
   <button class="nav" data-v="students">Manage Students</button>
   <button class="nav" data-v="courses">Manage Courses</button>
   <button class="nav" data-v="subjects">Manage Subjects</button>
+  <button class="nav" data-v="departments">Departments</button>
+  <button class="nav" data-v="terms">Semesters</button>
+  <button class="nav" data-v="faculty">Faculty &amp; Assignments</button>
   <button class="nav" data-v="notices">Manage Notices</button>
   <button class="nav" data-v="attendance">Attendance</button>
-  <button class="nav" data-v="departments">Departments</button>
-  <button class="nav" data-v="faculty">Manage Faculty</button>
-  <button class="nav" data-v="audit">Audit Log</button>
   <button class="nav" data-v="admissions">Admissions <span id="admBadge" style="display:none;background:#ef4444;color:#fff;border-radius:99px;padding:1px 8px;font-size:12px;margin-left:6px"></span></button>
   <button class="nav" data-v="orders">Store Orders</button>
   <button class="nav" data-v="feedback">Feedback <span id="fbBadge" style="display:none;background:#ef4444;color:#fff;border-radius:99px;padding:1px 8px;font-size:12px;margin-left:6px"></span></button>
+  <button class="nav" data-v="audit">Audit Log</button>
   <button class="nav out" onclick="logout()">Logout</button>
 </aside>
 <main>
   <div class="top">
     <div style="display:flex;gap:10px;align-items:center"><button class="btn" id="burger" onclick="side.classList.toggle('open')">☰</button><h1 id="title">Admin Panel</h1></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><a href="academics-admin.html" class="btn pri">Academics Manager</a><a href="admin-store.html" class="btn pri">Store Manager</a><a href="index.html" class="btn pri">Back to Website</a></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><a href="academics-admin.html" class="btn pri">Academics Manager</a><a href="admin-store.html" class="btn pri">Store Manager</a><a href="verify-id.html" class="btn pri">Verify ID</a><a href="admin-pyq.html" class="btn pri">Question Papers</a><a href="admin-face.html" class="btn pri">Face Enrolment</a><a href="face-attendance.html" class="btn pri">Face Attendance</a><a href="index.html" class="btn pri">Back to Website</a></div>
   </div>
   <section class="sec" id="sec-dashboard"></section>
   <section class="sec" id="sec-students"></section>
   <section class="sec" id="sec-courses"></section>
   <section class="sec" id="sec-subjects"></section>
-  <section class="sec" id="sec-notices"></section>
-  <section class="sec" id="sec-attendance"></section>
   <section class="sec" id="sec-departments"></section>
+  <section class="sec" id="sec-terms"></section>
   <section class="sec" id="sec-faculty"></section>
   <section class="sec" id="sec-audit"></section>
+  <section class="sec" id="sec-notices"></section>
+  <section class="sec" id="sec-attendance"></section>
   <section class="sec" id="sec-admissions"></section>
   <section class="sec" id="sec-orders"></section>
   <section class="sec" id="sec-feedback"></section>
@@ -117,7 +119,7 @@ td.act{white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap}
 const API = window.API_BASE, $ = s => document.querySelector(s);
 const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 if (localStorage.getItem("role") !== "admin" || !localStorage.getItem("token")) location.href = "login.html";
-const S = { students: [], courses: [], subjects: [], notices: [], departments: [], faculty: [] };
+const S = { students: [], courses: [], subjects: [], notices: [], departments: [], terms: [], faculty: [] };
 const logout = () => { localStorage.clear(); location.href = "login.html"; };
 
 /* ---------- helpers ---------- */
@@ -174,7 +176,7 @@ function collect(fields, form, editing) {
 }
 
 /* ---------- navigation ---------- */
-const VIEWS = { dashboard: ["Dashboard", loadDash], students: ["Manage Students", loadStudents], courses: ["Manage Courses", () => loadCrud("courses")], subjects: ["Manage Subjects", () => loadCrud("subjects")], notices: ["Manage Notices", () => loadCrud("notices")], attendance: ["Attendance", () => loadAtt()], departments: ["Departments", () => loadCrud("departments")], faculty: ["Manage Faculty", loadFaculty], audit: ["Audit Log", loadAudit], admissions: ["Admissions", loadAdmissions], orders: ["Store Orders", loadOrders], feedback: ["Website Feedback", loadFeedback] };
+const VIEWS = { dashboard: ["Dashboard", loadDash], students: ["Manage Students", loadStudents], courses: ["Manage Courses", () => loadCrud("courses")], subjects: ["Manage Subjects", () => loadCrud("subjects")], departments: ["Departments", () => loadCrud("departments")], terms: ["Semesters", () => loadCrud("terms")], faculty: ["Faculty & Assignments", loadFaculty], audit: ["Audit Log", loadAudit], notices: ["Manage Notices", () => loadCrud("notices")], attendance: ["Attendance", () => loadAtt()], admissions: ["Admissions", loadAdmissions], orders: ["Store Orders", loadOrders], feedback: ["Website Feedback", loadFeedback] };
 function go(v, arg) {
   if (!VIEWS[v]) v = "dashboard";
   document.querySelectorAll(".sec").forEach(e => e.classList.toggle("on", e.id === "sec-" + v));
@@ -208,12 +210,12 @@ const SF = [
   { k: "email", l: "Email", t: "email" }, { k: "phone", l: "Phone" },
   { k: "course", l: "Course", opts: () => S.courses.map(c => [c._id, c.name]), get: s => s.course && s.course._id },
   { k: "semester", l: "Semester", t: "number", min: 1, max: 12 },
-  { k: "department", l: "Department", opts: () => S.departments.map(d => [d.name, d.name]) }, { k: "admissionYear", l: "Admission year", t: "number", min: 2000, max: 2100 }
+  { k: "department", l: "Department", opts: () => deptOpts() }, { k: "admissionYear", l: "Admission year", t: "number", min: 2000, max: 2100 }
 ];
 let stuErr = "", orphans = [];
 async function loadStudents() {
   $("#sec-students").innerHTML = '<p class="empty">Loading…</p>';
-  const [d, , , o] = await Promise.all([load("students", "/students", "students"), load("courses", "/courses", "courses"), load("departments", "/departments", "departments"), api("/students/orphans")]);
+  const [d, , o] = await Promise.all([load("students", "/students", "students"), load("courses", "/courses", "courses"), api("/students/orphans"), load("departments", "/departments", "departments")]);
   stuErr = d.success ? "" : (d.message || "Could not load students");
   orphans = o.success ? o.orphans : [];
   drawStudents();
@@ -236,9 +238,9 @@ function drawStudents() {
 function drawRows() {
   const list = filteredStudents();
   $("#scount").textContent = `Showing ${list.length} of ${S.students.length} students`;
-  $("#srows").innerHTML = table(["Student ID", "Username", "Name", "Course", "Sem", "Email", "Phone", "Actions"],
-    list.map(s => [esc(s.studentId), esc(s.user?.username || "-"), esc(s.name), esc(s.course?.name || "-"), esc(s.semester || "-"), esc(s.email || "-"), esc(s.phone || "-"),
-      btn("Edit", `studentForm('${s._id}')`) + btn("Password", `resetPw('${s._id}')`) + btn("Attendance", `go('attendance','${s._id}')`) + btn("Delete", `delStudent('${s._id}')`, "bad")]),
+  $("#srows").innerHTML = table(["Student ID", "Username", "Name", "Course", "Sem", "Email", "Phone", "Login", "Actions"],
+    list.map(s => [esc(s.studentId), esc(s.user?.username || "-"), esc(s.name), esc(s.course?.name || "-"), esc(s.semester || "-"), esc(s.email || "-"), esc(s.phone || "-"), s.user?.isActive === false ? '<span style="color:var(--bad);font-weight:600">Disabled</span>' : '<span style="color:var(--ok)">Active</span>',
+      btn(s.user?.isActive === false ? "Enable" : "Disable", `toggleStu('${s._id}')`) + btn("Edit", `studentForm('${s._id}')`) + btn("Password", `resetPw('${s._id}')`) + btn("Attendance", `go('attendance','${s._id}')`) + btn("Delete", `delStudent('${s._id}')`, "bad")]),
     S.students.length ? "No students match your search." : (stuErr ? "Students could not be loaded." : "No students yet. Click “+ Add Student”."));
 }
 function studentForm(id) {
@@ -275,19 +277,20 @@ function exportCsv() {
 
 /* ---------- courses / subjects / notices (generic CRUD) ---------- */
 const CRUD = {
-  courses: { api: "/courses", prop: "courses", one: "course", needs: ["departments"], fields: [{ k: "name", l: "Course name", req: 1 }, { k: "code", l: "Course code", req: 1 }, { k: "department", l: "Department", opts: () => S.departments.map(d => [d.name, d.name]) }, { k: "durationYears", l: "Duration (years)", t: "number", min: 1, max: 6 }],
+  courses: { api: "/courses", prop: "courses", one: "course", fields: [{ k: "name", l: "Course name", req: 1 }, { k: "code", l: "Course code", req: 1 }, { k: "department", l: "Department", opts: () => deptOpts() }, { k: "durationYears", l: "Duration (years)", t: "number", min: 1, max: 6 }],
     cols: [["Name", c => c.name], ["Code", c => c.code], ["Department", c => c.department || "-"], ["Duration (yrs)", c => c.durationYears || "-"]] },
   subjects: { api: "/subjects", prop: "subjects", one: "subject", fields: [{ k: "name", l: "Subject name", req: 1 }, { k: "code", l: "Subject code", req: 1 }, { k: "course", l: "Course", opts: () => S.courses.map(c => [c._id, c.name]), get: s => s.course && s.course._id }, { k: "semester", l: "Semester", t: "number", req: 1, min: 1, max: 12 }],
     cols: [["Name", s => s.name], ["Code", s => s.code], ["Course", s => s.course?.name || "-"], ["Semester", s => s.semester]] },
   notices: { api: "/notices", prop: "notices", one: "notice", fields: [{ k: "title", l: "Title", req: 1 }, { k: "audience", l: "Audience", opts: () => [["all", "Everyone"], ["student", "Students only"], ["faculty", "Faculty only"], ["public", "Public (homepage + everyone)"]], get: n => n.audience || "all" }, { k: "content", l: "Content", t: "textarea", req: 1 }],
     cols: [["Title", n => n.title], ["Content", n => n.content.length > 90 ? n.content.slice(0, 90) + "…" : n.content], ["Audience", n => n.audience], ["Posted", n => new Date(n.createdAt).toLocaleDateString()]] },
-  departments: { api: "/departments", prop: "departments", one: "department", fields: [{ k: "name", l: "Department name", req: 1 }, { k: "code", l: "Code (optional)" }],
-    cols: [["Name", d => d.name], ["Code", d => d.code || "-"]] }
+  departments: { api: "/departments", prop: "departments", one: "department", fields: [{ k: "name", l: "Department name", req: 1 }, { k: "code", l: "Code (e.g. CSE)", req: 1 }, { k: "head", l: "Head of department" }, { k: "description", l: "Description", t: "textarea" }],
+    cols: [["Name", d => d.name], ["Code", d => d.code], ["Head", d => d.head || "-"], ["Courses", d => S.courses.filter(c => c.department === d.name).length]] },
+  terms: { api: "/terms", prop: "terms", one: "term", cols: [], fields: [{ k: "name", l: "Term name (e.g. 2026-27 Odd)", req: 1 }, { k: "academicYear", l: "Academic year (e.g. 2026-27)", req: 1 }, { k: "type", l: "Type", opts: () => [["Odd", "Odd"], ["Even", "Even"], ["Summer", "Summer"]] }, { k: "startDate", l: "Starts", t: "date", req: 1, get: t => t.startDate && t.startDate.slice(0, 10) }, { k: "endDate", l: "Ends", t: "date", req: 1, get: t => t.endDate && t.endDate.slice(0, 10) }] },
 };
 async function loadCrud(k) {
   $("#sec-" + k).innerHTML = '<p class="empty">Loading…</p>';
-  if (k === "subjects") await load("courses", "/courses", "courses");
-  if (CRUD[k].needs) await Promise.all(CRUD[k].needs.map(n => load(n, "/" + n, n)));
+  if (k === "terms") return loadTerms();
+  if (["subjects", "departments", "courses"].includes(k)) await Promise.all([load("courses", "/courses", "courses"), load("departments", "/departments", "departments")]);
   const d = await load(k, CRUD[k].api, CRUD[k].prop);
   const c = CRUD[k];
   $("#sec-" + k).innerHTML = (d.success ? "" : alertBox(d.message || "Could not load", `loadCrud('${k}')`)) +
@@ -308,6 +311,122 @@ function crudForm(k, id) {
 async function crudDel(k, id) {
   if (!await ask(`Delete this ${CRUD[k].one}?`)) return;
   const d = await send("DELETE", CRUD[k].api + "/" + id); toast(d.success ? "Deleted" : d.message || "Failed", !d.success); loadCrud(k);
+}
+
+/* ---------- departments helper, semesters, faculty & assignments, audit log ---------- */
+const deptNames = () => [...new Set([...(S.departments || []).map(d => d.name), ...S.courses.map(c => c.department), ...S.students.map(x => x.department)].filter(Boolean))].sort();
+const deptOpts = () => deptNames().map(n => [n, n]);
+const fmtDate = d => d ? new Date(d).toLocaleDateString() : "-";
+
+async function toggleStu(id) {
+  const st = S.students.find(x => x._id === id), off = st.user?.isActive !== false;
+  if (!await ask(off ? `Disable ${st.name}'s login? They won't be able to sign in. Nothing is deleted and you can re-enable it any time.` : `Re-enable ${st.name}'s login?`, off ? "Disable" : "Enable")) return;
+  const d = await send("PUT", `/students/${id}/active`, { isActive: !off });
+  toast(d.success ? (off ? "Login disabled" : "Login enabled") : d.message || "Failed", !d.success); loadStudents();
+}
+
+async function loadTerms() {
+  const el = $("#sec-terms"); el.innerHTML = '<p class="empty">Loading…</p>';
+  const [d] = await Promise.all([load("terms", "/terms", "terms"), load("courses", "/courses", "courses")]);
+  const cur = S.terms.find(t => t.isCurrent);
+  el.innerHTML = (d.success ? "" : alertBox(d.message || "Could not load terms", "loadTerms()")) +
+    `<div class="bar"><span class="grow" style="color:var(--mut)">${cur ? "Current term: <b>" + esc(cur.name) + "</b>" : "No current term set"}</span><button class="btn pri" onclick="crudForm('terms')">+ Add term</button></div>` +
+    table(["Term", "Year", "Type", "Dates", "Status", "Actions"], S.terms.map(t => [esc(t.name), esc(t.academicYear), esc(t.type), `${fmtDate(t.startDate)} – ${fmtDate(t.endDate)}`,
+      t.isCurrent ? '<span style="color:var(--ok);font-weight:600">Current</span>' : "-",
+      (t.isCurrent ? "" : btn("Make current", `termCurrent('${t._id}')`)) + btn("Edit", `crudForm('terms','${t._id}')`) + btn("Delete", `crudDel('terms','${t._id}')`, "bad")]), "No terms yet.") +
+    `<div class="card" style="margin-top:22px"><h3 style="margin-top:0">Promote a class to the next semester</h3><p style="color:var(--mut);font-size:13px">Moves every active student of a course from one semester to the next (students already in the last semester are left alone). You'll see how many will move before confirming, and the change is written to the audit log.</p>
+    <div class="grid">${sel("pmCourse", "Course", S.courses.map(c => [c._id, c.name]))}<label>From semester<input id="pmFrom" type="number" min="1" max="11" value="1"></label><label>&nbsp;<button class="btn pri" style="width:100%" onclick="promote()">Review &amp; promote</button></label></div></div>`;
+}
+async function termCurrent(id) { const d = await send("POST", `/terms/${id}/current`); toast(d.success ? "Current term updated" : d.message || "Failed", !d.success); loadTerms(); }
+async function promote() {
+  const b = { course: $("#pmCourse").value, fromSemester: Number($("#pmFrom").value) };
+  if (!b.course || !b.fromSemester) return toast("Choose a course and semester", 1);
+  const d = await send("POST", "/terms/promote", { ...b, dryRun: true });
+  if (!d.success) return toast(d.message || "Failed", 1);
+  if (!d.count) return toast("No active students found in that semester");
+  if (!await ask(`Promote ${d.count} student(s) from semester ${b.fromSemester} to ${d.to}?`, "Promote")) return;
+  const r = await send("POST", "/terms/promote", b); toast(r.success ? `Promoted ${r.promoted} student(s)` : r.message || "Failed", !r.success);
+}
+
+/* faculty & subject assignments */
+const FF = [
+  { k: "facultyId", l: "Faculty ID", req: 1, lock: 1 }, { k: "username", l: "Login username", req: 1, only: "add" },
+  { k: "password", l: "Password (min 6)", t: "password", req: 1, only: "add", min: 6 }, { k: "name", l: "Full name", req: 1 },
+  { k: "email", l: "Email", t: "email" }, { k: "phone", l: "Phone" }, { k: "department", l: "Department", opts: () => deptOpts() }
+];
+let facOnly = false;
+const fids = f => (f.subjects || []).map(x => x._id || x);
+async function loadFaculty() {
+  const el = $("#sec-faculty"); el.innerHTML = '<p class="empty">Loading…</p>';
+  const [d] = await Promise.all([load("faculty", "/faculty", "faculty"), load("subjects", "/subjects", "subjects"), load("courses", "/courses", "courses"), load("departments", "/departments", "departments")]);
+  const by = Object.fromEntries(S.subjects.map(x => [x._id, x]));
+  const teachers = sid => S.faculty.filter(f => fids(f).includes(sid));
+  const subs = S.subjects.filter(x => !facOnly || !teachers(x._id).length);
+  el.innerHTML = (d.success ? "" : alertBox(d.message || "Could not load faculty", "loadFaculty()")) +
+    `<div class="bar"><span class="grow" style="color:var(--mut)">${S.faculty.length} faculty · ${S.subjects.filter(x => !teachers(x._id).length).length} subject(s) with no teacher</span><button class="btn pri" onclick="facultyForm()">+ Add faculty</button></div>` +
+    table(["ID", "Name", "Department", "Email", "Subjects", "Actions"], S.faculty.map(f => [esc(f.facultyId), esc(f.name), esc(f.department || "-"), esc(f.email || "-"),
+      fids(f).length ? fids(f).map(i => esc(by[i]?.code || "?")).join(", ") : '<span style="color:var(--mut)">none</span>',
+      btn("Assign subjects", `assignSubjects('${f._id}')`) + btn("Edit", `facultyForm('${f._id}')`) + btn("Delete", `delFaculty('${f._id}')`, "bad")]), "No faculty yet. Click “+ Add faculty”.") +
+    `<h3 style="margin:26px 0 12px">Who teaches what</h3><div class="bar"><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" style="width:auto" ${facOnly ? "checked" : ""} onchange="facOnly=this.checked;loadFaculty()"> Show only subjects with no teacher</label></div>` +
+    table(["Subject", "Course", "Sem", "Assigned faculty"], subs.map(x => [esc(x.code + " - " + x.name), esc(x.course?.name || "-"), esc(x.semester), teachers(x._id).length ? teachers(x._id).map(f => esc(f.name)).join(", ") : '<span style="color:var(--warn)">⚠ Unassigned</span>']), "No subjects to show.");
+}
+function facultyForm(id) {
+  const f = id && S.faculty.find(x => x._id === id);
+  modal(f ? "Edit faculty" : "Add faculty", formHtml(FF, f, !!f), {
+    ok: f ? "Update" : "Add faculty",
+    onOk: async form => { const b = collect(FF, form, !!f); const d = f ? await send("PUT", "/faculty/" + id, b) : await send("POST", "/faculty", b); if (!d.success) return d.message || "Could not save"; toast("Faculty saved"); loadFaculty(); }
+  });
+}
+function assignSubjects(id) {
+  const f = S.faculty.find(x => x._id === id), mine = fids(f), groups = {};
+  S.subjects.forEach(x => (groups[x.course?.name || "No course"] = groups[x.course?.name || "No course"] || []).push(x));
+  const body = `<div style="max-height:340px;overflow:auto;padding-right:6px">${Object.entries(groups).map(([c, l]) => `<div style="margin:10px 0 4px;color:var(--acc);font-weight:600">${esc(c)}</div>` +
+    l.sort((a, b) => a.semester - b.semester).map(x => `<label style="display:flex;gap:8px;align-items:center;font-weight:400;color:var(--txt)"><input type="checkbox" name="sub" value="${x._id}" style="width:auto;margin:0" ${mine.includes(x._id) ? "checked" : ""}> ${esc(x.code)} - ${esc(x.name)} <span style="color:var(--mut)">(Sem ${esc(x.semester)})</span></label>`).join("")).join("")}</div>`;
+  modal("Subjects taught by " + f.name, body, { ok: "Save assignments", onOk: async form => {
+    const subjects = [...form.querySelectorAll("input[name=sub]:checked")].map(x => x.value);
+    const d = await send("PUT", "/faculty/" + id, { subjects }); if (!d.success) return d.message || "Could not save"; toast("Assignments saved"); loadFaculty();
+  } });
+}
+async function delFaculty(id) {
+  const f = S.faculty.find(x => x._id === id);
+  if (!await ask(`Delete ${f?.name || "this faculty member"}? This cannot be undone.`)) return;
+  const d = await send("DELETE", "/faculty/" + id); toast(d.success ? "Faculty deleted" : d.message || "Failed", !d.success); loadFaculty();
+}
+
+/* audit log */
+const AU = { page: 1, pages: 1, logs: [] };
+const AUE = [["", "Everything"], ["Attendance", "Attendance"], ["Result", "Grades / results"], ["Student", "Student details & accounts"], ["Faculty", "Faculty"], ["Course", "Courses"], ["Subject", "Subjects"], ["Department", "Departments"], ["Term", "Semesters"], ["Notice", "Notices"], ["Admission", "Admissions"], ["Order", "Store orders"], ["Stock", "Store stock"], ["Assignment", "Assignments"], ["Timetable", "Timetable"], ["Exam", "Exams"]];
+function loadAudit() {
+  $("#sec-audit").innerHTML = `<p style="color:var(--mut);margin-top:0">A permanent record of who changed what, and when. Entries can't be edited or deleted from the app.</p>
+    <div class="bar">${[["Attendance", "Attendance"], ["Result", "Grades"], ["Student", "Student details"]].map(([e, l]) => `<button class="btn sm" onclick="$('#auE').value='${e}';queryAudit(1)">${l}</button>`).join("")}</div>
+    <div class="bar">${sel("auE", "", AUE, 1, "")}<input id="auA" placeholder="Who (username)" style="width:150px"><input id="auQ" class="grow" placeholder="Search summary, student, ID…">
+      <input id="auF" type="date" title="From"><input id="auT" type="date" title="To"><button class="btn pri" onclick="queryAudit(1)">Search</button><button class="btn" onclick="exportAudit()">Export CSV</button></div>
+    <div id="auOut"></div>`;
+  queryAudit(1);
+}
+async function queryAudit(page) {
+  const q = new URLSearchParams({ page, limit: 50 });
+  [["entity", "#auE"], ["actor", "#auA"], ["q", "#auQ"], ["from", "#auF"], ["to", "#auT"]].forEach(([k, id]) => { const v = $(id)?.value.trim(); if (v) q.set(k, v); });
+  $("#auOut").innerHTML = '<p class="empty">Loading…</p>';
+  const d = await api("/audit?" + q);
+  if (!d.success) { $("#auOut").innerHTML = alertBox(d.message || "Could not load the audit log", "queryAudit(1)"); return; }
+  AU.page = d.page; AU.pages = d.pages; AU.logs = d.logs;
+  $("#auOut").innerHTML = `<p style="color:var(--mut);font-size:13px">${d.total} entr${d.total === 1 ? "y" : "ies"} · page ${d.page} of ${d.pages}</p>` +
+    table(["When", "Who", "Record", "What happened", "Changes"], d.logs.map((l, i) => [new Date(l.at).toLocaleString(), `${esc(l.actor?.name || "?")} <span style="color:var(--mut)">(${esc(l.actor?.role || "")})</span>`, esc(l.entity), esc(l.summary),
+      l.changes?.length || l.details ? btn(l.changes?.length ? `${l.changes.length} change${l.changes.length > 1 ? "s" : ""}` : "Details", `auditDetail(${i})`) : "-"]), "Nothing matches these filters.") +
+    `<div class="bar" style="margin-top:14px"><button class="btn" ${d.page <= 1 ? "disabled" : ""} onclick="queryAudit(${d.page - 1})">← Newer</button><button class="btn" ${d.page >= d.pages ? "disabled" : ""} onclick="queryAudit(${d.page + 1})">Older →</button></div>`;
+}
+function auditDetail(i) {
+  const l = AU.logs[i], ch = l.changes || [];
+  modal(l.summary, `<p style="color:var(--mut);font-size:13px">${new Date(l.at).toLocaleString()} · by ${esc(l.actor?.name || "?")} (${esc(l.actor?.role || "")})${l.ip ? " · from " + esc(l.ip) : ""}</p>` +
+    (ch.length ? table(["Record", "Field", "Before", "After"], ch.map(c => [esc(c.label || "-"), esc(c.field), esc(c.from ?? "-"), esc(c.to ?? "-")])) : "") +
+    (l.details ? `<p style="color:var(--mut);font-size:12px;margin-bottom:4px">Submitted values</p><pre style="white-space:pre-wrap;font-size:12px;margin:0">${esc(JSON.stringify(l.details, null, 2))}</pre>` : ""));
+}
+function exportAudit() {
+  const rows = [["When", "Who", "Role", "Action", "Record", "Summary", "Item", "Field", "Before", "After"]];
+  AU.logs.forEach(l => (l.changes?.length ? l.changes : [{}]).forEach(c => rows.push([new Date(l.at).toISOString(), l.actor?.name, l.actor?.role, l.action, l.entity, l.summary, c.label, c.field, c.from, c.to])));
+  const csv = rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "audit-log.csv"; a.click();
 }
 
 /* ---------- attendance ---------- */
@@ -343,90 +462,6 @@ async function viewAtt(id) {
   const m = d.summary;
   $("#attOut").innerHTML = `<div class="card" style="margin-bottom:14px"><b style="font-size:22px;color:var(--acc)">${m.percentage}%</b> attendance <span style="color:var(--mut)">· ${m.present} present · ${m.absent} absent · ${m.total} total</span><div class="pbar"><i style="width:${m.percentage}%"></i></div></div>` +
     table(["Date", "Subject", "Status"], d.records.map(r => [new Date(r.date).toLocaleDateString(), esc(r.subject?.name || "-"), `<span class="badge ${esc(r.status)}">${esc(r.status)}</span>`]), "No attendance recorded for this student yet.");
-}
-
-/* ---------- faculty ---------- */
-async function loadFaculty() {
-  $("#sec-faculty").innerHTML = '<p class="empty">Loading…</p>';
-  const [d] = await Promise.all([load("faculty", "/faculty", "faculty"), load("subjects", "/subjects", "subjects"), load("courses", "/courses", "courses"), load("departments", "/departments", "departments")]);
-  if (!d.success) { $("#sec-faculty").innerHTML = alertBox(d.message || "Could not load faculty", "loadFaculty()"); return; }
-  $("#sec-faculty").innerHTML =
-    `<div class="bar"><span style="color:var(--mut)" class="grow">${S.faculty.length} faculty</span><button class="btn pri" onclick="facultyForm()">+ Add Faculty</button></div>` +
-    table(["Faculty ID", "Name", "Username", "Department", "Subjects", "Actions"], S.faculty.map(f => [
-      esc(f.facultyId), esc(f.name), esc(f.user?.username || "-"), esc(f.department || "-"),
-      f.subjects.length ? f.subjects.map(s => esc(s.name)).join(", ") : "-",
-      btn("Edit", `facultyForm('${f._id}')`) + btn("Delete", `delFaculty('${f._id}')`, "bad")
-    ]), "No faculty yet. Click “+ Add Faculty”.");
-}
-function facultyForm(id) {
-  const f = id && S.faculty.find(x => x._id === id);
-  const selected = new Set((f?.subjects || []).map(s => s._id));
-  const body = `<div class="grid">
-      <label>Full name${f ? "" : " *"}<input name="name" value="${esc(f?.name || "")}" ${f ? "" : "required"}></label>
-      <label>Faculty ID${f ? "" : " *"}<input name="facultyId" value="${esc(f?.facultyId || "")}" ${f ? "disabled" : "required"}></label>
-      <label>Login username${f ? "" : " *"}<input name="username" value="${esc(f?.user?.username || "")}" ${f ? "disabled" : "required"}></label>
-      ${f ? "" : '<label>Password (min 6) *<input name="password" type="password" minlength="6" required></label>'}
-      <label>Email<input name="email" type="email" value="${esc(f?.email || "")}"></label>
-      <label>Phone<input name="phone" value="${esc(f?.phone || "")}"></label>
-      ${sel("department", "Department", S.departments.map(d => [d.name, d.name]), 0, f?.department || "")}
-    </div>
-    <label style="margin-top:10px">Subjects taught</label>
-    <div class="tw" style="max-height:220px;overflow:auto;padding:10px 14px">
-      ${S.subjects.length ? S.subjects.map(s => `<label style="display:flex;align-items:center;gap:8px;font-weight:400;padding:4px 0"><input type="checkbox" name="subj" value="${s._id}" ${selected.has(s._id) ? "checked" : ""} style="width:auto"> ${esc(s.name)} <small style="color:var(--mut)">(${esc(s.course?.name || "-")}, Sem ${s.semester})</small></label>`).join("") : '<p class="empty">No subjects created yet.</p>'}
-    </div>`;
-  modal(f ? "Edit faculty" : "Add faculty", body, {
-    ok: f ? "Update" : "Add faculty",
-    onOk: async form => {
-      const subjects = Array.from(form.querySelectorAll('input[name="subj"]:checked')).map(x => x.value);
-      const b = { email: form.elements.email.value.trim() || undefined, phone: form.elements.phone.value.trim() || undefined, department: form.elements.department.value || undefined, subjects };
-      if (!f) { b.name = form.elements.name.value.trim(); b.facultyId = form.elements.facultyId.value.trim(); b.username = form.elements.username.value.trim(); b.password = form.elements.password.value; }
-      else { b.name = form.elements.name.value.trim(); }
-      const d = f ? await send("PUT", "/faculty/" + id, b) : await send("POST", "/faculty", b);
-      if (!d.success) return d.message || "Could not save faculty";
-      toast(f ? "Faculty updated" : "Faculty added"); loadFaculty();
-    }
-  });
-}
-async function delFaculty(id) {
-  const f = S.faculty.find(x => x._id === id);
-  if (!await ask(`Delete ${f?.name || "this faculty member"}? Their login is removed too.`)) return;
-  const d = await send("DELETE", "/faculty/" + id); toast(d.success ? "Faculty deleted" : d.message || "Failed", !d.success); loadFaculty();
-}
-
-/* ---------- audit log ---------- */
-const AUDIT_ENTITIES = ["Attendance", "Result", "Student"];
-let AUD = [];
-async function loadAudit() {
-  const entityType = $("#audEntity")?.value || "", action = $("#audAction")?.value || "";
-  const el = $("#sec-audit");
-  el.innerHTML = '<p class="empty">Loading…</p>';
-  const qs = new URLSearchParams(); if (entityType) qs.set("entityType", entityType); if (action) qs.set("action", action);
-  const d = await api("/audit" + (qs.toString() ? "?" + qs.toString() : ""));
-  if (!d.success) { el.innerHTML = alertBox(d.message || "Could not load audit log", "loadAudit()"); return; }
-  AUD = d.logs;
-  const actBadge = a => `<span class="badge ${a === "delete" ? "Absent" : "Present"}" style="text-transform:capitalize">${a}</span>`;
-  el.innerHTML = `<div class="bar">
-      <select id="audEntity" onchange="loadAudit()"><option value="">All entities</option>${AUDIT_ENTITIES.map(e => `<option value="${e}" ${e === entityType ? "selected" : ""}>${e}</option>`).join("")}</select>
-      <select id="audAction" onchange="loadAudit()"><option value="">All actions</option>${["create", "update", "delete"].map(a => `<option value="${a}" ${a === action ? "selected" : ""}>${a[0].toUpperCase() + a.slice(1)}</option>`).join("")}</select>
-      <span style="color:var(--mut)" class="grow">${AUD.length} most recent entries</span></div>` +
-    table(["When", "Who", "Action", "Entity", "Details", ""], AUD.map(l => [
-      new Date(l.createdAt).toLocaleString(),
-      esc(l.performedBy?.username || "-") + `<br><small style="color:var(--mut)">${esc(l.performedByRole || "")}</small>`,
-      actBadge(l.action),
-      esc(l.entityType),
-      esc(l.entityLabel || "-"),
-      btn("View", `viewAuditEntry('${l._id}')`)
-    ]), "No audit entries match.");
-}
-function viewAuditEntry(id) {
-  const l = AUD.find(x => x._id === id);
-  if (!l) return;
-  modal("Audit entry", `
-    <p><b>${esc(l.entityType)}</b> · ${esc(l.action)} · ${new Date(l.createdAt).toLocaleString()}</p>
-    <p style="color:var(--mut)">By ${esc(l.performedBy?.username || "-")} (${esc(l.performedByRole || "-")})</p>
-    ${l.before ? `<label style="margin-top:10px">Before</label><pre style="white-space:pre-wrap;background:rgba(255,255,255,.04);padding:10px;border-radius:8px;font-size:12.5px">${esc(JSON.stringify(l.before, null, 2))}</pre>` : ""}
-    ${l.after ? `<label style="margin-top:10px">After</label><pre style="white-space:pre-wrap;background:rgba(255,255,255,.04);padding:10px;border-radius:8px;font-size:12.5px">${esc(JSON.stringify(l.after, null, 2))}</pre>` : ""}
-  `);
 }
 
 /* ---------- admissions ---------- */

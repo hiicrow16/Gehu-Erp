@@ -246,3 +246,21 @@ Hover zoom and spacing are already styled.
 **Test checklist**: nav links and mobile menu; Apply links (`apply.html?course=...`); program finder; notices strip and news list (needs a public notice in the database); Help tabs (FAQ, track order, track admission, ticket, cheat notes); login for student, faculty and admin; open the page with "reduce motion" enabled in the OS and confirm nothing moves.
 
 **Not verified**: admission deadlines (the official site lists none), the exact Grafest dates, placement figures, and anything that needs the live database or backend.
+
+---
+
+## Previous year question papers (PYQ)
+
+Anyone can upload a past question paper; nothing is public until an admin approves it.
+
+- **Public page** `Frontend/pyq.html` — browse approved papers (filter by course, semester, year, exam type, subject) and a "Share a question paper" form. No login needed. Linked from the homepage footer, the Academics section, the search palette and the student dashboard.
+- **Admin page** `Frontend/admin-pyq.html` — queue of Waiting / Approved / Rejected papers. Preview the file, edit the subject / semester / year / type / course, then Approve or Reject (with a reason), or Delete. Linked from the admin dashboard ("Question Papers").
+- **API** `Backend/routes/pyq.js` (mounted at `/api/pyq`), model `Backend/models/Pyq.js`. Public: `GET /meta`, `GET /`, `POST /`, `GET /:id/file` (approved only). Admin: `GET /admin/list`, `PATCH /admin/:id/review`, `DELETE /admin/:id`. Approve / reject / delete are written to the audit log.
+
+**Safeguards**: PDF / JPG / PNG / WEBP only, checked by the file's real bytes (not its name); 6 MB limit; identical file can't be uploaded twice; 5 saved uploads per visitor per hour; hidden honeypot field for bots; text fields stripped of tags; a "I'm allowed to share this" tick box; only a salted hash of the uploader's IP is stored.
+
+**Things to know**
+- Files are stored in MongoDB (the host's disk is wiped on redeploy). A typical scan is 0.5–2 MB, so a free 512 MB Atlas cluster holds hundreds of papers. Raise or lower `MAX_BYTES` in `routes/pyq.js` if needed.
+- The upload limiter is in memory: it resets when the server restarts and is per server instance.
+- Uploaders are anonymous, so always preview a file before approving it. Past papers can be copyrighted material of the university; decide your policy and edit the wording on the form if needed.
+- No email/notification is sent to the uploader on approval or rejection.

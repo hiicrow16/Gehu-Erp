@@ -6,7 +6,7 @@ const Faculty = require("../models/Faculty");
 const Subject = require("../models/Subject");
 const Student = require("../models/Student");
 const { protect, authorize } = require("../middleware/auth");
-const { logAudit } = require("../middleware/audit");
+const { record: auditRecord } = require("../lib/audit");
 
 // Faculty may only mark/view attendance for subjects assigned to them (admin: any)
 async function canManage(req, subjectId) {
@@ -37,13 +37,20 @@ router.post("/bulk", protect, authorize("faculty", "admin"), async (req, res) =>
           upsert: true,
         },
       }));
+    const ids = ops.map((o) => o.updateOne.filter.student);
+    const prevDocs = await Attendance.find({ subject, date: d, student: { $in: ids } }).select("student status");
+    const prev = Object.fromEntries(prevDocs.map((x) => [String(x.student), x.status]));
     if (ops.length) await Attendance.bulkWrite(ops);
-    logAudit(req, {
-      action: "update",
-      entityType: "Attendance",
-      entityLabel: `Bulk mark — ${sub.name} — ${d.toLocaleDateString()} (${ops.length} student${ops.length === 1 ? "" : "s"})`,
-      after: { subject: sub.name, date: d, count: ops.length },
-    });
+    if (ops.length) {
+      const changedOps = ops.filter((o) => prev[String(o.updateOne.filter.student)] !== o.updateOne.update.$set.status);
+      const names = Object.fromEntries((await Student.find({ _id: { $in: changedOps.map((o) => o.updateOne.filter.student) } }).select("name studentId")).map((x) => [String(x._id), `${x.studentId} - ${x.name}`]));
+      const present = ops.filter((o) => o.updateOne.update.$set.status === "Present").length;
+      await auditRecord(req, {
+        action: "mark-attendance", entity: "Attendance", entityId: subject,
+        summary: `Marked ${sub.name} on ${d.toISOString().slice(0, 10)}: ${present} present, ${ops.length - present} absent (${changedOps.length} changed)`,
+        changes: changedOps.map((o) => ({ label: names[String(o.updateOne.filter.student)], field: "status", from: prev[String(o.updateOne.filter.student)] || "not marked", to: o.updateOne.update.$set.status })),
+      });
+    }
     res.json({ success: true, saved: ops.length });
   } catch (err) {
     res.status(500).json({ success: false, message: "Could not save attendance" });
@@ -60,27 +67,22 @@ router.post("/", protect, authorize("faculty", "admin"), async (req, res) => {
 
     if (!(await canManage(req, subject))) return res.status(403).json({ success: false, message: "You are not assigned to this subject" });
     const faculty = await Faculty.findOne({ user: req.user.id });
-    const before = await Attendance.findOne({ student, subject, date: new Date(date) }).lean();
 
+    const was = await Attendance.findOne({ student, subject, date: new Date(date) }).select("status");
     const record = await Attendance.findOneAndUpdate(
       { student, subject, date: new Date(date) },
       { status, markedBy: faculty ? faculty._id : undefined },
       { new: true, upsert: true, runValidators: true }
     );
 
-    const [stu, sub] = await Promise.all([
-      Student.findById(student).select("name studentId"),
-      Subject.findById(subject).select("name"),
-    ]);
-    logAudit(req, {
-      action: before ? "update" : "create",
-      entityType: "Attendance",
-      entityId: record._id,
-      entityLabel: `${stu ? stu.name + " (" + stu.studentId + ")" : student} — ${sub ? sub.name : subject} — ${new Date(date).toLocaleDateString()}`,
-      before: before ? { status: before.status } : null,
-      after: { status },
-    });
-
+    if (!was || was.status !== record.status) {
+      const [st, sb] = await Promise.all([Student.findById(student).select("name studentId"), Subject.findById(subject).select("name")]);
+      await auditRecord(req, {
+        action: "mark-attendance", entity: "Attendance", entityId: subject,
+        summary: `Marked ${st ? st.name : "student"} ${record.status} in ${sb ? sb.name : "subject"} on ${new Date(date).toISOString().slice(0, 10)}`,
+        changes: [{ label: st ? `${st.studentId} - ${st.name}` : String(student), field: "status", from: was ? was.status : "not marked", to: record.status }],
+      });
+    }
     res.status(201).json({ success: true, record });
   } catch (err) {
     res.status(500).json({ success: false, message: "Could not mark attendance" });

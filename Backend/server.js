@@ -17,7 +17,12 @@ const feedbackRoutes = require("./routes/feedback");
 const academicsRoutes = require("./routes/academics");
 const admissionRoutes = require("./routes/admissions");
 const departmentRoutes = require("./routes/departments");
+const termRoutes = require("./routes/terms");
 const auditRoutes = require("./routes/audit");
+const idCardRoutes = require("./routes/idcard");
+const faceRoutes = require("./routes/face");
+const pyqRoutes = require("./routes/pyq");
+const audited = require("./lib/auditConfig");
 
 const app = express();
 // Render sits behind a proxy; this makes req.ip the visitor's real IP (used by the review spam guard)
@@ -36,7 +41,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "1mb" })); // face enrolment sends a small resized photo
 
 app.get("/", (req, res) =>
   res.json({ success: true, message: "GEHU ERP API. See /api/health for a status check." })
@@ -44,20 +49,24 @@ app.get("/", (req, res) =>
 app.get("/api/health", (req, res) => res.json({ success: true, status: "ok" }));
 
 app.use("/api/auth", authRoutes);
-app.use("/api/students", studentRoutes);
-app.use("/api/faculty", facultyRoutes);
-app.use("/api/courses", courseRoutes);
-app.use("/api/subjects", subjectRoutes);
+app.use("/api/students", audited.students, studentRoutes);
+app.use("/api/faculty", audited.faculty, facultyRoutes);
+app.use("/api/courses", audited.courses, courseRoutes);
+app.use("/api/subjects", audited.subjects, subjectRoutes);
 app.use("/api/attendance", attendanceRoutes);
-app.use("/api/notices", noticeRoutes);
-app.use("/api/store", storeRoutes);
+app.use("/api/notices", audited.notices, noticeRoutes);
+app.use("/api/store", audited.store, storeRoutes);
 app.use("/api/cheatnotes", cheatNoteRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/feedback", feedbackRoutes);
-app.use("/api/academics", academicsRoutes);
-app.use("/api/admissions", admissionRoutes);
-app.use("/api/departments", departmentRoutes);
+app.use("/api/academics", audited.academics, academicsRoutes);
+app.use("/api/admissions", audited.admissions, admissionRoutes);
+app.use("/api/departments", audited.departments, departmentRoutes);
+app.use("/api/terms", audited.terms, termRoutes);
 app.use("/api/audit", auditRoutes);
+app.use("/api/idcard", idCardRoutes);
+app.use("/api/face", faceRoutes);
+app.use("/api/pyq", pyqRoutes);
 
 // 404 handler for unknown API routes
 app.use("/api", (req, res) => {

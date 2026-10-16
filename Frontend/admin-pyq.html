@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Question paper review - GEHU</title>
+<style>
+:root{--bg:#eaf2f3;--ink:#17323a;--mut:#64808a;--line:#e3ecee;--teal:#3b7f86;--teal2:#2f6a70;--ok:#16a34a;--bad:#dc2626}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',system-ui,sans-serif}
+header{background:var(--teal);color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header a{color:#e4f3f4;text-decoration:none;font-size:14px;margin-left:16px}
+main{max-width:1000px;margin:22px auto;padding:0 14px}
+h1{margin:0 0 4px;font-size:24px}.sub{color:var(--mut);font-size:14px;margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:6px 18px;margin-bottom:16px}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.tabs button{border:1px solid var(--teal);background:#fff;color:var(--teal);border-radius:99px;padding:8px 16px;font-weight:600;cursor:pointer;font-size:14px}
+.tabs button.on{background:var(--teal);color:#fff}
+.tabs input{margin-left:auto;padding:9px 10px;border:1px solid #d5e2e5;border-radius:8px;font:inherit;min-width:200px}
+.btn{border:0;background:var(--teal);color:#fff;border-radius:10px;padding:8px 13px;font-weight:600;cursor:pointer;font-size:13px}
+.btn:hover{background:var(--teal2)}.btn.o{background:#fff;color:var(--teal);border:1px solid var(--teal)}.btn.d{background:#fff;color:var(--bad);border:1px solid #f1c5c5}.btn.g{background:var(--ok)}
+.btn:disabled{opacity:.5;cursor:default}
+.item{padding:16px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
+.top{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.t{font-weight:600;font-size:16px}.m{color:var(--mut);font-size:13px;margin-top:3px}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}.pill.pending{background:#fef3c7;color:#92400e}.pill.approved{background:#dcfce7;color:#166534}.pill.rejected{background:#fee2e2;color:#991b1b}
+.edit{display:none;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-top:12px}.edit.open{display:grid}
+.edit label{font-size:12px;color:var(--mut);display:block;margin-bottom:3px}
+.edit input,.edit select,.why input{width:100%;padding:8px 9px;border:1px solid #d5e2e5;border-radius:8px;font:inherit;font-size:14px}
+.why{display:none;gap:8px;margin-top:12px;align-items:center}.why.open{display:flex}
+.empty{padding:30px 0;color:var(--mut);text-align:center}
+#toast{position:fixed;right:18px;bottom:18px;background:#17323a;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:9}
+@media(max-width:700px){.edit{grid-template-columns:1fr 1fr}.tabs input{margin-left:0;width:100%}}
+</style>
+</head>
+<body>
+<header><b>Question paper review</b><span><a href="admin-dashboard.html">Dashboard</a><a href="pyq.html" target="_blank" rel="noopener">Public page</a></span></header>
+<main>
+  <h1>Review shared papers</h1>
+  <div class="sub">Anyone can share a paper. Only the ones you approve appear on the public page. Preview a file, fix the details if needed, then approve or reject.</div>
+  <div class="tabs" id="tabs">
+    <button data-s="pending" class="on">Waiting <span id="c-pending">0</span></button>
+    <button data-s="approved">Approved <span id="c-approved">0</span></button>
+    <button data-s="rejected">Rejected <span id="c-rejected">0</span></button>
+    <input type="search" id="q" placeholder="Search subject" aria-label="Search subject">
+  </div>
+  <div class="card" id="list"></div>
+</main>
+<div id="toast"></div>
+
+<script src="config.js"></script>
+<script>
+const API = window.API_BASE, $ = id => document.getElementById(id);
+if (localStorage.getItem("role") !== "admin" || !localStorage.getItem("token")) location.href = "login.html";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const hdr = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` });
+async function call(path, method = "GET", body) {
+  const r = await fetch(API + path, { method, headers: hdr(), body: body ? JSON.stringify(body) : undefined });
+  const d = await r.json().catch(() => ({})); if (!d.success) throw new Error(d.message || "Request failed"); return d;
+}
+function toast(m) { const t = $("toast"); t.textContent = m; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 3200); }
+const mb = n => n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+const fmt = d => new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
+let status = "pending", items = [], courses = [];
+const TYPES = ["Mid-term", "End-term", "Supplementary", "Other"];
+
+async function load() {
+  $("list").innerHTML = `<div class="empty">Loading…</div>`;
+  try {
+    const d = await call(`/pyq/admin/list?status=${status}&q=${encodeURIComponent($("q").value.trim())}`);
+    items = d.items; ["pending", "approved", "rejected"].forEach(k => $("c-" + k).textContent = d.counts[k] || 0);
+  } catch (e) { items = []; toast(e.message); }
+  render();
+}
+function render() {
+  if (!items.length) { $("list").innerHTML = `<div class="empty">${status === "pending" ? "Nothing is waiting for review." : "No papers here."}</div>`; return; }
+  $("list").innerHTML = items.map(p => `<div class="item" id="i-${p.id}">
+    <div class="top">
+      <div><div class="t">${esc(p.subjectName)} — ${esc(p.examType)} ${esc(p.examYear)} <span class="pill ${p.status}">${p.status}</span></div>
+        <div class="m">${esc(p.course || "No course")}${p.semester ? " · Semester " + p.semester : ""} · ${p.contentType === "application/pdf" ? "PDF" : "Image"} ${mb(p.size)} · sent ${fmt(p.createdAt)}${p.sharedBy ? " by " + esc(p.sharedBy) : ""}</div>
+        ${p.status === "rejected" && p.rejectReason ? `<div class="m">Reason: ${esc(p.rejectReason)}</div>` : ""}
+        ${p.reviewedBy ? `<div class="m">Reviewed by ${esc(p.reviewedBy)}</div>` : ""}</div>
+      <div class="acts">
+        <button class="btn o" onclick="preview('${p.id}')">Preview</button>
+        ${p.status !== "approved" ? `<button class="btn g" onclick="approve('${p.id}')">Approve</button>` : ""}
+        ${p.status !== "rejected" ? `<button class="btn d" onclick="toggle('why','${p.id}')">Reject</button>` : ""}
+        <button class="btn o" onclick="toggle('edit','${p.id}')">Edit details</button>
+        <button class="btn d" onclick="del('${p.id}')">Delete</button>
+      </div></div>
+    <div class="edit" id="edit-${p.id}">
+      <div><label>Subject</label><input id="es-${p.id}" value="${esc(p.subjectName)}" maxlength="120"></div>
+      <div><label>Semester</label><select id="em-${p.id}"><option value="">—</option>${[1,2,3,4,5,6,7,8].map(n => `<option ${p.semester === n ? "selected" : ""}>${n}</option>`).join("")}</select></div>
+      <div><label>Year</label><input id="ey-${p.id}" type="number" value="${esc(p.examYear)}"></div>
+      <div><label>Exam type</label><select id="et-${p.id}">${TYPES.map(t => `<option ${p.examType === t ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+      <div style="grid-column:1/-1"><label>Course</label><select id="ec-${p.id}">${courses.map(c => `<option value="${c.id}" ${String(c.id) === String(p.courseId) ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select></div>
+      <div style="grid-column:1/-1"><button class="btn" onclick="saveEdit('${p.id}')">Save and approve</button></div>
+    </div>
+    <div class="why" id="why-${p.id}"><input id="wr-${p.id}" placeholder="Reason (shown only to admins)" maxlength="300"><button class="btn d" onclick="reject('${p.id}')">Confirm reject</button></div>
+  </div>`).join("");
+}
+const toggle = (k, id) => $(`${k}-${id}`).classList.toggle("open");
+
+async function preview(id) { // files are fetched with the admin token, then opened from memory
+  const w = window.open("", "_blank");
+  try {
+    const r = await fetch(`${API}/pyq/${id}/file`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+    if (!r.ok) throw new Error("Could not load the file");
+    const url = URL.createObjectURL(await r.blob()); if (w) w.location = url; else location.href = url;
+  } catch (e) { if (w) w.close(); toast(e.message); }
+}
+async function review(id, body, done) { try { await call(`/pyq/admin/${id}/review`, "PATCH", body); toast(done); load(); } catch (e) { toast(e.message); } }
+const approve = id => review(id, { action: "approve" }, "Approved — it is now public");
+const reject = id => review(id, { action: "reject", reason: $("wr-" + id).value }, "Rejected");
+const saveEdit = id => review(id, { action: "approve", edits: { subjectName: $("es-" + id).value, semester: $("em-" + id).value, examYear: $("ey-" + id).value, examType: $("et-" + id).value, course: $("ec-" + id).value } }, "Saved and approved");
+async function del(id) { if (!confirm("Delete this paper and its file permanently?")) return; try { await call(`/pyq/admin/${id}`, "DELETE"); toast("Deleted"); load(); } catch (e) { toast(e.message); } }
+
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (!b) return; status = b.dataset.s; document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b)); load(); });
+let t; $("q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(load, 250); });
+fetch(API + "/pyq/meta").then(r => r.json()).then(d => { courses = d.courses || []; }).catch(() => {}).then(load);
+</script>
+</body>
+</html>

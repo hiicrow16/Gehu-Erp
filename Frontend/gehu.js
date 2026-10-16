@@ -290,6 +290,7 @@
       S("Help and support", "#help", "—", "support contact faq"),
       { g: "Go to", ico: "→", label: "Apply for admission", kw: "apply form 2026 enroll", run: function () { goPage("apply.html"); } },
       { g: "Go to", ico: "→", label: "Student / faculty login", kw: "sign in dashboard portal", run: function () { goPage("login.html"); } },
+      { g: "Go to", ico: "→", label: "Previous year question papers", kw: "pyq exam papers old question paper download upload share", run: function () { goPage("pyq.html"); } },
       { g: "Go to", ico: "→", label: "College store", kw: "buy shop merchandise", run: function () { goPage("store.html"); } },
       { g: "Help", ico: "?", label: "Track an order", kw: "order status delivery payment", run: function () { openHelp("track"); } },
       { g: "Help", ico: "?", label: "Track an admission application", kw: "application tracking id", run: function () { openHelp("admission"); } },
