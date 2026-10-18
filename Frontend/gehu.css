@@ -381,3 +381,30 @@ html.entering::before{content:"";position:fixed;inset:0;background:var(--navy);z
 
 /* signed-in menu label: sentence case, like the rest of the site */
 .nud-head span{text-transform:none!important;letter-spacing:0!important}
+
+/* ---------- unofficial notice ---------- */
+.unofficial{background:#F1E4C8;color:#3b2f10;font-size:.875rem;border-bottom:1px solid #dcc994}
+.unofficial-in{display:flex;align-items:center;justify-content:space-between;gap:12px 28px;padding-block:12px;flex-wrap:wrap}
+.unofficial p{max-width:80ch;line-height:1.5}.unofficial b{font-weight:600}
+.unofficial a{flex:none;text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px}
+.foot-unofficial{font-size:.8125rem;color:var(--accent-hi)}
+
+/* ---------- hero upgrade ---------- */
+.hero-link{align-self:center;color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.5);padding-bottom:2px;font-size:.9375rem;transition:border-color .25s}
+.hero-link:hover{border-color:#fff}
+.hero-facts{display:flex;flex-wrap:wrap;gap:18px 40px;margin:44px 0 0;padding-top:22px;border-top:1px solid rgba(255,255,255,.28);max-width:640px;animation:rise 1s var(--ease) .8s both}
+.hero-facts dt{font-size:.75rem;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.hero-facts dd{margin:2px 0 0;font:400 1.125rem/1.3 var(--serif);color:#fff}
+.hero-facts a{text-decoration:none}
+@media (max-width:760px){.hero-facts{gap:14px 28px;margin-top:32px}.hero-facts dd{font-size:1rem}}
+
+/* ---------- admission dates ---------- */
+.dates{margin-top:20px;border-top:1px solid rgba(255,255,255,.18)}
+.dates li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.18);font-size:.9375rem}
+.dates .d-name{color:var(--on-dark)}
+.dates .d-when{color:var(--on-dark);font-variant-numeric:tabular-nums;text-align:right}
+.dates [data-status="tba"] .d-when{color:var(--on-dark-mut);font-style:italic}
+.adm-side .dates+.fine{color:var(--on-dark-mut)}
+.hero-badge{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-bottom:20px;padding:7px 14px;font-size:.8125rem;line-height:1.3;background:rgba(241,228,200,.94);color:#3b2f10;border-radius:2px;animation:rise 1s var(--ease) .15s both}
+.hero-badge span{font-weight:600}
+.hero-badge a{color:inherit;text-decoration:none;border-bottom:1px solid currentColor}

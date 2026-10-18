@@ -54,17 +54,33 @@
   <div class="hero-scrim" aria-hidden="true"></div>
   <div class="wrap hero-grid">
     <div class="hero-copy">
+      <p class="hero-badge"><span>Unofficial student-built portal</span><a href="https://www.gehu.ac.in" target="_blank" rel="noopener">Official site: gehu.ac.in ↗</a></p>
       <p class="kicker">Admissions open · 2026 session</p>
       <h1 id="heroTitle">Where Ambition<br>Meets Innovation.</h1>
-      <p class="hero-intro">Graphic Era Hill University is a private university in Uttarakhand, with campuses in Dehradun, Bhimtal and Haldwani.</p>
+      <p class="hero-intro">Engineering, computer applications and management across three Himalayan-foothill campuses, with admissions open for the 2026 session.</p>
       <div class="actions">
-        <a href="#academics" class="btn btn-light">Explore Academics</a>
-        <a href="#admissions" class="btn btn-line-light">Admissions</a>
+        <a href="apply.html" class="btn btn-light">Apply now</a>
+        <a href="#academics" class="btn btn-line-light">Explore programs</a>
+        <a href="#help" class="hero-link" data-help-tab="admission">Track your application →</a>
       </div>
+      <dl class="hero-facts" aria-label="University at a glance">
+        <div><dt>Founded</dt><dd>2011</dd></div>
+        <div><dt>Campuses</dt><dd>3</dd></div>
+        <div><dt>Programs</dt><dd>B.Tech · BCA · BBA · MBA</dd></div>
+        <div><dt>Helpline</dt><dd><a href="tel:18002701280">1800 270 1280</a></dd></div>
+      </dl>
     </div>
     <p class="hero-credit">The GEHU lawn, Dehradun campus</p>
   </div>
 </section>
+
+<!-- ============ UNOFFICIAL PORTAL NOTICE ============ -->
+<aside class="unofficial" role="note" aria-label="About this website">
+  <div class="wrap unofficial-in">
+    <p><b>Unofficial student-built portal.</b> This site is made and maintained by GEHU students. It is not the university's official website, and it does not replace official admission channels.</p>
+    <a href="https://www.gehu.ac.in" target="_blank" rel="noopener">Visit official site: gehu.ac.in</a>
+  </div>
+</aside>
 
 <!-- ============ NOTICE STRIP (live public notices from the portal) ============ -->
 <aside class="strip" id="pulse" aria-label="Latest announcements" hidden>
@@ -319,7 +335,16 @@
       </div>
       <div class="adm-side">
         <h3 class="h3">Important dates</h3>
-        <p>Application deadlines and counselling schedules are announced by the Admissions Office and may differ by program and campus.</p>
+        <!-- EDIT ME: replace each "To be announced" with the real date from the Admissions Office,
+             e.g. <time datetime="2026-07-15">15 Jul 2026</time>. Rows marked data-status="tba" show as pending. -->
+        <ol class="dates" aria-label="Admission timeline">
+          <li data-status="tba"><span class="d-name">Applications open</span><span class="d-when">To be announced</span></li>
+          <li data-status="tba"><span class="d-name">Last date to apply</span><span class="d-when">To be announced</span></li>
+          <li data-status="tba"><span class="d-name">Document verification</span><span class="d-when">To be announced</span></li>
+          <li data-status="tba"><span class="d-name">Counselling / merit list</span><span class="d-when">To be announced</span></li>
+          <li data-status="tba"><span class="d-name">Session begins</span><span class="d-when">To be announced</span></li>
+        </ol>
+        <p class="fine">Dates can differ by program and campus. Confirm with the Admissions Office before relying on them.</p>
         <p class="contact-line"><b>Admissions helpline</b><br><a href="tel:18002701280">1800 270 1280</a> · <a href="mailto:enquiry@gehu.ac.in">enquiry@gehu.ac.in</a></p>
         <div class="actions left">
           <a href="apply.html" class="btn btn-light">Apply now</a>
@@ -453,6 +478,7 @@
       <div class="foot-brand">
         <a href="#top" class="brand" aria-label="Back to top"><img src="img/logo-96.png" width="40" height="40" alt=""><span class="brand-text"><b>Graphic Era</b><i>Hill University</i></span></a>
         <p>Dehradun · Bhimtal · Haldwani<br>Uttarakhand, India</p>
+        <p class="foot-unofficial">Unofficial student-built portal. Not affiliated with the official university website.</p>
         <p class="foot-phone"><a href="tel:18002701280">1800 270 1280</a><br><a href="mailto:enquiry@gehu.ac.in">enquiry@gehu.ac.in</a></p>
       </div>
       <div>
