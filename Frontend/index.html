@@ -541,15 +541,6 @@
 <script src="help.min.js" defer></script>
 <script src="gehu.js" defer></script>
 <script src="team-data.js" defer></script>
-<script defer>
-window.addEventListener("DOMContentLoaded",function(){
-  if(!window.GEHU_TEAM) return;
-  var lis=document.querySelectorAll("#footTeam li");
-  window.GEHU_TEAM.forEach(function(p,i){
-    var html=window.gehuSocials(p); if(!html||!lis[i]) return;
-    var d=document.createElement("span"); d.className="team-socials"; d.innerHTML=html; lis[i].appendChild(d);
-  });
-});
-</script>
+<script src="footer-team.js" defer></script>
 </body>
 </html>

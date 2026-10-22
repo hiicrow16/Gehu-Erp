@@ -30,3 +30,28 @@
 .team-socials a:hover{background:#fff;color:var(--navy)}
 .team-socials svg{width:15px;height:15px}
 .team-more{color:var(--accent-hi);text-decoration:none;border-bottom:1px solid currentColor;margin-left:auto}
+
+/* footer popout */
+.team-line button.tl-name{font:inherit;color:var(--on-dark);cursor:pointer;padding:0;background:none;border:0;border-bottom:1px solid rgba(255,255,255,.3)}
+.team-line button.tl-name:hover,.team-line button.tl-name[aria-expanded="true"]{color:var(--accent-hi);border-color:var(--accent-hi)}
+.tpop{position:absolute;z-index:400;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:18px;box-shadow:0 14px 40px rgba(10,20,40,.35);animation:tpop-in .18s var(--ease) both}
+.tpop[hidden]{display:none}
+.tpop::after{content:"";position:absolute;left:var(--ax,30px);bottom:-7px;width:12px;height:12px;background:#fff;border:solid var(--line);border-width:0 1px 1px 0;transform:translateX(-50%) rotate(45deg)}
+.tpop.below::after{bottom:auto;top:-7px;border-width:1px 0 0 1px}
+.tpop-x{position:absolute;top:6px;right:8px;width:32px;height:32px;font-size:1.4rem;line-height:1;color:var(--stone)}
+.tpop-x:hover{color:var(--ink)}
+.tpop-head{display:flex;gap:12px;align-items:center;padding-right:28px}
+.tpop-head img{width:52px;height:52px;border-radius:50%;object-fit:cover}
+.tpop-head b{display:block;font:500 1.15rem/1.2 var(--serif)}
+.tpop-head span{font-size:.8125rem;color:var(--accent)}
+.tpop-bio{margin-top:12px;font-size:.9rem;color:#3a3a3a;line-height:1.5}
+.tpop-links{display:grid;gap:6px;margin-top:14px}
+.tpop-link{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:3px;text-decoration:none;color:var(--navy);font-size:.9375rem;transition:background .2s,color .2s,border-color .2s}
+.tpop-link svg{width:20px;height:20px;flex:none}
+.tpop-link:hover,.tpop-link:focus-visible{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tpop-none{margin-top:14px;font-size:.875rem;color:var(--stone)}
+.tpop-more{display:inline-block;margin-top:14px;font-size:.875rem;color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor}
+@keyframes tpop-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.tpop{animation:none}}
+/* inline icon row beside the name is no longer needed: the popout shows them */
+.team-line .team-socials{display:none}
