@@ -10,6 +10,7 @@
 <link rel="preload" href="fonts/newsreader-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="gehu.css">
+<link rel="stylesheet" href="team.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="img/icon-192.png">
 <link rel="preload" as="image" href="img/hero-wide.webp" media="(min-width: 761px)" type="image/webp">
@@ -518,12 +519,13 @@
 
     <div class="team-line">
       <p>This portal is built and maintained by students:</p>
-      <ul>
-        <li><img src="img/neeraj.webp" width="32" height="32" alt="" loading="lazy"><span>Hiicrow <i>Full stack</i></span></li>
-        <li><img src="img/gaurav.webp" width="32" height="32" alt="" loading="lazy"><span>Garry <i>Frontend</i></span></li>
-        <li><img src="img/rakshit.webp" width="32" height="32" alt="" loading="lazy"><span>Rakshit <i>Backend</i></span></li>
-        <li><img src="img/deepak.webp" width="32" height="32" alt="" loading="lazy"><span>Deepak <i>Backend</i></span></li>
+      <ul id="footTeam">
+        <li><img src="img/neeraj.webp" width="32" height="32" alt="" loading="lazy"><span><a class="tl-name" href="team.html#hiicrow">Hiicrow</a> <i>Full stack</i></span></li>
+        <li><img src="img/gaurav.webp" width="32" height="32" alt="" loading="lazy"><span><a class="tl-name" href="team.html#garry">Garry</a> <i>Frontend</i></span></li>
+        <li><img src="img/rakshit.webp" width="32" height="32" alt="" loading="lazy"><span><a class="tl-name" href="team.html#rakshit">Rakshit</a> <i>Backend</i></span></li>
+        <li><img src="img/deepak.webp" width="32" height="32" alt="" loading="lazy"><span><a class="tl-name" href="team.html#deepak">Deepak</a> <i>Backend</i></span></li>
       </ul>
+      <a class="team-more" href="team.html">Meet the team →</a>
     </div>
 
     <div class="foot-bottom">
@@ -538,5 +540,16 @@
 <script src="shell.js"></script>
 <script src="help.min.js" defer></script>
 <script src="gehu.js" defer></script>
+<script src="team-data.js" defer></script>
+<script defer>
+window.addEventListener("DOMContentLoaded",function(){
+  if(!window.GEHU_TEAM) return;
+  var lis=document.querySelectorAll("#footTeam li");
+  window.GEHU_TEAM.forEach(function(p,i){
+    var html=window.gehuSocials(p); if(!html||!lis[i]) return;
+    var d=document.createElement("span"); d.className="team-socials"; d.innerHTML=html; lis[i].appendChild(d);
+  });
+});
+</script>
 </body>
 </html>

@@ -1,0 +1,32 @@
+.team-page{background:var(--paper)}
+.team-hero{background:var(--navy);color:#fff;padding:calc(var(--head) + clamp(48px,8vw,110px)) 0 clamp(56px,8vw,100px)}
+.team-kicker{font-size:.875rem;letter-spacing:.02em;display:flex;align-items:center;gap:14px;margin-bottom:22px;color:var(--accent-hi)}
+.team-kicker::before{content:"";width:36px;height:1px;background:currentColor}
+.team-hero h1{font-size:clamp(2.4rem,6vw,4.6rem);line-height:1.05;max-width:16ch}
+.team-intro{margin-top:26px;max-width:56ch;color:var(--on-dark-mut);font-size:1.0625rem}
+.team-intro a{color:#fff;border-bottom:1px solid rgba(255,255,255,.45);text-decoration:none}
+.team-grid-wrap{padding-block:clamp(48px,7vw,96px)}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:clamp(20px,3vw,36px)}
+.member{display:flex;gap:24px;align-items:flex-start;padding:28px;background:#fff;border:1px solid var(--line);border-radius:2px;scroll-margin-top:calc(var(--head) + 16px)}
+.member:target{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.member-photo{flex:none;width:132px;height:132px;border-radius:50%;object-fit:cover;background:var(--paper-2)}
+.member-body{min-width:0}
+.member-role{font-size:.8125rem;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.member-name{font-size:clamp(1.7rem,3vw,2.2rem);line-height:1.1;margin:4px 0 8px}
+.member-tag{color:var(--stone)}
+.member-bio{margin-top:12px;color:#3a3a3a}
+.member-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.member-links a,.team-socials a{display:inline-flex;width:40px;height:40px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;color:var(--navy);transition:background .25s,color .25s,border-color .25s}
+.member-links a:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.member-links svg,.team-socials svg{width:19px;height:19px}
+@media (max-width:560px){.member{flex-direction:column;padding:22px}.member-photo{width:104px;height:104px}}
+
+/* homepage footer: linked names + small social icons */
+.team-line li{flex-wrap:wrap}
+.team-line .tl-name{color:var(--on-dark);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.3)}
+.team-line .tl-name:hover{color:var(--accent-hi);border-color:var(--accent-hi)}
+.team-socials{display:inline-flex;gap:6px;margin-left:4px}
+.team-socials a{width:28px;height:28px;border-color:rgba(255,255,255,.28);color:var(--on-dark)}
+.team-socials a:hover{background:#fff;color:var(--navy)}
+.team-socials svg{width:15px;height:15px}
+.team-more{color:var(--accent-hi);text-decoration:none;border-bottom:1px solid currentColor;margin-left:auto}
