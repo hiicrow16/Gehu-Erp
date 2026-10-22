@@ -55,3 +55,20 @@
 @media (prefers-reduced-motion:reduce){.tpop{animation:none}}
 /* inline icon row beside the name is no longer needed: the popout shows them */
 .team-line .team-socials{display:none}
+
+/* ---------- brand icons ---------- */
+.member-links a{width:44px;height:44px}
+.member-links a svg{width:20px;height:20px}
+[data-k="instagram"]{--brand:#E4405F}[data-k="linkedin"]{--brand:#0A66C2}[data-k="github"]{--brand:#24292F}
+[data-k="x"]{--brand:#000}[data-k="email"]{--brand:#B3261E}[data-k="website"]{--brand:#2F6F5E}
+.member-links a[data-k]{color:var(--brand)}
+.member-links a[data-k]:hover,.member-links a[data-k]:focus-visible{background:var(--brand);border-color:var(--brand);color:#fff}
+.member-links a[data-k="instagram"]:hover{background:linear-gradient(45deg,#FEDA75,#FA7E1E 25%,#D62976 50%,#962FBF 75%,#4F5BD5);border-color:transparent}
+/* popout rows: brand-coloured icon tile */
+.tpop-link{padding:8px 12px 8px 8px;gap:12px}
+.tpop-link svg{width:34px;height:34px;padding:8px;border-radius:8px;background:var(--brand);color:#fff;flex:none}
+.tpop-link[data-k="instagram"] svg{background:linear-gradient(45deg,#FEDA75,#FA7E1E 25%,#D62976 50%,#962FBF 75%,#4F5BD5)}
+.tpop-link span{flex:1}
+.tpop-link::after{content:"↗";color:var(--stone);font-size:.9rem;transition:transform .2s,color .2s}
+.tpop-link:hover,.tpop-link:focus-visible{background:#F4F6FA;color:var(--navy);border-color:var(--brand)}
+.tpop-link:hover::after{transform:translate(2px,-2px);color:var(--brand)}

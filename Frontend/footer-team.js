@@ -13,10 +13,8 @@
   function rows(p){
     var out = "";
     Object.keys(window.GEHU_ICONS).forEach(function(k){
-      var v = ((p.links && p.links[k]) || "").trim(); if(!v) return;
-      var href = k === "email" ? "mailto:" + v : v;
-      if(k !== "email" && !/^https:\/\//i.test(href)) return;
-      out += '<a class="tpop-link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer me">' +
+      var href = window.gehuLink(k, p.links && p.links[k]); if(!href) return;
+      out += '<a class="tpop-link" data-k="' + k + '" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer me">' +
              window.GEHU_ICONS[k] + '<span>' + window.GEHU_LABELS[k] + '</span></a>';
     });
     return out;
@@ -33,7 +31,12 @@
     pop.style.setProperty("--ax", Math.max(18, Math.min(w - 18, r.left + r.width/2 + window.scrollX - left)) + "px");
     pop.classList.toggle("below", above <= 8);
   }
+  var hydrated = false;
   function open(btn, p){
+    if(!hydrated){ hydrated = true; window.gehuHydrate(function(){ if(!pop.hidden && current === btn) render(btn, p); }); }
+    render(btn, p);
+  }
+  function render(btn, p){
     var links = rows(p);
     pop.innerHTML =
       '<button class="tpop-x" type="button" aria-label="Close">×</button>' +
